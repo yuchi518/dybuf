@@ -1371,54 +1371,63 @@ public class DyBuf {
 
     /// ================= Variable, Non-fixed length variable =====================
 
-    public static class IndexAnd4bitsType {
-        public IndexAnd4bitsType() {
+    public static class Typdex {
+        public Typdex() {
 
         }
 
-        public IndexAnd4bitsType(long v, byte t) {
-            value = v;
-            RPCValueType = t;
+        public Typdex(byte type, int index) {
+            this.index = index;
+            this.type = type;
         }
 
-        public long value;
-        public byte RPCValueType;
+        public int index;
+        public byte type;
     }
 
-    public DyBuf putIndexAnd4bitsType(IndexAnd4bitsType vat) {
-        if (vat.value >= 0 && vat.value <= 0x07) {                                                    // 0 ~ 0x07
-            put((byte) ((vat.RPCValueType << 4) | vat.value));
-        } else if (vat.value >= 0 && vat.value <= 0x03FF + (0x08)) {                                    // 0x08 ~ 0x3FF+0x08
-            putShort((short) ((vat.RPCValueType << 12) | 0x0800 | (vat.value - 0x08)));
-        } else if (vat.value >= 0 && vat.value <= 0x01FFFFL + 0x0408L) {                                    // 0x0408 ~ 0x01FFFF+0x0408
-            put3bytesInt((int) ((vat.RPCValueType << 20) | 0x0C0000 | (vat.value - 0x0408L)));
-        } else if (vat.value >= 0 && vat.value <= 0x00FFFFFFL + 0x020408L) {                                // 0x020408 ~ 0x00FFFFFF+0x020408
-            putInt((int) ((vat.RPCValueType << 28) | 0x0E000000L | (vat.value - 0x020408L)));
+    public DyBuf putTypdex(Typdex typdex) {
+        if (typdex.type<0 || typdex.index<0) {
+            throw new RuntimeException("Incorrect typdex value");
+        }
+        if (typdex.type <= 0x0f && typdex.index <= 0x07) {                                              // header:0x00(1bits), type:0~0x0F(4bits), index:0~0x7(3bits)
+            put((byte) ((typdex.type<<3) | typdex.index));
+        } else if (typdex.type <= 0x1f && typdex.index <= 0x1FF) {									        // header:0x02(2bits), type:0~0x1F(5bits), index:0~0x01FF(9bits)
+            putShort((short) (0x8000 | ((short)typdex.type<<9) | typdex.index));
+        } else if (typdex.type <= 0x3f && typdex.index <= 0x7FFF) {									        // header:0x06(3bits), type:0~0x3F(6bits), index:0~0x7FFF(15bits)
+            put3bytesInt((0xC00000 | ((int)typdex.type<<15) | typdex.index));
+        } else if (typdex.type <= 0x7f && typdex.index <= 0x1FFFFF) {								            // header:0x0E(4bits), type:0~0x7F(7bits), index:0~0x1FFFFF(21bits)
+            putInt((0xE0000000 | ((int)typdex.type<<21) | typdex.index));
         } else {
-            //throw new RuntimeException("Type value(%lld) to long", value);
+            throw new RuntimeException("Type or index value is too long");
             //EXCEPTIONv(@"Type value(%lld) to long", value);
         }
         return this;
     }
 
-    public IndexAnd4bitsType getIndexAnd4bitsType() {
-        byte t = get();
-        IndexAnd4bitsType vat = new IndexAnd4bitsType();
-        vat.RPCValueType = (byte) ((t >> 4) & 0x0F);
-        if ((t & 0x08) == 0) {
-            vat.value = t & 0x07;
-        } else if ((t & 0x04) == 0) {
-            vat.value = (((t & 0x03) << 8) | (get() & 0x00FF)) + 0x08;
-        } else if ((t & 0x02) == 0) {
-            vat.value = (((t & 0x01) << 16) | (getShort() & 0x00FFFFL)) + 0x0408;
-        } else if ((t & 0x01) == 0) {
-            vat.value = (((t & 0x00) << 24) | (get3bytesInt() & 0x00FFFFFFL)) + 0x020408L;
+    public Typdex getTypdex() {
+        byte header = peek();
+        Typdex typdex = new Typdex();
+        if ((header&0x80)==0) {
+            byte v = get();
+            typdex.type = (byte)((v >> 3) & 0x0F);
+            typdex.index = v & 0x07;
+        } else if ((header&0x40)==0) {
+            short v = getShort();
+            typdex.type = (byte)((v >> 9) & 0x1F);
+            typdex.index = v & 0x01FF;
+        } else if ((header&0x20)==0) {
+            int v = get3bytesInt();
+            typdex.type = (byte)((v >> 15) & 0x3F);
+            typdex.index = v & 0x7FFF;
+        } else if ((header&0x10)==0) {
+            int v = getInt();
+            typdex.type = (byte)((v >> 21) & 0x7F);
+            typdex.index = v & 0x1FFFFF;
         } else {
-            //EXCEPTIONv(@"Type value(%d) to long", vat.type);
+            throw new RuntimeException("Type or index value is too long");
         }
 
-        return vat;
-
+        return typdex;
     }
 
     public DyBuf putVarLong(long value) {

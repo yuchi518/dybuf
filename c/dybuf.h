@@ -808,42 +808,48 @@ dyb_inline uint8_t* dyb_get_data_before_current_position(dybuf* dyb, uint* len)
 }
 
 /// ===== type, index manage
-dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8_t type/*4bits*/, uint32_t index)
+
+dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8_t type, uint32_t index)
 {
-    type &= 0x0f;
-    if (index <= 0x07) {													// 0 ~ 0x07
-        dyb_append_u8(dyb, (type<<4) | index);
-    } else if (index <= 0x03FF+(0x08)) {									// 0x08 ~ 0x3FF+0x08
-        dyb_append_u16(dyb, ((uint16_t)type<<12) | 0x0800 | (index-0x08));
-    } else if (index <= 0x01FFFF+0x0408) {									// 0x0408 ~ 0x01FFFF+0x0408
-        dyb_append_u24(dyb, ((uint32_t)type<<20) | 0x0C0000 | (index-0x0408));
-    } else if (index <= 0x00FFFFFF+0x020408) {								// 0x020408 ~ 0x00FFFFFF+0x020408
-        dyb_append_u32(dyb, ((uint32_t)type<<28) | 0x0E000000 | (index-0x020408));
+    if (type <= 0x0f && index <= 0x07) {													// header:0x00(1bits), type:0~0x0F(4bits), index:0~0x7(3bits)
+        dyb_append_u8(dyb, (type<<3) | index);
+    } else if (type <= 0x1f && index <= 0x1FF) {									        // header:0x02(2bits), type:0~0x1F(5bits), index:0~0x01FF(9bits)
+        dyb_append_u16(dyb, 0x8000 | ((uint16_t)type<<9) | index);
+    } else if (type <= 0x3f && index <= 0x7FFF) {									        // header:0x06(3bits), type:0~0x3F(6bits), index:0~0x7FFF(15bits)
+        dyb_append_u24(dyb, 0xC00000 | ((uint32_t)type<<15) | index);
+    } else if (type <= 0x7f && index <= 0x1FFFFF) {								            // header:0x0E(4bits), type:0~0x7F(7bits), index:0~0x1FFFFF(21bits)
+        dyb_append_u32(dyb, 0xE0000000 | ((uint32_t)type<<21) | index);
     } else {
         return null;
     }
-
     return dyb;
 }
 
 
-dyb_inline void dyb_next_typdex(dybuf* dyb, uint8_t* type/*4bits*/, uint32_t* index)
+dyb_inline void dyb_next_typdex(dybuf* dyb, uint8_t* type, uint32_t* index)
 {
-    uint8_t t = dyb_next_u8(dyb);
-    *type = (t >> 4) & 0x0F;
-    if ((t&0x08)==0) {
-        *index = t & 0x07;
-    } else if ((t&0x04)==0) {
-        *index = (((uint16_t)(t&0x03)<<8) | (dyb_next_u8(dyb)&0x00FF)) + 0x08;
-    } else if ((t&0x02)==0) {
-        *index = (((uint32_t)(t&0x01)<<16) | (dyb_next_u16(dyb)&0x00FFFF)) + 0x0408;
-    } else if ((t&0x01)==0) {
-        *index = (((uint32_t)(t&0x00)<<24) | (dyb_next_u24(dyb)&0x00FFFFFF)) + 0x020408;
+    uint8_t header = dyb_peek_u8(dyb);
+    if ((header&0x80)==0) {
+        uint8_t v = dyb_next_u8(dyb);
+        *type = (v >> 3) & 0x0F;
+        *index = v & 0x07;
+    } else if ((header&0x40)==0) {
+        uint16_t v = dyb_next_u16(dyb);
+        *type = (uint8_t)(v >> 9) & 0x1F;
+        *index = v & 0x01FF;
+    } else if ((header&0x20)==0) {
+        uint32_t v = dyb_next_u24(dyb);
+        *type = (uint8_t)(v >> 15) & 0x3F;
+        *index = v & 0x7FFF;
+    } else if ((header&0x10)==0) {
+        uint32_t v = dyb_next_u24(dyb);
+        *type = (uint8_t)(v >> 21) & 0x7F;
+        *index = v & 0x1FFFFF;
     } else {
         // error
     }
-
 }
+
 
 /// var u64
 dyb_inline dybuf* dyb_append_var_u64(dybuf* dyb, uint64_t value)
