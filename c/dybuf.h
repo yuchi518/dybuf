@@ -1,0 +1,968 @@
+//
+// Created by Yuchi on 2015/12/19.
+//
+
+#ifndef DYBUF_C_DYBUF_H
+#define DYBUF_C_DYBUF_H
+
+
+#ifdef __KERNEL__
+// add headers
+#else
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#endif
+
+
+typedef unsigned char byte;
+typedef unsigned int uint;
+
+
+typedef enum {
+    false = 0,
+    true,
+} boolean;
+
+#define null                    (0)
+
+#define dyb_inline              static inline
+
+#define CACHE_SIZE_UNIT         16
+
+#define MAX(a,b)                ((a)>=(b)?(a):(b))
+#define MIN(a,b)                ((a)<=(b)?(a):(b))
+
+/**
+ *  Memory allocator, create a memory and
+ *  its size is larger or equal than (*size).
+ *  TO-DO: reused memory
+ */
+dyb_inline void* dyb_mem_alloc(uint *size, boolean dyn)
+{
+#ifdef __KERNEL__
+    return null;
+#else
+    if (dyn)
+    {
+        *size = MAX(CACHE_SIZE_UNIT,*size);
+        // TO-DO: reuse algorithm
+        return malloc(*size);
+    }
+    else
+        // fixed size
+        return malloc(*size);
+#endif
+}
+
+dyb_inline void dyb_mem_release(void* buf, uint size)
+{
+#ifdef __KERNEL__
+#else
+    free(buf);
+#endif
+}
+
+dyb_inline void dyb_mem_copy(void* dest, void* src, uint size)
+{
+#ifdef __KERNEL__
+#else
+    memcpy(dest, src, size);
+#endif
+}
+
+dyb_inline void dyb_mem_move(void* dest, void* src, uint size)
+{
+#ifdef __KERNEL__
+#else
+    memmove(dest, src, size);
+#endif
+}
+
+dyb_inline uint32_t dyb_swap_u32(uint32_t value)
+{
+    union{
+        uint32_t    u;
+        uint8_t     bs[4];
+    } v;
+    //
+
+    const int i = 1;
+    if (((char*)&i)[0])
+    {
+        // little endian
+        v.u = value;
+        uint8_t b;
+        b = v.bs[0]; v.bs[0] = v.bs[3]; v.bs[3] = b;
+        b = v.bs[1]; v.bs[1] = v.bs[2]; v.bs[2] = b;
+        return v.u;
+    }
+    else
+        return value;
+}
+
+dyb_inline uint64_t dyb_swap_u64(uint64_t value)
+{
+    union {
+        uint64_t    u;
+        uint8_t     bs[8];
+    } v;
+
+    const int i = 1;
+    if (((char*)&i)[0]) {
+        // little endian
+        v.u = value;
+        uint8_t b;
+        b = v.bs[0]; v.bs[0] = v.bs[7]; v.bs[7] = b;
+        b = v.bs[1]; v.bs[1] = v.bs[6]; v.bs[6] = b;
+        b = v.bs[2]; v.bs[2] = v.bs[5]; v.bs[5] = b;
+        b = v.bs[3]; v.bs[3] = v.bs[4]; v.bs[4] = b;
+        return v.u;
+    }
+    else
+        return value;
+}
+
+
+/**
+ * 0 <= mark <= position <= limit <= capacity
+ * 1. clear() makes a buffer ready for a new sequence of channel-read or relative put operations:
+ * It sets the limit to the capacity and the position to zero.
+ * 2. flip() makes a buffer ready for a new sequence of channel-write or relative get operations:
+ * It sets the limit to the current position and then sets the position to zero.
+ * 3. rewind() makes a buffer ready for re-reading the data that it already contains:
+ * It leaves the limit unchanged and sets the position to zero.
+ */
+struct dybuf
+{
+    byte* _data;
+    uint _capacity;
+    uint _limit;
+    uint _position;
+    uint _mark;
+    boolean fixedCapacity;
+
+    boolean _should_release_instance;
+};
+typedef struct dybuf dybuf;
+
+
+dyb_inline dybuf* dyb_create(dybuf* dyb, uint capacity)
+{
+    if (dyb == null)
+    {
+        uint size = sizeof(*dyb);
+        dyb = dyb_mem_alloc(&size, false);
+        if (dyb == null) return null;
+        dyb->_should_release_instance = true;
+    }
+
+    dyb->_data = dyb_mem_alloc(&capacity, true);
+    dyb->_capacity = capacity;
+    dyb->_limit = 0;
+    dyb->_position = 0;
+    dyb->_mark = 0;
+    dyb->fixedCapacity = false;
+
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_copy(dybuf* dyb, byte* data, uint capacity, boolean no_copy)
+{
+    if (data == null) {
+        return dyb_create(dyb, capacity);
+    }
+
+    if (dyb == null)
+    {
+        uint size = sizeof(*dyb);
+        dyb = dyb_mem_alloc(&size, false);
+        if (dyb == null) return null;
+        dyb->_should_release_instance = true;
+    }
+
+
+    if (no_copy) {
+        dyb->_data = data;
+        dyb->_capacity = dyb->_limit = capacity;
+    } else {
+        uint origin_capacity = capacity;
+        dyb->_data = dyb_mem_alloc(&capacity, true);
+        dyb_mem_copy(dyb->_data, data, origin_capacity);
+        dyb->_limit = origin_capacity;
+        dyb->_capacity = capacity;
+    }
+
+    dyb->_position = dyb->_mark = 0;
+    dyb->fixedCapacity = false;
+
+    return dyb;
+}
+
+dyb_inline void dyb_release(dybuf* dyb)
+{
+    if (dyb == null) return;
+
+    dyb_mem_release(dyb->_data, dyb->_capacity);
+
+    if (dyb->_should_release_instance)
+    {
+        dyb_mem_release(dyb, sizeof(*dyb));
+    }
+}
+
+dyb_inline int dyb_get_capacity(dybuf* dyb)
+{
+    return dyb->_capacity;
+}
+
+dyb_inline dybuf* dyb_set_capacity(dybuf* dyb, uint newCapacity)
+{
+    if (dyb->fixedCapacity && newCapacity!=dyb->_capacity) {
+        // error
+        return null;
+    }
+
+    if (newCapacity == dyb->_capacity) return dyb;
+
+    byte *newData = dyb_mem_alloc(&newCapacity, true);
+    dyb_mem_copy(newData, dyb->_data, MIN(dyb->_capacity, newCapacity));
+    dyb_mem_release(dyb->_data, dyb->_capacity);
+    dyb->_capacity = newCapacity;
+    dyb->_data = newData;
+    newData = null;
+
+    if (dyb->_limit >= dyb->_capacity) {
+        dyb->_limit = dyb->_capacity;
+    }
+
+    if (dyb->_position >= dyb->_capacity) {
+        dyb->_position = dyb->_capacity;
+    }
+
+    if (dyb->_mark >= dyb->_capacity) {
+        dyb->_mark = dyb->_capacity;
+    }
+
+    return dyb;
+}
+
+dyb_inline uint dyb_get_position(dybuf* dyb)
+{
+    return dyb->_position;
+}
+
+dyb_inline dybuf* dyb_set_position(dybuf* dyb, uint newPosition)
+{
+    if (newPosition > dyb->_limit) {
+        // error
+        return null;
+    }
+
+    if (newPosition < dyb->_mark) {
+        // discard or set the same value
+        dyb->_position = dyb->_mark;
+    } else {
+        dyb->_position = newPosition;
+    }
+
+    return dyb;
+}
+
+dyb_inline uint dyb_get_limit(dybuf* dyb)
+{
+    return dyb->_limit;
+}
+
+dyb_inline dybuf* dyb_set_limit(dybuf* dyb, int newLimit)
+{
+    if (newLimit < 0) {
+        // error
+        return null;
+    }
+
+    if (newLimit > dyb->_capacity) {
+        if (dyb_set_capacity(dyb, newLimit) == null) {
+            // error
+            return null;
+        }
+    }
+
+    dyb->_limit = newLimit;
+
+    if (dyb->_mark > dyb->_limit) {
+        dyb->_mark = dyb->_limit;
+    }
+
+    if (dyb->_position > dyb->_limit) {
+        dyb->_position = dyb->_limit;
+    }
+
+    return dyb;
+}
+
+/**
+ * The bytes between the buffer's current position and its limit, if any, are copied to the beginning of the buffer.
+ * This is user for read. If use for write, the copy is meaningless.
+ *
+ * @return
+ */
+dyb_inline dybuf* dyb_compact(dybuf* dyb)
+{
+    if (dyb->_position == 0) return dyb;
+    uint move_size = dyb->_limit - dyb->_position;
+    dyb_mem_move(dyb->_data, dyb->_data+dyb->_position, move_size);
+    dyb->_limit = move_size;
+    dyb->_position = 0;
+    dyb->_mark = 0;
+    return dyb;
+}
+
+dyb_inline uint dyb_get_remainder(dybuf* dyb)
+{
+    return dyb->_limit - dyb->_position;
+}
+
+
+/// ====== Position operation
+
+/**
+ * Mark the current position, and go back later.
+ *
+ * @return
+ */
+dyb_inline dybuf* dyb_mark(dybuf* dyb) {
+    dyb->_mark = dyb->_position;
+
+    return dyb;
+}
+
+/**
+ * Go to mark position.
+ *
+ * @return
+ */
+dyb_inline dybuf* dyb_reset(dybuf* dyb) {
+    dyb->_position = dyb->_mark;
+
+    return dyb;
+}
+
+/**
+ * A new sequence, all reset to default.
+ * Clears this buffer. The position is set to zero, the limit is set to the capacity, and the mark is discarded.
+ *
+ * @return
+ */
+dyb_inline dybuf* dyb_clear(dybuf* dyb) {
+    dyb->_position = 0;
+    dyb->_mark = 0;
+    dyb->_limit = dyb->_capacity;
+
+    return dyb;
+}
+
+/**
+ * Flips this buffer. The limit is set to the current position and then the position is set to zero.
+ * If the mark is defined then it is discarded.
+ * This is use for write and then read.
+ *
+ * @return
+ */
+dyb_inline dybuf* dyb_flip(dybuf* dyb) {
+    dyb->_limit = dyb->_position;
+    dyb->_position = 0;
+    dyb->_mark = 0;
+
+    return dyb;
+}
+
+/**
+ * Repeat a sequence again. The position is set to zero and the mark is discarded.
+ *
+ * @return
+ */
+dyb_inline dybuf* dyb_rewind(dybuf* dyb)
+{
+    dyb->_position = 0;
+    dyb->_mark = 0;
+
+    return dyb;
+}
+
+
+dyb_inline boolean dyb_next_bool(dybuf* dyb)
+{
+    return dyb->_data[dyb->_position++]!=0?true:false;
+}
+
+dyb_inline boolean dyb_peek_bool(dybuf* dyb)
+{
+    return dyb->_data[dyb->_position]!=0?true:false;
+}
+
+dyb_inline uint8_t dyb_next_u8(dybuf* dyb)
+{
+    return dyb->_data[dyb->_position++];
+}
+
+dyb_inline uint8_t dyb_peek_u8(dybuf* dyb)
+{
+    return dyb->_data[dyb->_position];
+}
+
+dyb_inline uint16_t dyb_next_u16(dybuf* dyb)
+{
+    uint16_t v = ((dyb->_data[dyb->_position++]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position++]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint16_t dyb_peek_u16(dybuf* dyb)
+{
+    uint16_t v = ((dyb->_data[dyb->_position+0]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position+1]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint32_t dyb_next_u24(dybuf* dyb)
+{
+    uint32_t v = ((dyb->_data[dyb->_position++]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position++]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint32_t dyb_peek_u24(dybuf* dyb)
+{
+    uint32_t v = ((dyb->_data[dyb->_position+0]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position+1]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position+2]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint32_t dyb_next_u32(dybuf* dyb)
+{
+    uint32_t v = ((dyb->_data[dyb->_position++]&0x00ff)<<24);
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position++]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint32_t dyb_peek_u32(dybuf* dyb)
+{
+    uint32_t v = ((dyb->_data[dyb->_position+0]&0x00ff)<<24);
+    v |= ((dyb->_data[dyb->_position+1]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position+2]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position+3]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint64_t dyb_next_u40(dybuf* dyb)
+{
+    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<32);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<24);		// be careful, type convert is necessary
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position++]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint64_t dyb_peek_u40(dybuf* dyb)
+{
+    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position+0]&0x00ff)<<32);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+1]&0x00ff)<<24);		// be careful, type convert is necessary
+    v |= ((dyb->_data[dyb->_position+2]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position+3]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position+4]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint64_t dyb_next_u48(dybuf* dyb)
+{
+    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<40);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<32);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<24);		// be careful, type convert is necessary
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position++]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint64_t dyb_peek_u48(dybuf* dyb)
+{
+    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position+0]&0x00ff)<<40);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+1]&0x00ff)<<32);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+2]&0x00ff)<<24);		// be careful, type convert is necessary
+    v |= ((dyb->_data[dyb->_position+3]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position+4]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position+5]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint64_t dyb_next_u56(dybuf* dyb)
+{
+    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<48);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<40);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<32);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<24);		// be careful, type convert is necessary
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position++]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint64_t dyb_peek_u56(dybuf* dyb)
+{
+    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position+0]&0x00ff)<<48);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+1]&0x00ff)<<40);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+2]&0x00ff)<<32);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+3]&0x00ff)<<24);		// be careful, type convert is necessary
+    v |= ((dyb->_data[dyb->_position+4]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position+5]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position+6]&0x00ff);
+
+    return v;
+}
+
+
+dyb_inline uint64_t dyb_next_u64(dybuf* dyb)
+{
+    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<56);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<48);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<40);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<32);
+    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<24);		// be careful, type convert is necessary
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position++]&0x00ff);
+
+    return v;
+}
+
+dyb_inline uint64_t dyb_peek_u64(dybuf* dyb)
+{
+    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position+0]&0x00ff)<<56);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+1]&0x00ff)<<48);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+2]&0x00ff)<<40);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+3]&0x00ff)<<32);
+    v |= ((uint64_t)(dyb->_data[dyb->_position+4]&0x00ff)<<24);		// be careful, type convert is necessary
+    v |= ((dyb->_data[dyb->_position+5]&0x00ff)<<16);
+    v |= ((dyb->_data[dyb->_position+6]&0x00ff)<<8);
+    v |= (dyb->_data[dyb->_position+7]&0x00ff);
+
+    return v;
+}
+
+
+dyb_inline uint8_t* dyb_next_data_with_1byte_len(dybuf* dyb, uint *len)
+{
+    *len = dyb->_data[dyb->_position++];
+
+    if ((*len)==0 || (dyb->_position + (*len)) > dyb->_limit) {
+        return null;
+    }
+
+    uint8_t* data = dyb->_data + dyb->_position;
+    dyb->_position += *len;
+
+    return data;
+}
+
+dyb_inline uint8_t* dyb_next_data_with_2bytes_len(dybuf* dyb, uint *len)
+{
+    *len = dyb->_data[dyb->_position++];
+    *len <<= 8;
+    *len |= dyb->_data[dyb->_position++];
+
+    if ((*len)==0 || (dyb->_position + (*len)) > dyb->_limit) {
+        return null;
+    }
+
+    uint8_t* data = dyb->_data + dyb->_position;
+    dyb->_position += *len;
+
+    return data;
+}
+
+dyb_inline uint8_t* dyb_next_data_without_len(dybuf* dyb, uint len)
+{
+    if (len==0 || (dyb->_position + len) > dyb->_limit) {
+        return null;
+    }
+
+    uint8_t* data = dyb->_data + dyb->_position;
+    dyb->_position += len;
+
+    return data;
+}
+
+dyb_inline void* dyb_next_structure(dybuf* dyb, void* structure, uint size)
+{
+    if (size==0 || (dyb->_position + size) > dyb->_limit) {
+        return null;
+    }
+
+    dyb_mem_copy(structure, dyb->_data + dyb->_position, size);
+    dyb->_position += size;
+
+    return structure;
+}
+
+
+// append
+
+dyb_inline dybuf* dyb_append_bool(dybuf* dyb, boolean value)
+{
+    if (dyb->_position+1 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+1);
+    }
+    dyb->_data[dyb->_position++] = value?1:0;
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_u8(dybuf* dyb, uint8_t value)
+{
+    if (dyb->_position+1 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+1);
+    }
+    dyb->_data[dyb->_position++] = value;
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_u16(dybuf* dyb, uint16_t value)
+{
+    if (dyb->_position+2 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+2);
+    }
+    dyb->_data[dyb->_position++] = (value>>8)&0x00ff;
+    dyb->_data[dyb->_position++] = value&0x00ff;
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_u24(dybuf* dyb, uint32_t value)
+{
+    if (dyb->_position+3 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+3);
+    }
+    dyb->_data[dyb->_position++] = (value>>16)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>8)&0x00ff;
+    dyb->_data[dyb->_position++] = value&0x00ff;
+    return dyb;
+}
+
+
+dyb_inline dybuf* dyb_append_u32(dybuf* dyb, uint32_t value)
+{
+    if (dyb->_position+4 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+4);
+    }
+    dyb->_data[dyb->_position++] = (value>>24)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>16)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>8)&0x00ff;
+    dyb->_data[dyb->_position++] = value&0x00ff;
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_u40(dybuf* dyb, uint64_t value)
+{
+    if (dyb->_position+5 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+5);
+    }
+    //dyb->_data[dyb->_position++] = (value>>56)&0x00ff;
+    //dyb->_data[dyb->_position++] = (value>>48)&0x00ff;
+    //dyb->_data[dyb->_position++] = (value>>40)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>32)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>24)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>16)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>8)&0x00ff;
+    dyb->_data[dyb->_position++] = value;
+
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_u48(dybuf* dyb, uint64_t value)
+{
+    if (dyb->_position+6 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+6);
+    }
+    //dyb->_data[dyb->_position++] = (value>>56)&0x00ff;
+    //dyb->_data[dyb->_position++] = (value>>48)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>40)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>32)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>24)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>16)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>8)&0x00ff;
+    dyb->_data[dyb->_position++] = value;
+
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_u56(dybuf* dyb, uint64_t value)
+{
+    if (dyb->_position+7 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+7);
+    }
+    //dyb->_data[dyb->_position++] = (value>>56)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>48)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>40)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>32)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>24)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>16)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>8)&0x00ff;
+    dyb->_data[dyb->_position++] = value;
+
+    return dyb;
+}
+
+
+dyb_inline dybuf* dyb_append_u64(dybuf* dyb, uint64_t value)
+{
+    if (dyb->_position+8 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+8);
+    }
+    dyb->_data[dyb->_position++] = (value>>56)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>48)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>40)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>32)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>24)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>16)&0x00ff;
+    dyb->_data[dyb->_position++] = (value>>8)&0x00ff;
+    dyb->_data[dyb->_position++] = value;
+
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_data_with_1byte_len(dybuf* dyb, uint8_t* data, uint length)
+{
+    length &= 0x00ff;
+
+    if (dyb->_position+length+1 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+length+1);
+    }
+
+    dyb->_data[dyb->_position++] = length;
+
+    if (length > 0) {
+        dyb_mem_copy(dyb->_data+dyb->_position, data, length);
+        dyb->_position += length;
+    }
+
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_data_with_2bytes_len(dybuf* dyb, uint8_t* data, uint length)
+{
+    length &= 0x00ffff;
+
+    if (dyb->_position+length+2 > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+length+2);
+    }
+
+    dyb->_data[dyb->_position++] = (uint8_t)(length>>8);
+    dyb->_data[dyb->_position++] = (uint8_t)length;
+
+    if (length > 0) {
+        dyb_mem_copy(dyb->_data+dyb->_position, data, length);
+        dyb->_position += length;
+    }
+
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_data_without_len(dybuf* dyb, uint8_t* data, uint length)
+{
+    if (dyb->_position+length > dyb->_limit) {
+        dyb_set_limit(dyb, dyb->_position+length);
+    }
+
+    if (length > 0) {
+        dyb_mem_copy(dyb->_data+dyb->_position, data, length);
+        dyb->_position += length;
+    }
+
+    return dyb;
+}
+
+dyb_inline dybuf* dyb_append_structure(dybuf* dyb, void* structure, uint size)
+{
+    return dyb_append_data_without_len(dyb, structure, size);
+}
+
+dyb_inline uint8_t* dyb_get_data_before_current_position(dybuf* dyb, uint* len)
+{
+    *len = dyb->_position;
+    return dyb->_data;
+}
+
+/// ===== type, index manage
+dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8_t type/*4bits*/, uint32_t index)
+{
+    type &= 0x0f;
+    if (index <= 0x07) {													// 0 ~ 0x07
+        dyb_append_u8(dyb, (type<<4) | index);
+    } else if (index <= 0x03FF+(0x08)) {									// 0x08 ~ 0x3FF+0x08
+        dyb_append_u16(dyb, ((uint16_t)type<<12) | 0x0800 | (index-0x08));
+    } else if (index <= 0x01FFFF+0x0408) {									// 0x0408 ~ 0x01FFFF+0x0408
+        dyb_append_u24(dyb, ((uint32_t)type<<20) | 0x0C0000 | (index-0x0408));
+    } else if (index <= 0x00FFFFFF+0x020408) {								// 0x020408 ~ 0x00FFFFFF+0x020408
+        dyb_append_u32(dyb, ((uint32_t)type<<28) | 0x0E000000 | (index-0x020408));
+    } else {
+        return null;
+    }
+
+    return dyb;
+}
+
+
+dyb_inline void dyb_next_typdex(dybuf* dyb, uint8_t* type/*4bits*/, uint32_t* index)
+{
+    uint8_t t = dyb_next_u8(dyb);
+    *type = (t >> 4) & 0x0F;
+    if ((t&0x08)==0) {
+        *index = t & 0x07;
+    } else if ((t&0x04)==0) {
+        *index = (((uint16_t)(t&0x03)<<8) | (dyb_next_u8(dyb)&0x00FF)) + 0x08;
+    } else if ((t&0x02)==0) {
+        *index = (((uint32_t)(t&0x01)<<16) | (dyb_next_u16(dyb)&0x00FFFF)) + 0x0408;
+    } else if ((t&0x01)==0) {
+        *index = (((uint32_t)(t&0x00)<<24) | (dyb_next_u24(dyb)&0x00FFFFFF)) + 0x020408;
+    } else {
+        // error
+    }
+
+}
+
+/// var u64
+dyb_inline dybuf* dyb_append_var_u64(dybuf* dyb, uint64_t value)
+{
+    if (value<=0x7F) {
+        dyb_append_u8(dyb, value);// 0 ~ 0x7F
+    } else if (value <= (0x3FFF+0x80)) {
+        // (0x7F+1) ~ 0x3FFF+(0x7F+1)
+        // 0x80 ~ 0x3FFF+0x80
+        dyb_append_u16(dyb, 0x8000 | (value-0x80));
+    } else if (value <= (0x1FFFFFUL+0x4080UL)) {
+        // (0x3FFF+(0x7F+1)+1) ~ 0x1FFFFF+(0x3FFF+(0x7F+1)+1)
+        // 0x4080 ~ 0x1FFFFF + 0x4080
+        dyb_append_u24(dyb, (uint32_t)(0xC00000UL | (value-0x4080UL)));
+    } else if (value <= (0x0FFFFFFFUL+0x204080UL)) {
+        // (0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1) ~ 0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)
+        // 0x204080 ~ 0x0FFFFFFF + 0x204080
+        dyb_append_u32(dyb, (uint32_t)(0xE0000000UL | (value-0x204080UL)));
+    } else if (value <= (0x07FFFFFFFFUL+0x10204080UL)) {
+        // (0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1) ~ 0x07FFFFFFFF+(0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1)
+        // 0x10204080 ~ 0x07FFFFFFFF+0x10204080
+        dyb_append_u40(dyb, 0xF000000000UL | (value-0x10204080UL));
+    } else if (value <= (0x03FFFFFFFFFFUL+0x0810204080UL)) {
+        //  (0x07FFFFFFFF+(0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1)) ~ 0x03FFFFFFFFFF+(0x07FFFFFFFF+(0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1))
+        // 0x0810204080 ~ 0x03FFFFFFFFFF+0x0810204080
+        dyb_append_u48(dyb, 0xF80000000000UL | (value-0x0810204080UL));
+    } else if (value <= (0x01FFFFFFFFFFFFL+0x040810204080UL)) {
+        // (0x03FFFFFFFFFF+(0x07FFFFFFFF+(0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1))+1) ~ 0x01FFFFFFFFFFFF+(0x03FFFFFFFFFF+(0x07FFFFFFFF+(0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1))+1)
+        // 0x040810204080 ~ 0x01FFFFFFFFFFFF+0x040810204080
+        dyb_append_u56(dyb, 0xFC000000000000UL | (value-0x040810204080UL));
+    } else if (value <= (0x00FFFFFFFFFFFFFFUL+0x02040810204080UL)) {
+        // (0x01FFFFFFFFFFFF+(0x03FFFFFFFFFF+(0x07FFFFFFFF+(0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1))+1)) ~ 0x00FFFFFFFFFFFFFF+((0x01FFFFFFFFFFFF+(0x03FFFFFFFFFF+(0x07FFFFFFFF+(0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1))+1)))
+        // 0x02040810204080 ~ 0x00FFFFFFFFFFFFFF+0x02040810204080
+        dyb_append_u64(dyb, 0xFE00000000000000UL | (value-0x02040810204080UL));
+    } else {
+        // 0x0102040810204080 ~ 0xFFFFFFFFFFFFFFFF
+        dyb_append_u8(dyb, 0xFF);
+        dyb_append_u64(dyb, value-0x0102040810204080UL);
+    }
+    return dyb;
+}
+
+dyb_inline uint64_t dyb_next_var_u64(dybuf* dyb)
+{
+    uint8_t b = dyb_next_u8(dyb);
+    if ((b&0x80)==0) {
+        return (b&0x7F);
+    } else if ((b&0x40)==0) {
+        return (((b&0x3F)<<8) | (dyb_next_u8(dyb) & 0x00FFUL))+0x80UL;
+    } else if ((b&0x20)==0) {
+        return (((b&0x1F)<<16) | (dyb_next_u16(dyb) & 0x00FFFFUL))+0x4080UL;
+    } else if ((b&0x10)==0) {
+        return (((b&0x0F)<<24) | (dyb_next_u24(dyb) & 0x00FFFFFFUL))+0x204080UL;
+    } else if ((b&0x08)==0) {
+        return (((uint64_t)(b&0x07)<<32) | (dyb_next_u32(dyb) & 0x00FFFFFFFFUL))+0x10204080UL;
+    } else if ((b&0x04)==0) {
+        return (((uint64_t)(b&0x03)<<40) | (dyb_next_u40(dyb) & 0x00FFFFFFFFFFUL))+0x0810204080UL;
+    } else if ((b&0x02)==0) {
+        return (((uint64_t)(b&0x01)<<48) | (dyb_next_u48(dyb) & 0x00FFFFFFFFFFFFUL))+0x040810204080UL;
+    } else if ((b&0x01)==0) {
+        return (dyb_next_u56(dyb) & 0x00FFFFFFFFFFFFFFUL)+0x02040810204080UL;
+    } else {
+        return dyb_next_u64(dyb)+0x0102040810204080UL;
+    }
+}
+
+
+dyb_inline dybuf* dyb_append_var_s64(dybuf* dyb, int64_t value)
+{
+    dyb_append_var_u64(dyb, ((value << 1) ^ (value >> 63)));
+    return dyb;
+}
+
+dyb_inline int64_t dyb_next_var_s64(dybuf* dyb)
+{
+    uint64_t u = dyb_next_var_u64(dyb);
+    return ((u&0x01)==0)?((int64_t)((u>>1)&0x7FFFFFFFFFFFFFFF)):(((int64_t)((u>>1)&0x7FFFFFFFFFFFFFFF)) ^ 0xFFFFFFFFFFFFFFFF);
+}
+
+dyb_inline dybuf* dyb_append_float(dybuf* dyb, float value)
+{
+    dyb_append_u32(dyb, dyb_swap_u32(*(uint32_t*)&value));
+    return dyb;
+}
+
+dyb_inline float dyb_next_float(dybuf* dyb)
+{
+    uint32_t v = dyb_swap_u32(dyb_next_u32(dyb));
+    return *(float*)&v;
+}
+
+dyb_inline dybuf* dyb_append_double(dybuf* dyb, double value)
+{
+    dyb_append_u64(dyb, dyb_swap_u64(*(uint64_t*)&value));
+    return dyb;
+}
+
+dyb_inline double dyb_next_double(dybuf* dyb)
+{
+    uint64_t v = dyb_swap_u64(dyb_next_u64(dyb));
+    return *(double*)&v;
+}
+
+dyb_inline dybuf* dyb_append_data_with_var_len(dybuf* dyb, uint8_t* data, uint size)
+{
+    dyb_append_var_u64(dyb, size);
+    dyb_append_data_without_len(dyb, data, size);
+
+    return dyb;
+}
+
+dyb_inline uint8_t* dyb_next_data_with_var_len(dybuf* dyb, uint* size)
+{
+    *size = (uint32_t)dyb_next_var_u64(dyb);
+    return dyb_next_data_without_len(dyb, *size);
+}
+
+
+#endif //DYBUF_C_DYBUF_H
+
+
+
