@@ -2,17 +2,29 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" assignedExecutableTargets="true" buildAllGenerated="true">
     <generated>
+      <config projectName="dybuf_c" targetName="json" />
       <config projectName="dybuf_c" targetName="dybuf_c" />
     </generated>
   </component>
-  <component name="CMakeSettings" AUTO_RELOAD="false" GENERATION_PASS_SYSTEM_ENVIRONMENT="true">
+  <component name="CMakeSettings" AUTO_RELOAD="true" GENERATION_PASS_SYSTEM_ENVIRONMENT="true">
     <ADDITIONAL_GENERATION_ENVIRONMENT>
       <envs />
     </ADDITIONAL_GENERATION_ENVIRONMENT>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1e72d53-9887-47e9-9372-2c6ef30259b4" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/json/LICENSE" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/json/Makefile" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/json/json.l" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/json/json.lex.c" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/json/json.tab.c" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/json/json.y" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../LICENSE" afterPath="$PROJECT_DIR$/../LICENSE" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/c.iml" afterPath="$PROJECT_DIR$/.idea/c.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CMakeLists.txt" afterPath="$PROJECT_DIR$/CMakeLists.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dybuf.h" afterPath="$PROJECT_DIR$/dybuf.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.c" afterPath="$PROJECT_DIR$/main.c" />
     </list>
     <ignored path="c.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -37,8 +49,95 @@
         <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="35" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
+              <caret line="7" column="32" selection-start-line="7" selection-start-column="32" selection-end-line="7" selection-end-column="32" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="json.l" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/json/json.l">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-0.5555556">
+              <caret line="1" column="32" selection-start-line="1" selection-start-column="32" selection-end-line="1" selection-end-column="32" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="json.y" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/json/json.y">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-0.5555556">
+              <caret line="1" column="7" selection-start-line="1" selection-start-column="7" selection-end-line="1" selection-end-column="7" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="json.lex.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/json/json.lex.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-8.851851">
+              <caret line="346" column="19" selection-start-line="345" selection-start-column="13" selection-end-line="345" selection-end-column="19" />
+              <folding>
+                <element signature="e#409#427#0" expanded="true" />
+                <element signature="e#16018#16035#0" expanded="true" />
+                <element signature="e#17157#17187#0" expanded="true" />
+                <element signature="e#17309#17366#0" expanded="true" />
+                <element signature="e#17397#17441#0" expanded="true" />
+                <element signature="e#17490#17517#0" expanded="true" />
+                <element signature="e#20090#20103#0" expanded="true" />
+                <element signature="e#33091#33116#0" expanded="true" />
+                <element signature="e#34322#34339#0" expanded="true" />
+                <element signature="e#46202#46235#0" expanded="true" />
+                <element signature="e#47038#47168#0" expanded="true" />
+                <element signature="e#47199#47307#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="json.tab.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/json/json.tab.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-55.296295">
+              <caret line="1143" column="20" selection-start-line="1143" selection-start-column="20" selection-end-line="1143" selection-end-column="20" />
+              <folding>
+                <element signature="e#2462#2479#0" expanded="true" />
+                <element signature="e#2737#2766#0" expanded="true" />
+                <element signature="e#2880#2930#0" expanded="true" />
+                <element signature="e#3048#3067#0" expanded="true" />
+                <element signature="e#3436#3517#0" expanded="true" />
+                <element signature="e#3680#3693#0" expanded="true" />
+                <element signature="e#3722#3756#0" expanded="true" />
+                <element signature="e#3826#3858#0" expanded="true" />
+                <element signature="e#3927#3963#0" expanded="true" />
+                <element signature="e#4040#4074#0" expanded="true" />
+                <element signature="e#4215#4388#0" expanded="true" />
+                <element signature="e#4499#4639#0" expanded="true" />
+                <element signature="e#4974#5014#0" expanded="true" />
+                <element signature="e#5303#5451#0" expanded="true" />
+                <element signature="e#5591#5620#0" expanded="true" />
+                <element signature="e#5692#6055#0" expanded="true" />
+                <element signature="e#6272#6319#0" expanded="true" />
+                <element signature="e#6476#7139#0" expanded="true" />
+                <element signature="e#7174#7683#0" expanded="true" />
+                <element signature="e#8001#8119#0" expanded="true" />
+                <element signature="e#8225#8284#0" expanded="true" />
+                <element signature="e#8392#8446#0" expanded="true" />
+                <element signature="e#10418#10783#0" expanded="true" />
+                <element signature="e#13672#13929#0" expanded="true" />
+                <element signature="e#13974#14383#0" expanded="true" />
+                <element signature="e#14408#14689#0" expanded="true" />
+                <element signature="e#18968#22805#0" expanded="true" />
+                <element signature="e#23490#30677#0" expanded="true" />
+                <element signature="e#32217#32364#0" expanded="true" />
+                <element signature="e#33383#34110#0" expanded="true" />
+                <element signature="e#34169#34189#0" expanded="true" />
+                <element signature="e#42677#43646#0" expanded="true" />
+                <element signature="e#47214#47262#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -46,12 +145,12 @@
       <file leaf-file-name="dybuf.h" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/dybuf.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.80536914">
-              <caret line="846" column="30" selection-start-line="844" selection-start-column="8" selection-end-line="846" selection-end-column="30" />
+            <state vertical-scroll-proportion="0.20134228">
+              <caret line="10" column="43" selection-start-line="10" selection-start-column="43" selection-end-line="10" selection-end-column="43" />
               <folding>
-                <element signature="e#110#124#0" expanded="true" />
-                <element signature="e#131#149#0" expanded="true" />
-                <element signature="e#732#744#0" expanded="true" />
+                <element signature="e#922#936#0" expanded="true" />
+                <element signature="e#943#961#0" expanded="true" />
+                <element signature="e#1544#1556#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -61,9 +160,9 @@
         <entry file="file://$PROJECT_DIR$/main.c">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="43" column="37" selection-start-line="43" selection-start-column="37" selection-end-line="43" selection-end-column="37" />
+              <caret line="17" column="3" selection-start-line="17" selection-start-column="3" selection-end-line="17" selection-end-column="3" />
               <folding>
-                <element signature="e#826#843#0" expanded="true" />
+                <element signature="e#855#872#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -77,9 +176,15 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/main.c" />
+        <option value="$PROJECT_DIR$/json/LICENSE" />
+        <option value="$PROJECT_DIR$/json/json.lex" />
         <option value="$PROJECT_DIR$/dybuf.h" />
+        <option value="$PROJECT_DIR$/main.c" />
+        <option value="$PROJECT_DIR$/json/json.lex.c" />
+        <option value="$PROJECT_DIR$/json/json.tab.h" />
+        <option value="$PROJECT_DIR$/CMakeLists.txt" />
+        <option value="$PROJECT_DIR$/json/json.l" />
+        <option value="$PROJECT_DIR$/json/json.y" />
       </list>
     </option>
   </component>
@@ -135,6 +240,20 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="c" />
+              <option name="myItemType" value="com.jetbrains.cidr.projectView.CidrFilesViewHelper$MyProjectTreeStructure$1" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="c" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="json" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -144,6 +263,7 @@
     <property name="settings.editor.selected.configurable" value="CPPToolchains" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="FullScreen" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../la" />
   </component>
   <component name="RunManager" selected="Application.Build All">
     <configuration default="true" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="dybuf_c" TARGET_NAME="dybuf_c" CONFIG_NAME="Debug" TEST_MODE="SUITE_TEST">
@@ -179,9 +299,14 @@
       <envs />
       <method />
     </configuration>
-    <list size="2">
+    <configuration default="false" name="json" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="dybuf_c" TARGET_NAME="json" CONFIG_NAME="Debug">
+      <envs />
+      <method />
+    </configuration>
+    <list size="3">
       <item index="0" class="java.lang.String" itemvalue="Application.dybuf_c" />
       <item index="1" class="java.lang.String" itemvalue="Application.Build All" />
+      <item index="2" class="java.lang.String" itemvalue="Application.json" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false" />
@@ -203,23 +328,25 @@
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Tool Output" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32957503" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32945737" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32870772" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="LuaJ" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="ANTLR Preview" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32957503" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32957503" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32957503" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -233,6 +360,145 @@
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="24" selection-start-line="6" selection-start-column="24" selection-end-line="6" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.l">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="26" column="10" selection-start-line="26" selection-start-column="4" selection-end-line="26" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.y">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.lex.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="31" selection-start-line="9" selection-start-column="31" selection-end-line="9" selection-end-column="31" />
+          <folding>
+            <element signature="e#409#427#0" expanded="true" />
+            <element signature="e#16018#16035#0" expanded="true" />
+            <element signature="e#17157#17187#0" expanded="true" />
+            <element signature="e#17309#17366#0" expanded="true" />
+            <element signature="e#17397#17441#0" expanded="true" />
+            <element signature="e#17490#17517#0" expanded="true" />
+            <element signature="e#20090#20103#0" expanded="true" />
+            <element signature="e#33091#33116#0" expanded="true" />
+            <element signature="e#34322#34339#0" expanded="true" />
+            <element signature="e#46202#46235#0" expanded="true" />
+            <element signature="e#47038#47168#0" expanded="true" />
+            <element signature="e#47199#47307#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.tab.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="1346" column="12" selection-start-line="1346" selection-start-column="6" selection-end-line="1346" selection-end-column="12" />
+          <folding>
+            <element signature="e#2462#2479#0" expanded="true" />
+            <element signature="e#2737#2766#0" expanded="true" />
+            <element signature="e#2880#2930#0" expanded="true" />
+            <element signature="e#3048#3067#0" expanded="true" />
+            <element signature="e#3436#3517#0" expanded="true" />
+            <element signature="e#3680#3693#0" expanded="true" />
+            <element signature="e#3722#3756#0" expanded="true" />
+            <element signature="e#3826#3858#0" expanded="true" />
+            <element signature="e#3927#3963#0" expanded="true" />
+            <element signature="e#4040#4074#0" expanded="true" />
+            <element signature="e#4215#4388#0" expanded="true" />
+            <element signature="e#4499#4639#0" expanded="true" />
+            <element signature="e#4974#5014#0" expanded="true" />
+            <element signature="e#5303#5451#0" expanded="true" />
+            <element signature="e#5591#5620#0" expanded="true" />
+            <element signature="e#5692#6055#0" expanded="true" />
+            <element signature="e#6272#6319#0" expanded="true" />
+            <element signature="e#6476#7139#0" expanded="true" />
+            <element signature="e#7174#7683#0" expanded="true" />
+            <element signature="e#8001#8119#0" expanded="true" />
+            <element signature="e#8225#8284#0" expanded="true" />
+            <element signature="e#8392#8446#0" expanded="true" />
+            <element signature="e#10418#10783#0" expanded="true" />
+            <element signature="e#13672#13929#0" expanded="true" />
+            <element signature="e#13974#14383#0" expanded="true" />
+            <element signature="e#14408#14689#0" expanded="true" />
+            <element signature="e#18968#22805#0" expanded="true" />
+            <element signature="e#23490#30677#0" expanded="true" />
+            <element signature="e#32217#32364#0" expanded="true" />
+            <element signature="e#33383#34110#0" expanded="true" />
+            <element signature="e#34169#34189#0" expanded="true" />
+            <element signature="e#42677#43646#0" expanded="true" />
+            <element signature="e#47214#47262#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dybuf.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="17" selection-end-column="3" />
+          <folding>
+            <element signature="e#922#936#0" expanded="true" />
+            <element signature="e#943#961#0" expanded="true" />
+            <element signature="e#1544#1556#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="17" column="3" selection-start-line="17" selection-start-column="3" selection-end-line="17" selection-end-column="3" />
+          <folding>
+            <element signature="e#855#872#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="35" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dybuf.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#922#936#0" expanded="true" />
+            <element signature="e#943#961#0" expanded="true" />
+            <element signature="e#1544#1556#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="43" column="37" selection-start-line="43" selection-start-column="37" selection-end-line="43" selection-end-column="37" />
+          <folding>
+            <element signature="e#855#872#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
@@ -243,9 +509,9 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="767" column="22" selection-start-line="767" selection-start-column="22" selection-end-line="767" selection-end-column="22" />
           <folding>
-            <element signature="e#110#124#0" expanded="true" />
-            <element signature="e#131#149#0" expanded="true" />
-            <element signature="e#732#744#0" expanded="true" />
+            <element signature="e#922#936#0" expanded="true" />
+            <element signature="e#943#961#0" expanded="true" />
+            <element signature="e#1544#1556#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -255,7 +521,7 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="43" column="37" selection-start-line="43" selection-start-column="37" selection-end-line="43" selection-end-column="37" />
           <folding>
-            <element signature="e#826#843#0" expanded="true" />
+            <element signature="e#855#872#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -273,9 +539,9 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#110#124#0" expanded="true" />
-            <element signature="e#131#149#0" expanded="true" />
-            <element signature="e#732#744#0" expanded="true" />
+            <element signature="e#922#936#0" expanded="true" />
+            <element signature="e#943#961#0" expanded="true" />
+            <element signature="e#1544#1556#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -285,7 +551,7 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="25" column="1" selection-start-line="25" selection-start-column="1" selection-end-line="25" selection-end-column="1" />
           <folding>
-            <element signature="e#826#843#0" expanded="true" />
+            <element signature="e#855#872#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -297,10 +563,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/json/Makefile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.1409396">
+          <caret line="7" column="20" selection-start-line="7" selection-start-column="14" selection-end-line="7" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/LICENSE">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.44295302">
+          <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="35" selection-start-line="6" selection-start-column="35" selection-end-line="6" selection-end-column="35" />
+          <caret line="7" column="32" selection-start-line="7" selection-start-column="32" selection-end-line="7" selection-end-column="32" />
           <folding />
         </state>
       </provider>
@@ -308,21 +588,100 @@
     <entry file="file://$PROJECT_DIR$/main.c">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="43" column="37" selection-start-line="43" selection-start-column="37" selection-end-line="43" selection-end-column="37" />
+          <caret line="17" column="3" selection-start-line="17" selection-start-column="3" selection-end-line="17" selection-end-column="3" />
           <folding>
-            <element signature="e#826#843#0" expanded="true" />
+            <element signature="e#855#872#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.l">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.5555556">
+          <caret line="1" column="32" selection-start-line="1" selection-start-column="32" selection-end-line="1" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.y">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.5555556">
+          <caret line="1" column="7" selection-start-line="1" selection-start-column="7" selection-end-line="1" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.lex.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-8.851851">
+          <caret line="346" column="19" selection-start-line="345" selection-start-column="13" selection-end-line="345" selection-end-column="19" />
+          <folding>
+            <element signature="e#409#427#0" expanded="true" />
+            <element signature="e#16018#16035#0" expanded="true" />
+            <element signature="e#17157#17187#0" expanded="true" />
+            <element signature="e#17309#17366#0" expanded="true" />
+            <element signature="e#17397#17441#0" expanded="true" />
+            <element signature="e#17490#17517#0" expanded="true" />
+            <element signature="e#20090#20103#0" expanded="true" />
+            <element signature="e#33091#33116#0" expanded="true" />
+            <element signature="e#34322#34339#0" expanded="true" />
+            <element signature="e#46202#46235#0" expanded="true" />
+            <element signature="e#47038#47168#0" expanded="true" />
+            <element signature="e#47199#47307#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.tab.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-55.296295">
+          <caret line="1143" column="20" selection-start-line="1143" selection-start-column="20" selection-end-line="1143" selection-end-column="20" />
+          <folding>
+            <element signature="e#2462#2479#0" expanded="true" />
+            <element signature="e#2737#2766#0" expanded="true" />
+            <element signature="e#2880#2930#0" expanded="true" />
+            <element signature="e#3048#3067#0" expanded="true" />
+            <element signature="e#3436#3517#0" expanded="true" />
+            <element signature="e#3680#3693#0" expanded="true" />
+            <element signature="e#3722#3756#0" expanded="true" />
+            <element signature="e#3826#3858#0" expanded="true" />
+            <element signature="e#3927#3963#0" expanded="true" />
+            <element signature="e#4040#4074#0" expanded="true" />
+            <element signature="e#4215#4388#0" expanded="true" />
+            <element signature="e#4499#4639#0" expanded="true" />
+            <element signature="e#4974#5014#0" expanded="true" />
+            <element signature="e#5303#5451#0" expanded="true" />
+            <element signature="e#5591#5620#0" expanded="true" />
+            <element signature="e#5692#6055#0" expanded="true" />
+            <element signature="e#6272#6319#0" expanded="true" />
+            <element signature="e#6476#7139#0" expanded="true" />
+            <element signature="e#7174#7683#0" expanded="true" />
+            <element signature="e#8001#8119#0" expanded="true" />
+            <element signature="e#8225#8284#0" expanded="true" />
+            <element signature="e#8392#8446#0" expanded="true" />
+            <element signature="e#10418#10783#0" expanded="true" />
+            <element signature="e#13672#13929#0" expanded="true" />
+            <element signature="e#13974#14383#0" expanded="true" />
+            <element signature="e#14408#14689#0" expanded="true" />
+            <element signature="e#18968#22805#0" expanded="true" />
+            <element signature="e#23490#30677#0" expanded="true" />
+            <element signature="e#32217#32364#0" expanded="true" />
+            <element signature="e#33383#34110#0" expanded="true" />
+            <element signature="e#34169#34189#0" expanded="true" />
+            <element signature="e#42677#43646#0" expanded="true" />
+            <element signature="e#47214#47262#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/dybuf.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.80536914">
-          <caret line="846" column="30" selection-start-line="844" selection-start-column="8" selection-end-line="846" selection-end-column="30" />
+        <state vertical-scroll-proportion="0.20134228">
+          <caret line="10" column="43" selection-start-line="10" selection-start-column="43" selection-end-line="10" selection-end-column="43" />
           <folding>
-            <element signature="e#110#124#0" expanded="true" />
-            <element signature="e#131#149#0" expanded="true" />
-            <element signature="e#732#744#0" expanded="true" />
+            <element signature="e#922#936#0" expanded="true" />
+            <element signature="e#943#961#0" expanded="true" />
+            <element signature="e#1544#1556#0" expanded="true" />
           </folding>
         </state>
       </provider>
