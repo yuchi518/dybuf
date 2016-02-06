@@ -501,8 +501,8 @@ char *yytext;
 #line 1 "json.l"
 #line 2 "json.l"
     // flex -o json.lex.c json.l
-    #include<stdio.h>
-    #include "json.tab.c"
+    #include <stdio.h>
+    #include "json.yacc.c"
     char *strclone(char *str);
 #line 508 "json.lex.c"
 

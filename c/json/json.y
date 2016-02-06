@@ -3,11 +3,13 @@
     typedef char* YYSTYPE;
     #define YYSTYPE_IS_DECLARED     1
 
-    #include<stdio.h>
-    #include<string.h>
-    #include<stdlib.h>
+    #include <stdio.h>
+    #include <string.h>
+    #include <stdlib.h>
+    #include "cjson.h"
 
-    char *strconcat(char *str1, char *str2);
+
+char *strconcat(char *str1, char *str2);
     int yylex();
     void yyerror (char const *s);
 %}

@@ -68,15 +68,17 @@
     typedef char* YYSTYPE;
     #define YYSTYPE_IS_DECLARED     1
 
-    #include<stdio.h>
-    #include<string.h>
-    #include<stdlib.h>
+    #include <stdio.h>
+    #include <string.h>
+    #include <stdlib.h>
+    #include "cjson.h"
 
-    char *strconcat(char *str1, char *str2);
+
+char *strconcat(char *str1, char *str2);
     int yylex();
     void yyerror (char const *s);
 
-#line 80 "json.tab.c" /* yacc.c:339  */
+#line 82 "json.yacc.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -138,7 +140,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 142 "json.tab.c" /* yacc.c:358  */
+#line 144 "json.yacc.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -436,8 +438,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    25,    25,    26,    30,    31,    39,    40,    47,    54,
-      59,    67,    68,    76,    77,    78,    79,    80,    81,    82
+       0,    27,    27,    28,    32,    33,    41,    42,    49,    56,
+      61,    69,    70,    78,    79,    80,    81,    82,    83,    84
 };
 #endif
 
@@ -1220,133 +1222,133 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 25 "json.y" /* yacc.c:1661  */
+#line 27 "json.y" /* yacc.c:1661  */
     { printf("%s",(yyvsp[0])); }
-#line 1226 "json.tab.c" /* yacc.c:1661  */
+#line 1228 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 3:
-#line 26 "json.y" /* yacc.c:1661  */
+#line 28 "json.y" /* yacc.c:1661  */
     { printf("%s",(yyvsp[0])); }
-#line 1232 "json.tab.c" /* yacc.c:1661  */
+#line 1234 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 4:
-#line 30 "json.y" /* yacc.c:1661  */
+#line 32 "json.y" /* yacc.c:1661  */
     { (yyval) = "{}"; }
-#line 1238 "json.tab.c" /* yacc.c:1661  */
+#line 1240 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 5:
-#line 32 "json.y" /* yacc.c:1661  */
+#line 34 "json.y" /* yacc.c:1661  */
     {
             (yyval) = (char *)malloc(sizeof(char)*(1+strlen((yyvsp[-1]))+1+1));
             sprintf((yyval),"{%s}",(yyvsp[-1]));
         }
-#line 1247 "json.tab.c" /* yacc.c:1661  */
+#line 1249 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 6:
-#line 39 "json.y" /* yacc.c:1661  */
+#line 41 "json.y" /* yacc.c:1661  */
     { (yyval) = (yyvsp[0]); }
-#line 1253 "json.tab.c" /* yacc.c:1661  */
+#line 1255 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 7:
-#line 41 "json.y" /* yacc.c:1661  */
+#line 43 "json.y" /* yacc.c:1661  */
     {
             (yyval) = (char *)malloc(sizeof(char)*(strlen((yyvsp[-2]))+1+strlen((yyvsp[0]))+1));
             sprintf((yyval),"%s,%s",(yyvsp[-2]),(yyvsp[0]));
         }
-#line 1262 "json.tab.c" /* yacc.c:1661  */
+#line 1264 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 8:
-#line 47 "json.y" /* yacc.c:1661  */
+#line 49 "json.y" /* yacc.c:1661  */
     {
     (yyval) = (char *)malloc(sizeof(char)*(strlen((yyvsp[-2]))+1+strlen((yyvsp[0]))+1));
     sprintf((yyval),"%s:%s",(yyvsp[-2]),(yyvsp[0]));
   }
-#line 1271 "json.tab.c" /* yacc.c:1661  */
+#line 1273 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 9:
-#line 55 "json.y" /* yacc.c:1661  */
+#line 57 "json.y" /* yacc.c:1661  */
     {
             (yyval) = (char *)malloc(sizeof(char)*(2+1));
             sprintf((yyval),"[]");
         }
-#line 1280 "json.tab.c" /* yacc.c:1661  */
+#line 1282 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 10:
-#line 60 "json.y" /* yacc.c:1661  */
+#line 62 "json.y" /* yacc.c:1661  */
     {
             (yyval) = (char *)malloc(sizeof(char)*(1+strlen((yyvsp[-1]))+1+1));
             sprintf((yyval),"[%s]",(yyvsp[-1]));
         }
-#line 1289 "json.tab.c" /* yacc.c:1661  */
+#line 1291 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 11:
-#line 67 "json.y" /* yacc.c:1661  */
+#line 69 "json.y" /* yacc.c:1661  */
     { (yyval) = (yyvsp[0]); }
-#line 1295 "json.tab.c" /* yacc.c:1661  */
+#line 1297 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 12:
-#line 69 "json.y" /* yacc.c:1661  */
+#line 71 "json.y" /* yacc.c:1661  */
     {
             (yyval) = (char *)malloc(sizeof(char)*(strlen((yyvsp[-2]))+1+strlen((yyvsp[0]))+1));
             sprintf((yyval),"%s,%s",(yyvsp[-2]),(yyvsp[0]));
         }
-#line 1304 "json.tab.c" /* yacc.c:1661  */
+#line 1306 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 13:
-#line 76 "json.y" /* yacc.c:1661  */
+#line 78 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval; }
-#line 1310 "json.tab.c" /* yacc.c:1661  */
+#line 1312 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 14:
-#line 77 "json.y" /* yacc.c:1661  */
+#line 79 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval; }
-#line 1316 "json.tab.c" /* yacc.c:1661  */
+#line 1318 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 15:
-#line 78 "json.y" /* yacc.c:1661  */
+#line 80 "json.y" /* yacc.c:1661  */
     { (yyval)=(yyvsp[0]); }
-#line 1322 "json.tab.c" /* yacc.c:1661  */
+#line 1324 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 16:
-#line 79 "json.y" /* yacc.c:1661  */
+#line 81 "json.y" /* yacc.c:1661  */
     { (yyval)=(yyvsp[0]); }
-#line 1328 "json.tab.c" /* yacc.c:1661  */
+#line 1330 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 17:
-#line 80 "json.y" /* yacc.c:1661  */
+#line 82 "json.y" /* yacc.c:1661  */
     { (yyval)="true"; }
-#line 1334 "json.tab.c" /* yacc.c:1661  */
+#line 1336 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 18:
-#line 81 "json.y" /* yacc.c:1661  */
+#line 83 "json.y" /* yacc.c:1661  */
     { (yyval)="false"; }
-#line 1340 "json.tab.c" /* yacc.c:1661  */
+#line 1342 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 19:
-#line 82 "json.y" /* yacc.c:1661  */
+#line 84 "json.y" /* yacc.c:1661  */
     { (yyval)="null"; }
-#line 1346 "json.tab.c" /* yacc.c:1661  */
+#line 1348 "json.yacc.c" /* yacc.c:1661  */
     break;
 
 
-#line 1350 "json.tab.c" /* yacc.c:1661  */
+#line 1352 "json.yacc.c" /* yacc.c:1661  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1574,7 +1576,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 85 "json.y" /* yacc.c:1906  */
+#line 87 "json.y" /* yacc.c:1906  */
 
 
 /*int main()

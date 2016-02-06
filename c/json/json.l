@@ -1,7 +1,7 @@
 %{
     // flex -o json.lex.c json.l
-    #include<stdio.h>
-    #include "json.tab.c"
+    #include <stdio.h>
+    #include "json.yacc.c"
     char *strclone(char *str);
 %}
 
