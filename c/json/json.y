@@ -16,7 +16,7 @@ char *strconcat(char *str1, char *str2);
 
 %token  NUMBER
 %token  STRING
-%token  true false null
+%token  TRUE_T FALSE_T NULL_T
 %left   O_BEGIN O_END A_BEGIN A_END
 %left   COMMA
 %left   COLON
@@ -79,9 +79,9 @@ VALUE
     | NUMBER { $$=yylval; }
     | OBJECT { $$=$1; }
     | ARRAY { $$=$1; }
-    | true { $$="true"; }
-    | false { $$="false"; }
-    | null { $$="null"; }
+    | TRUE_T { $$="true"; }
+    | FALSE_T { $$="false"; }
+    | NULL_T { $$="null"; }
     ;
 
 %%
@@ -94,12 +94,13 @@ VALUE
    return 0;
 }*/
 
-int yywrap()
+/*int yywrap()
 {
    return 1;
-}
+}*/
 
-void yyerror (char const *s) {
+void yyerror (char const *s)
+{
    fprintf (stderr, "%s\n", s);
 }
 

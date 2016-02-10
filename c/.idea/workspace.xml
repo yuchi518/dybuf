@@ -20,7 +20,10 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dybuf.h" afterPath="$PROJECT_DIR$/dybuf.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/cjson.c" afterPath="$PROJECT_DIR$/json/cjson.c" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/cjson.h" afterPath="$PROJECT_DIR$/json/cjson.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.c" afterPath="$PROJECT_DIR$/main.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.l" afterPath="$PROJECT_DIR$/json/json.l" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.lex.c" afterPath="$PROJECT_DIR$/json/json.lex.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.y" afterPath="$PROJECT_DIR$/json/json.y" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.yacc.c" afterPath="$PROJECT_DIR$/json/json.yacc.c" />
     </list>
     <ignored path="c.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -45,7 +48,7 @@
         <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="21" column="31" selection-start-line="21" selection-start-column="31" selection-end-line="21" selection-end-column="31" />
+              <caret line="24" column="29" selection-start-line="24" selection-start-column="29" selection-end-line="24" selection-end-column="29" />
               <folding />
             </state>
           </provider>
@@ -54,8 +57,8 @@
       <file leaf-file-name="cjson.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/json/cjson.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-32.851852">
-              <caret line="254" column="12" selection-start-line="254" selection-start-column="12" selection-end-line="254" selection-end-column="12" />
+            <state vertical-scroll-proportion="-9.888889">
+              <caret line="179" column="36" selection-start-line="179" selection-start-column="36" selection-end-line="179" selection-end-column="36" />
               <folding>
                 <element signature="e#853#872#0" expanded="true" />
               </folding>
@@ -67,7 +70,7 @@
         <entry file="file://$PROJECT_DIR$/json/cjson.h">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="130" column="15" selection-start-line="130" selection-start-column="15" selection-end-line="130" selection-end-column="15" />
+              <caret line="125" column="21" selection-start-line="125" selection-start-column="21" selection-end-line="125" selection-end-column="21" />
               <folding />
             </state>
           </provider>
@@ -76,22 +79,32 @@
       <file leaf-file-name="json.y" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/json/json.y">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="23" selection-start-line="6" selection-start-column="23" selection-end-line="6" selection-end-column="23" />
+            <state vertical-scroll-proportion="-9.444445">
+              <caret line="17" column="14" selection-start-line="17" selection-start-column="14" selection-end-line="17" selection-end-column="14" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dybuf.h" pinned="false" current-in-tab="true">
+      <file leaf-file-name="json.l" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/json/json.l">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-0.71635884">
+              <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dybuf.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/dybuf.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.31530493">
-              <caret line="178" column="45" selection-start-line="178" selection-start-column="45" selection-end-line="178" selection-end-column="45" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="39" selection-end-column="19" />
               <folding>
                 <element signature="e#922#936#0" expanded="true" />
                 <element signature="e#943#961#0" expanded="true" />
-                <element signature="e#1544#1556#0" expanded="true" />
+                <element signature="e#1612#1624#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -101,10 +114,8 @@
         <entry file="file://$PROJECT_DIR$/main.c">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="114" column="0" selection-start-line="114" selection-start-column="0" selection-end-line="114" selection-end-column="0" />
-              <folding>
-                <element signature="e#855#872#0" expanded="true" />
-              </folding>
+              <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -121,15 +132,17 @@
         <option value="$PROJECT_DIR$/json/json.lex" />
         <option value="$PROJECT_DIR$/json/json.lex.c" />
         <option value="$PROJECT_DIR$/json/json.tab.h" />
-        <option value="$PROJECT_DIR$/json/json.l" />
         <option value="$PROJECT_DIR$/json/json.yacc.c" />
-        <option value="$PROJECT_DIR$/json/json.y" />
         <option value="$PROJECT_DIR$/libavl/avl-test.c" />
-        <option value="$PROJECT_DIR$/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/json/cjson.h" />
-        <option value="$PROJECT_DIR$/json/cjson.c" />
         <option value="$PROJECT_DIR$/main.c" />
+        <option value="$PROJECT_DIR$/json/src_stack.c" />
+        <option value="$PROJECT_DIR$/json/src_stack.h" />
+        <option value="$PROJECT_DIR$/CMakeLists.txt" />
+        <option value="$PROJECT_DIR$/json/cjson.c" />
+        <option value="$PROJECT_DIR$/json/json.y" />
         <option value="$PROJECT_DIR$/dybuf.h" />
+        <option value="$PROJECT_DIR$/json/cjson.h" />
+        <option value="$PROJECT_DIR$/json/json.l" />
       </list>
     </option>
   </component>
@@ -293,7 +306,7 @@
     <layout>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Tool Output" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29488292" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29488292" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32784042" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -304,7 +317,7 @@
       <window_info id="ANTLR Preview" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22202949" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22202949" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -385,7 +398,7 @@
           <folding>
             <element signature="e#922#936#0" expanded="true" />
             <element signature="e#943#961#0" expanded="true" />
-            <element signature="e#1544#1556#0" expanded="true" />
+            <element signature="e#1612#1624#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -394,9 +407,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="17" column="3" selection-start-line="17" selection-start-column="3" selection-end-line="17" selection-end-column="3" />
-          <folding>
-            <element signature="e#855#872#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -437,7 +448,7 @@
           <folding>
             <element signature="e#922#936#0" expanded="true" />
             <element signature="e#943#961#0" expanded="true" />
-            <element signature="e#1544#1556#0" expanded="true" />
+            <element signature="e#1612#1624#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -446,9 +457,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="17" column="3" selection-start-line="17" selection-start-column="3" selection-end-line="17" selection-end-column="3" />
-          <folding>
-            <element signature="e#855#872#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -467,7 +476,7 @@
           <folding>
             <element signature="e#922#936#0" expanded="true" />
             <element signature="e#943#961#0" expanded="true" />
-            <element signature="e#1544#1556#0" expanded="true" />
+            <element signature="e#1612#1624#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -476,9 +485,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="43" column="37" selection-start-line="43" selection-start-column="37" selection-end-line="43" selection-end-column="37" />
-          <folding>
-            <element signature="e#855#872#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -497,7 +504,7 @@
           <folding>
             <element signature="e#922#936#0" expanded="true" />
             <element signature="e#943#961#0" expanded="true" />
-            <element signature="e#1544#1556#0" expanded="true" />
+            <element signature="e#1612#1624#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -506,9 +513,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="43" column="37" selection-start-line="43" selection-start-column="37" selection-end-line="43" selection-end-column="37" />
-          <folding>
-            <element signature="e#855#872#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -527,7 +532,7 @@
           <folding>
             <element signature="e#922#936#0" expanded="true" />
             <element signature="e#943#961#0" expanded="true" />
-            <element signature="e#1544#1556#0" expanded="true" />
+            <element signature="e#1612#1624#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -536,9 +541,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="25" column="1" selection-start-line="25" selection-start-column="1" selection-end-line="25" selection-end-column="1" />
-          <folding>
-            <element signature="e#855#872#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -565,29 +568,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/json/json.lex.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33245382">
+        <state vertical-scroll-proportion="0.33256617">
           <caret line="504" column="22" selection-start-line="504" selection-start-column="19" selection-end-line="504" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/json.l">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.05732484">
-          <caret line="3" column="23" selection-start-line="3" selection-start-column="23" selection-end-line="3" selection-end-column="23" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/json/json.yacc.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.07643312">
+        <state vertical-scroll-proportion="-0.20943613">
           <caret line="4" column="3" selection-start-line="4" selection-start-column="3" selection-end-line="4" selection-end-column="3" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/json.y">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="23" selection-start-line="6" selection-start-column="23" selection-end-line="6" selection-end-column="23" />
           <folding />
         </state>
       </provider>
@@ -595,15 +585,23 @@
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="31" selection-start-line="21" selection-start-column="31" selection-end-line="21" selection-end-column="31" />
+          <caret line="24" column="29" selection-start-line="24" selection-start-column="29" selection-end-line="24" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/json/cjson.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-32.851852">
-          <caret line="254" column="12" selection-start-line="254" selection-start-column="12" selection-end-line="254" selection-end-column="12" />
+        <state vertical-scroll-proportion="-9.888889">
+          <caret line="179" column="36" selection-start-line="179" selection-start-column="36" selection-end-line="179" selection-end-column="36" />
           <folding>
             <element signature="e#853#872#0" expanded="true" />
           </folding>
@@ -613,30 +611,36 @@
     <entry file="file://$PROJECT_DIR$/json/cjson.h">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="130" column="15" selection-start-line="130" selection-start-column="15" selection-end-line="130" selection-end-column="15" />
+          <caret line="125" column="21" selection-start-line="125" selection-start-column="21" selection-end-line="125" selection-end-column="21" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="114" column="0" selection-start-line="114" selection-start-column="0" selection-end-line="114" selection-end-column="0" />
-          <folding>
-            <element signature="e#855#872#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/dybuf.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.31530493">
-          <caret line="178" column="45" selection-start-line="178" selection-start-column="45" selection-end-line="178" selection-end-column="45" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="39" selection-end-column="19" />
           <folding>
             <element signature="e#922#936#0" expanded="true" />
             <element signature="e#943#961#0" expanded="true" />
-            <element signature="e#1544#1556#0" expanded="true" />
+            <element signature="e#1612#1624#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.y">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-9.444445">
+          <caret line="17" column="14" selection-start-line="17" selection-start-column="14" selection-end-line="17" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.l">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.71635884">
+          <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>

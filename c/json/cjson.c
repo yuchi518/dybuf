@@ -22,9 +22,15 @@
 //
 
 #include <string.h>
-#include <stdio.h>
 #include "cjson.h"
+
+/// ==== json yacc & lex
 #include "json.lex.c"
+
+
+
+
+/// ============= cjson obj
 
 static unsigned int memory_profile_size = 0;
 static unsigned int* memory_alloc_records_idx;
@@ -79,6 +85,7 @@ struct jsobj* cjson_make(enum jstype type)
     switch(type)
     {
         case jstype_nil: return cjson_make_nil();
+        case jstype_bool: return cjson_make_bool(false);
         case jstype_int: return cjson_make_int(0);
         case jstype_double: return cjson_make_double(0);
         case jstype_string: return cjson_make_string("");
@@ -94,6 +101,7 @@ enum jserr cjson_release(struct jsobj* obj)
     switch(obj->type)
     {
         case jstype_nil: cjson_release_nil(_obj2inst_n(obj));
+        case jstype_bool: cjson_release_bool(_obj2inst_b(obj));
         case jstype_int: cjson_release_int(_obj2inst_i(obj));
         case jstype_double: cjson_release_double(_obj2inst_d(obj));
         case jstype_string: cjson_release_string(_obj2inst_s(obj));
@@ -109,6 +117,7 @@ struct jsobj* cjson_clone(struct jsobj* obj)
     switch(obj->type)
     {
         case jstype_nil: return cjson_clone_nil(_obj2inst_n(obj));
+        case jstype_bool: return cjson_clone_bool(_obj2inst_b(obj));
         case jstype_int: return cjson_clone_int(_obj2inst_i(obj));
         case jstype_double: return cjson_clone_double(_obj2inst_d(obj));
         case jstype_string: return cjson_clone_string(_obj2inst_s(obj));
@@ -131,6 +140,7 @@ int cjson_compare(struct jsobj* obj0, struct jsobj* obj1)
         switch(obj0->type)
         {
             case jstype_nil: return 0;
+            case jstype_bool: return _obj2bool(obj0) - _obj2bool(obj1);
             case jstype_int: return _obj2int(obj0) - _obj2int(obj1);
             case jstype_double: {
                 double d0 = _obj2double(obj0);
@@ -178,6 +188,38 @@ enum jserr cjson_release_nil(struct jsobj_nil* nil_obj)
         cjson_memory_release(nil_obj);
     return jserr_no_error;
 }
+
+
+/// ========== bool ==========
+
+struct jsobj* cjson_make_bool(bool value)
+{
+    struct jsobj_bool* obj = cjson_memory_allocate(sizeof(*obj));
+    obj->base = (struct jsobj) {
+            .type = jstype_bool,
+            .should_copy = 0,
+            .reference_count = 1,
+            .wrapper = NULL,
+            .this = NULL,
+    };
+    obj->value = value;
+    return &(obj->base);
+}
+
+struct jsobj* cjson_clone_bool(struct jsobj_bool* bool_obj)
+{
+    if (bool_obj == NULL) return cjson_make_nil();
+    return cjson_make_bool(bool_obj->value);
+}
+
+enum jserr cjson_release_bool(struct jsobj_bool* bool_obj)
+{
+    if (bool_obj==NULL) return jserr_invalid_args;
+    if ((--bool_obj->base.reference_count) <= 0)
+        cjson_memory_release(bool_obj);
+    return jserr_no_error;
+}
+
 
 /// ========== int ==========
 

@@ -70,11 +70,13 @@ enum jstype
 {
     jstype_nil          = 0x000,
 
-    jstype_int          = 0x010,        // 32bits or 64bits, depends on platform
+    jstype_bool         = 0x010,
 
-    jstype_double       = 0x020,
+    jstype_int          = 0x020,        // 32bits or 64bits, depends on platform
 
-    jstype_string       = 0x030,
+    jstype_double       = 0x030,
+
+    jstype_string       = 0x040,
 
     //jstype_object       = 0x100,
     jstype_array        = 0x101,
@@ -99,11 +101,13 @@ struct jsobj
     const typeof( ((type *)0)->base ) *__mptr = (ptr); \
     (type *)( (void *)__mptr - ((size_t) &((type *)0)->base) );})
 #define _obj2inst_n(ptr)    (_obj2inst(ptr, struct jsobj_nil) )
+#define _obj2inst_b(ptr)    (_obj2inst(ptr, struct jsobj_bool) )
 #define _obj2inst_i(ptr)    (_obj2inst(ptr, struct jsobj_int) )
 #define _obj2inst_d(ptr)    (_obj2inst(ptr, struct jsobj_double) )
 #define _obj2inst_s(ptr)    (_obj2inst(ptr, struct jsobj_string) )
 #define _obj2inst_a(ptr)    (_obj2inst(ptr, struct jsobj_array) )
 #define _obj2inst_m(ptr)    (_obj2inst(ptr, struct jsobj_map) )
+#define _obj2bool(ptr)       ( _obj2inst(ptr, struct jsobj_bool)->value )
 #define _obj2int(ptr)       ( _obj2inst(ptr, struct jsobj_int)->value )
 #define _obj2double(ptr)    ( _obj2inst(ptr, struct jsobj_double)->value )
 #define _obj2string(ptr)    ( _obj2inst(ptr, struct jsobj_string)->value )
@@ -111,6 +115,21 @@ struct jsobj
 struct jsobj_nil
 {
     struct jsobj base;
+};
+
+#ifndef _BOOL_TYPE_
+#define _BOOL_TYPE_
+typedef enum {
+    false       = 0,
+    true,
+} bool;
+typedef bool boolean;
+#endif
+
+struct jsobj_bool
+{
+    struct jsobj base;
+    bool value;             // 0 or 1
 };
 
 struct jsobj_int
@@ -159,6 +178,10 @@ enum jserr cjson_release(struct jsobj* obj);
 struct jsobj* cjson_make_nil(void);
 struct jsobj* cjson_clone_nil(struct jsobj_nil* nil_obj);
 enum jserr cjson_release_nil(struct jsobj_nil* nil_obj);
+
+struct jsobj* cjson_make_bool(bool value);
+struct jsobj* cjson_clone_bool(struct jsobj_bool* bool_obj);
+enum jserr cjson_release_bool(struct jsobj_bool* bool_obj);
 
 struct jsobj* cjson_make_int(int value);
 struct jsobj* cjson_clone_int(struct jsobj_int* int_obj);

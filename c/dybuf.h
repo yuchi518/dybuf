@@ -36,11 +36,14 @@
 typedef unsigned char byte;
 typedef unsigned int uint;
 
-
+#ifndef _BOOL_TYPE_
+#define _BOOL_TYPE_
 typedef enum {
     false = 0,
     true,
 } boolean;
+typedef boolean bool;
+#endif
 
 #define null                    (0)
 

@@ -112,9 +112,9 @@ extern int yydebug;
   {
     NUMBER = 258,
     STRING = 259,
-    true = 260,
-    false = 261,
-    null = 262,
+    TRUE_T = 260,
+    FALSE_T = 261,
+    NULL_T = 262,
     O_BEGIN = 263,
     O_END = 264,
     A_BEGIN = 265,
@@ -448,8 +448,8 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "NUMBER", "STRING", "true", "false",
-  "null", "O_BEGIN", "O_END", "A_BEGIN", "A_END", "COMMA", "COLON",
+  "$end", "error", "$undefined", "NUMBER", "STRING", "TRUE_T", "FALSE_T",
+  "NULL_T", "O_BEGIN", "O_END", "A_BEGIN", "A_END", "COMMA", "COLON",
   "$accept", "START", "OBJECT", "MEMBERS", "PAIR", "ARRAY", "ELEMENTS",
   "VALUE", YY_NULLPTR
 };
@@ -1587,12 +1587,13 @@ yyreturn:
    return 0;
 }*/
 
-int yywrap()
+/*int yywrap()
 {
    return 1;
-}
+}*/
 
-void yyerror (char const *s) {
+void yyerror (char const *s)
+{
    fprintf (stderr, "%s\n", s);
 }
 
