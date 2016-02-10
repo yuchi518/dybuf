@@ -22,9 +22,56 @@
 //
 
 #include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "dybuf.h"
+#include "cjson.h"
+
+void cjson_test(void);
+void dybuf_test(void);
 
 int main(int argc, char **argv)
+{
+    srand(time(NULL));
+
+    cjson_test();
+    dybuf_test();
+
+    return 0;
+}
+
+void cjson_test(void)
+{
+    struct jsobj *obj;
+    enum jstype typs[] = {jstype_nil, jstype_int, jstype_double, jstype_string, jstype_array, jstype_map};
+    unsigned int i;
+
+    unsigned int profile_size = 1024, alloc_idx, release_idx;
+    void** alloc_rec = malloc(profile_size*sizeof(alloc_rec[0]));
+    void** release_rec = malloc(profile_size*sizeof(release_rec[0]));
+
+    cjson_memory_profile(alloc_rec, &alloc_idx, release_rec, &release_idx, profile_size);
+
+    for (i=0; i<sizeof(typs)/sizeof(typs[0]); i++)
+    {
+        obj = cjson_make(typs[i]);
+        cjson_release(obj);
+    }
+
+
+    for (i=0; i<alloc_idx; i++)
+    {
+        printf("%p,", alloc_rec[i]);
+    }
+    printf("\n");
+    for (i=0; i<release_idx; i++)
+    {
+        printf("%p,", release_rec[i]);
+    }
+    printf("\n");
+}
+
+void dybuf_test(void)
 {
     dybuf dyb0, *dyb1;
     int i=0;
@@ -33,9 +80,7 @@ int main(int argc, char **argv)
     uint size;
     int diff = 0;
 
-    srand(time(NULL));
-
-    for (i=0; i<1000000; i++)
+    for (i=0; i<1000; i++)
     {
         dyb_create(&dyb0, 32);
 
@@ -72,7 +117,4 @@ int main(int argc, char **argv)
     }
 
     printf("diff: %d\n", diff);
-
-
-    return 0;
 }

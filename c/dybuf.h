@@ -174,6 +174,10 @@ dyb_inline dybuf* dyb_create(dybuf* dyb, uint capacity)
         if (dyb == null) return null;
         dyb->_should_release_instance = true;
     }
+    else
+    {
+        dyb->_should_release_instance = false;
+    }
 
     dyb->_data = dyb_mem_alloc(&capacity, true);
     dyb->_capacity = capacity;

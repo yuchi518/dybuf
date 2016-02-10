@@ -48,45 +48,146 @@
  *
  *      foreach(array, lambda(value) { });
  *
- *      foreach (key, value in dictionary)
+ *      foreach (key, value in map)
  *      {
  *          //
  *      }
  *
- *      foreach(dictionary, lambda(key, value) {});
+ *      foreach(map, lambda(key, value) {});
  *  }
  *  sayhi("cyc", 1)
  */
 
-enum jtype
+enum jserr
 {
-    jtyp_nil            = 0x000,
+    jserr_no_error          = 0,
+    jserr_no_memory,
+    jserr_invalid_args,
+    jserr_incorrect_map_alg,
+};
 
-    jtyp_int            = 0x010,        // 32bits or 64bits, depends on platform
+enum jstype
+{
+    jstype_nil          = 0x000,
 
-    jtyp_double         = 0x020,
+    jstype_int          = 0x010,        // 32bits or 64bits, depends on platform
 
-    jtyp_string         = 0x030,
+    jstype_double       = 0x020,
 
-    jtyp_object         = 0x100,
-    jtyp_array,
-    jtyp_dictionary,
+    jstype_string       = 0x030,
 
-    jtyp_closure        = 0x200,
-    jtyp_express,                       // expr is a closure with a return boolean value
-    jtyp_lambda,                        // lambda is a functional closure with input/output values
+    //jstype_object       = 0x100,
+    jstype_array        = 0x101,
+    jstype_map          = 0x102,
+
+    //jstype_closure      = 0x200,
+    //jstype_express,                     // expr is a closure with a return boolean value
+    //jstype_lambda,                      // lambda is a functional closure with input/output values
 
 };
 
-struct j_object
+struct jsobj
 {
-    enum jtype type;
+    enum jstype type;
     unsigned int should_copy:1;
     unsigned int reference_count;
-    struct j_object* wrapper;           // belong to which closure
-    struct j_object* this;
-    void* instant[0];
+    struct jsobj * wrapper;           // belong to which closure
+    struct jsobj * this;
 };
+
+#define _obj2inst(ptr, type) ({ \
+    const typeof( ((type *)0)->base ) *__mptr = (ptr); \
+    (type *)( (void *)__mptr - ((size_t) &((type *)0)->base) );})
+#define _obj2inst_n(ptr)    (_obj2inst(ptr, struct jsobj_nil) )
+#define _obj2inst_i(ptr)    (_obj2inst(ptr, struct jsobj_int) )
+#define _obj2inst_d(ptr)    (_obj2inst(ptr, struct jsobj_double) )
+#define _obj2inst_s(ptr)    (_obj2inst(ptr, struct jsobj_string) )
+#define _obj2inst_a(ptr)    (_obj2inst(ptr, struct jsobj_array) )
+#define _obj2inst_m(ptr)    (_obj2inst(ptr, struct jsobj_map) )
+#define _obj2int(ptr)       ( _obj2inst(ptr, struct jsobj_int)->value )
+#define _obj2double(ptr)    ( _obj2inst(ptr, struct jsobj_double)->value )
+#define _obj2string(ptr)    ( _obj2inst(ptr, struct jsobj_string)->value )
+
+struct jsobj_nil
+{
+    struct jsobj base;
+};
+
+struct jsobj_int
+{
+    struct jsobj base;
+    int value;
+};
+
+struct jsobj_double
+{
+    struct jsobj base;
+    double value;
+};
+
+struct jsobj_string
+{
+    struct jsobj base;
+    char* value;
+};
+
+struct jsobj_array
+{
+    struct jsobj base;
+    unsigned int capacity, size;
+    struct jsobj** values;
+};
+
+struct map_pair
+{
+    struct jsobj *key;
+    struct jsobj *value;
+};
+
+struct jsobj_map
+{
+    struct jsobj base;
+    unsigned int capacity, size;
+    struct map_pair* pairs;
+};
+
+struct jsobj* cjson_clone(struct jsobj* obj);
+int cjson_compare(struct jsobj* obj0, struct jsobj* obj1);
+struct jsobj* cjson_make(enum jstype type);
+enum jserr cjson_release(struct jsobj* obj);
+
+struct jsobj* cjson_make_nil(void);
+struct jsobj* cjson_clone_nil(struct jsobj_nil* nil_obj);
+enum jserr cjson_release_nil(struct jsobj_nil* nil_obj);
+
+struct jsobj* cjson_make_int(int value);
+struct jsobj* cjson_clone_int(struct jsobj_int* int_obj);
+enum jserr cjson_release_int(struct jsobj_int* int_obj);
+
+struct jsobj* cjson_make_double(double value);
+struct jsobj* cjson_clone_double(struct jsobj_double* double_obj);
+enum jserr cjson_release_double(struct jsobj_double* double_obj);
+
+struct jsobj* cjson_make_string(char *value);
+struct jsobj* cjson_clone_string(struct jsobj_string* string_obj);
+enum jserr cjson_release_string(struct jsobj_string* string_obj);
+
+struct jsobj* cjson_make_array(void);
+struct jsobj* cjson_clone_array(struct jsobj_array* array_obj);
+int cjson_compare_array(struct jsobj_array* array0, struct jsobj_array* array1);
+enum jserr cjson_array_add_object(struct jsobj* array, struct jsobj* value);
+enum jserr cjson_release_array(struct jsobj_array* array_obj);
+
+struct jsobj* cjson_make_map(void);
+struct jsobj* cjson_clone_map(struct jsobj_map* map_obj);
+int cjson_compare_map(struct jsobj_map* map0, struct jsobj_map* map1);      // if two map have the same keys in all pairs, they are the same.
+enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jsobj* value);
+enum jserr cjson_release_map(struct jsobj_map* map_obj);
+
+
+// debug
+void cjson_memory_profile(void** alloc_record, unsigned int* alloc_idx, void** release_record, unsigned int* release_idx, unsigned int size);
+
 
 
 #endif //DYBUF_C_CJSON_H
