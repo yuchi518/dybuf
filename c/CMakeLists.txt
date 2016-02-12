@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(dybuf_c)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c99")
-include_directories(json)
+include_directories(platform json)
 
 add_custom_command(OUTPUT json/json.yacc.c
         PRE_BUILD

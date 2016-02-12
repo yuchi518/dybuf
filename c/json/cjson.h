@@ -24,6 +24,8 @@
 #ifndef DYBUF_C_CJSON_H
 #define DYBUF_C_CJSON_H
 
+#include "plat_type.h"
+
 /*
  *  var message = "hello";
  *  var sayhi = lambda(name, count)
@@ -116,15 +118,6 @@ struct jsobj_nil
 {
     struct jsobj base;
 };
-
-#ifndef _BOOL_TYPE_
-#define _BOOL_TYPE_
-typedef enum {
-    false       = 0,
-    true,
-} bool;
-typedef bool boolean;
-#endif
 
 struct jsobj_bool
 {

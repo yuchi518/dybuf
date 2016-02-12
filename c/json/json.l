@@ -3,8 +3,9 @@
 
 %{
     // flex -o json.lex.c json.l
-    #include <stdio.h>
     #include "json.yacc.c"
+    #include "plat_io.h"
+
     char *strclone(char *str);
 
     struct src_stack
@@ -91,13 +92,7 @@ nil {
     return COLON;
 };
 
-[ \t\n]+ /* ignore whitespace */;
-
-. {
-    printf("Unexpected: %c\nExiting...\n",*yytext);
-    exit(0);
-};
-
+[ \t]+ /* ignore whitespace */;
 
 ^"#"[ \t]*include[ \t]*\[\"<] {
     BEGIN IFILE;
@@ -120,13 +115,14 @@ nil {
     if(!pop_src()) yyterminate();
 }
 
-^. { fprintf(yyout, "%4d %s", yylineno, yytext); }
-
 ^\n { fprintf(yyout, "%4d %s", yylineno++, yytext); }
 
-\n { ECHO; yylineno++; }
+^. { fprintf(yyout, "%4d %s", yylineno, yytext); }
 
-. { ECHO; }
+. {
+    printf("Unexpected: %c\nExiting...\n",*yytext);
+    exit(0);
+};
 
 %%
 
@@ -162,33 +158,15 @@ int new_src(char *buff, unsigned int size)
 
 int new_file(char* filename)
 {
-    FILE *f;
     unsigned int size;
     char *buf;
 
-    f = fopen(filename, "rb");
+    int r = plat_io_get_resource(filename, (void**)&buf, &size);
 
-    if(!f)
-    {
-        perror(filename);
-        return 0;
-    }
+    if (r) return r;
+    if (!size) return 0;  // no content
 
-    fseek(f, 0L, SEEK_END);
-    size = ftell(f);
-    fseek(f, 0L, SEEK_SET);
-
-    buf = malloc(size);
-    if (!buf)
-    {
-        fclose(f);
-        return 0;
-    }
-
-    fread(buf, size, 1, f);
-    fclose(f);
-
-    int r = new_src(buf, size);
+    r = new_src(buf, size);
     free(buf);
 
     return r;

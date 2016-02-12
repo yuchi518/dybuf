@@ -24,30 +24,10 @@
 #define DYBUF_C_DYBUF_H
 
 
-#ifdef __KERNEL__
-// add headers
-#else
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#endif
+#include "plat_type.h"
+#include "plat_mem.h"
 
-
-typedef unsigned char byte;
-typedef unsigned int uint;
-
-#ifndef _BOOL_TYPE_
-#define _BOOL_TYPE_
-typedef enum {
-    false = 0,
-    true,
-} boolean;
-typedef boolean bool;
-#endif
-
-#define null                    (0)
-
-#define dyb_inline              static inline
+#define dyb_inline              plat_inline
 
 #define CACHE_SIZE_UNIT         16
 
@@ -61,43 +41,30 @@ typedef boolean bool;
  */
 dyb_inline void* dyb_mem_alloc(uint *size, boolean dyn)
 {
-#ifdef __KERNEL__
-    return null;
-#else
     if (dyn)
     {
         *size = MAX(CACHE_SIZE_UNIT,*size);
         // TO-DO: reuse algorithm
-        return malloc(*size);
+        return plat_mem_allocate(*size);
     }
     else
         // fixed size
-        return malloc(*size);
-#endif
+        return plat_mem_allocate(*size);
 }
 
 dyb_inline void dyb_mem_release(void* buf, uint size)
 {
-#ifdef __KERNEL__
-#else
-    free(buf);
-#endif
+    plat_mem_release(buf);
 }
 
 dyb_inline void dyb_mem_copy(void* dest, void* src, uint size)
 {
-#ifdef __KERNEL__
-#else
-    memcpy(dest, src, size);
-#endif
+    plat_mem_copy(dest, src, size);
 }
 
 dyb_inline void dyb_mem_move(void* dest, void* src, uint size)
 {
-#ifdef __KERNEL__
-#else
-    memmove(dest, src, size);
-#endif
+    plat_mem_move(dest, src, size);
 }
 
 dyb_inline uint32_t dyb_swap_u32(uint32_t value)
