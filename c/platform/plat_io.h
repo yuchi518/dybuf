@@ -34,7 +34,7 @@
 #endif
 #endif
 
-plat_inline int plat_io_get_resource(char* resource_name, void** content_memory, uint* size)
+plat_inline int plat_io_get_resource(const char* resource_name, void** content_memory, uint* size)
 {
 #if _NO_STD_INC_
     return -1;

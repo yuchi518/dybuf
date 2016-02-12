@@ -26,7 +26,6 @@
 #include "cjson.h"
 
 
-
 /// ============= cjson obj
 
 static unsigned int memory_profile_size = 0;
@@ -238,6 +237,11 @@ struct jsobj* cjson_make_int(int value)
     return &(obj->base);
 }
 
+struct jsobj* cjson_make_int_from_string(char* string)
+{
+    return cjson_make_int((int)strtol(string, NULL, 0));
+}
+
 struct jsobj* cjson_clone_int(struct jsobj_int* int_obj)
 {
     if (int_obj == NULL) return cjson_make_nil();
@@ -266,6 +270,11 @@ struct jsobj* cjson_make_double(double value)
     };
     obj->value = value;
     return &(obj->base);
+}
+
+struct jsobj* cjson_make_double_from_string(char* string)
+{
+    return cjson_make_double(strtod(string, NULL));
 }
 
 struct jsobj* cjson_clone_double(struct jsobj_double* double_obj)

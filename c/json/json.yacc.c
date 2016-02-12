@@ -64,9 +64,6 @@
 /* Copy the first part of user declarations.  */
 #line 1 "json.y" /* yacc.c:339  */
 
-    // bison json.y
-    typedef char* YYSTYPE;
-    #define YYSTYPE_IS_DECLARED     1
 
     #include <stdio.h>
     #include <string.h>
@@ -74,11 +71,15 @@
     #include "cjson.h"
     #include "cjson_runtime.h"
 
+    // bison json.y
+    typedef void* YYSTYPE;
+    #define YYSTYPE_IS_DECLARED     1
+
 char *strconcat(char *str1, char *str2);
     int yylex();
     void yyerror (char const *s);
 
-#line 82 "json.yacc.c" /* yacc.c:339  */
+#line 83 "json.yacc.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -140,7 +141,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 144 "json.yacc.c" /* yacc.c:358  */
+#line 145 "json.yacc.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -380,18 +381,18 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  20
+#define YYFINAL  25
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   30
+#define YYLAST   38
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  8
+#define YYNNTS  9
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  19
+#define YYNRULES  24
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  29
+#define YYNSTATES  34
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -438,8 +439,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    27,    27,    28,    32,    33,    41,    42,    49,    56,
-      61,    69,    70,    78,    79,    80,    81,    82,    83,    84
+       0,    28,    28,    29,    33,    34,    43,    44,    52,    60,
+      61,    70,    71,    80,    81,    82,    83,    84,    88,    89,
+      90,    91,    92,    93,    94
 };
 #endif
 
@@ -451,7 +453,7 @@ static const char *const yytname[] =
   "$end", "error", "$undefined", "NUMBER", "STRING", "TRUE_T", "FALSE_T",
   "NULL_T", "O_BEGIN", "O_END", "A_BEGIN", "A_END", "COMMA", "COLON",
   "$accept", "START", "OBJECT", "MEMBERS", "PAIR", "ARRAY", "ELEMENTS",
-  "VALUE", YY_NULLPTR
+  "KEY", "VALUE", YY_NULLPTR
 };
 #endif
 
@@ -465,10 +467,10 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -8
+#define YYPACT_NINF -7
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-8)))
+  (!!((Yystate) == (-7)))
 
 #define YYTABLE_NINF -1
 
@@ -479,9 +481,10 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       9,    11,    -3,    18,    -8,    -8,    -7,    -8,    12,    10,
-      -8,    -8,    -8,    -8,    -8,    -8,    -8,    -8,    13,    14,
-      -8,     6,    -8,    19,    -8,     6,    -8,    -8,    -8
+      22,    14,    -3,    15,    -7,    -7,    -7,    -7,    -7,    -7,
+      -7,    -7,    13,    -6,    16,    -7,    -7,    -7,    -7,    -7,
+      -7,    -7,    -7,    20,    23,    -7,    -7,    21,     6,    -7,
+       6,    -7,    -7,    -7
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -489,21 +492,22 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     3,     2,     0,     4,     0,     6,
-      14,    13,    17,    18,    19,     9,    15,    16,     0,    11,
-       1,     0,     5,     0,    10,     0,     8,     7,    12
+       0,     0,     0,     0,     3,     2,    14,    13,    15,    16,
+      17,     4,     0,     6,     0,    19,    18,    22,    23,    24,
+       9,    20,    21,     0,    11,     1,     5,     0,     0,    10,
+       0,     7,     8,    12
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -8,    -8,    25,     4,    -8,    28,     5,     8
+      -7,    -7,    33,     7,    -7,    36,     8,    -7,     9
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,    16,     8,     9,    17,    18,    19
+      -1,     3,    21,    12,    13,    22,    23,    14,    24
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -511,41 +515,44 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      10,    11,    12,    13,    14,     1,    21,     2,    15,    10,
-      11,    12,    13,    14,     1,     6,     2,     1,    20,     2,
-       7,    22,    23,     6,    24,     4,    25,    27,     5,    26,
-      28
+      15,    16,    17,    18,    19,     1,    27,     2,    20,    15,
+      16,    17,    18,    19,     1,    25,     2,     6,     7,     8,
+       9,    10,    26,    11,     6,     7,     8,     9,    10,    28,
+       1,    29,     2,     4,    31,    30,     5,    32,    33
 };
 
 static const yytype_uint8 yycheck[] =
 {
-       3,     4,     5,     6,     7,     8,    13,    10,    11,     3,
-       4,     5,     6,     7,     8,     4,    10,     8,     0,    10,
-       9,     9,    12,     4,    11,     0,    12,    23,     0,    21,
-      25
+       3,     4,     5,     6,     7,     8,    12,    10,    11,     3,
+       4,     5,     6,     7,     8,     0,    10,     3,     4,     5,
+       6,     7,     9,     9,     3,     4,     5,     6,     7,    13,
+       8,    11,    10,     0,    27,    12,     0,    28,    30
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     8,    10,    15,    16,    19,     4,     9,    17,    18,
-       3,     4,     5,     6,     7,    11,    16,    19,    20,    21,
-       0,    13,     9,    12,    11,    12,    21,    17,    20
+       0,     8,    10,    15,    16,    19,     3,     4,     5,     6,
+       7,     9,    17,    18,    21,     3,     4,     5,     6,     7,
+      11,    16,    19,    20,    22,     0,     9,    12,    13,    11,
+      12,    17,    22,    20
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
        0,    14,    15,    15,    16,    16,    17,    17,    18,    19,
-      19,    20,    20,    21,    21,    21,    21,    21,    21,    21
+      19,    20,    20,    21,    21,    21,    21,    21,    22,    22,
+      22,    22,    22,    22,    22
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     1,     1,     2,     3,     1,     3,     3,     2,
-       3,     1,     3,     1,     1,     1,     1,     1,     1,     1
+       3,     1,     3,     1,     1,     1,     1,     1,     1,     1,
+       1,     1,     1,     1,     1
 };
 
 
@@ -1222,133 +1229,165 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 27 "json.y" /* yacc.c:1661  */
-    { printf("%s",(yyvsp[0])); }
-#line 1228 "json.yacc.c" /* yacc.c:1661  */
+#line 28 "json.y" /* yacc.c:1661  */
+    { /*printf("%s",$1);*/printf("START(ARRAY)\n"); }
+#line 1235 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 3:
-#line 28 "json.y" /* yacc.c:1661  */
-    { printf("%s",(yyvsp[0])); }
-#line 1234 "json.yacc.c" /* yacc.c:1661  */
+#line 29 "json.y" /* yacc.c:1661  */
+    { /*printf("%s",$1);*/printf("START(OBJECT)\n"); }
+#line 1241 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 4:
-#line 32 "json.y" /* yacc.c:1661  */
-    { (yyval) = "{}"; }
-#line 1240 "json.yacc.c" /* yacc.c:1661  */
+#line 33 "json.y" /* yacc.c:1661  */
+    { (yyval) = cjson_make_map();printf("OBJECT(O_BEGIN O_END)\n"); }
+#line 1247 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 5:
-#line 34 "json.y" /* yacc.c:1661  */
+#line 35 "json.y" /* yacc.c:1661  */
     {
-            (yyval) = (char *)malloc(sizeof(char)*(1+strlen((yyvsp[-1]))+1+1));
-            sprintf((yyval),"{%s}",(yyvsp[-1]));
+            printf("OBJECT(O_BEGIN MEMBERS O_END)\n");
+            /*$$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
+            sprintf($$,"{%s}",$2);*/
         }
-#line 1249 "json.yacc.c" /* yacc.c:1661  */
+#line 1257 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 6:
-#line 41 "json.y" /* yacc.c:1661  */
-    { (yyval) = (yyvsp[0]); }
-#line 1255 "json.yacc.c" /* yacc.c:1661  */
+#line 43 "json.y" /* yacc.c:1661  */
+    { (yyval) = (yyvsp[0]);printf("MEMBERS(PAIR)\n"); }
+#line 1263 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 7:
-#line 43 "json.y" /* yacc.c:1661  */
+#line 45 "json.y" /* yacc.c:1661  */
     {
-            (yyval) = (char *)malloc(sizeof(char)*(strlen((yyvsp[-2]))+1+strlen((yyvsp[0]))+1));
-            sprintf((yyval),"%s,%s",(yyvsp[-2]),(yyvsp[0]));
+            printf("MEMBERS(PAIR COMMA MEMBERS)\n");
+            //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
+            //sprintf($$,"%s,%s",$1,$3);
         }
-#line 1264 "json.yacc.c" /* yacc.c:1661  */
-    break;
-
-  case 8:
-#line 49 "json.y" /* yacc.c:1661  */
-    {
-    (yyval) = (char *)malloc(sizeof(char)*(strlen((yyvsp[-2]))+1+strlen((yyvsp[0]))+1));
-    sprintf((yyval),"%s:%s",(yyvsp[-2]),(yyvsp[0]));
-  }
 #line 1273 "json.yacc.c" /* yacc.c:1661  */
     break;
 
-  case 9:
-#line 57 "json.y" /* yacc.c:1661  */
+  case 8:
+#line 52 "json.y" /* yacc.c:1661  */
     {
-            (yyval) = (char *)malloc(sizeof(char)*(2+1));
-            sprintf((yyval),"[]");
-        }
-#line 1282 "json.yacc.c" /* yacc.c:1661  */
+    printf("PAIR(STRING COLON VALUE)\n");
+    //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
+    //sprintf($$,"%s:%s",$1,$3);
+  }
+#line 1283 "json.yacc.c" /* yacc.c:1661  */
+    break;
+
+  case 9:
+#line 60 "json.y" /* yacc.c:1661  */
+    { (yyval) = cjson_make_array();printf("ARRAY(A_BEGIN A_END)\n"); }
+#line 1289 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 10:
 #line 62 "json.y" /* yacc.c:1661  */
     {
-            (yyval) = (char *)malloc(sizeof(char)*(1+strlen((yyvsp[-1]))+1+1));
-            sprintf((yyval),"[%s]",(yyvsp[-1]));
+            printf("ARRAY(A_BEGIN ELEMENTS A_END)\n");
+            //$$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
+            //sprintf($$,"[%s]",$2);
         }
-#line 1291 "json.yacc.c" /* yacc.c:1661  */
+#line 1299 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 11:
-#line 69 "json.y" /* yacc.c:1661  */
-    { (yyval) = (yyvsp[0]); }
-#line 1297 "json.yacc.c" /* yacc.c:1661  */
+#line 70 "json.y" /* yacc.c:1661  */
+    { (yyval) = (yyvsp[0]); printf("ELEMENTS(VALUE)\n"); }
+#line 1305 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 12:
-#line 71 "json.y" /* yacc.c:1661  */
+#line 72 "json.y" /* yacc.c:1661  */
     {
-            (yyval) = (char *)malloc(sizeof(char)*(strlen((yyvsp[-2]))+1+strlen((yyvsp[0]))+1));
-            sprintf((yyval),"%s,%s",(yyvsp[-2]),(yyvsp[0]));
+            printf("ELEMENTS(VALUE COMMA ELEMENTS)\n");
+            //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
+            //sprintf($$,"%s,%s",$1,$3);
         }
-#line 1306 "json.yacc.c" /* yacc.c:1661  */
+#line 1315 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 13:
-#line 78 "json.y" /* yacc.c:1661  */
-    { (yyval)=yylval; }
-#line 1312 "json.yacc.c" /* yacc.c:1661  */
+#line 80 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("KEY(STRING)\n"); }
+#line 1321 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 14:
-#line 79 "json.y" /* yacc.c:1661  */
-    { (yyval)=yylval; }
-#line 1318 "json.yacc.c" /* yacc.c:1661  */
+#line 81 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("KEY(NUMBER)\n"); }
+#line 1327 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 15:
-#line 80 "json.y" /* yacc.c:1661  */
-    { (yyval)=(yyvsp[0]); }
-#line 1324 "json.yacc.c" /* yacc.c:1661  */
+#line 82 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("KEY(TRUE_T)\n"); }
+#line 1333 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 16:
-#line 81 "json.y" /* yacc.c:1661  */
-    { (yyval)=(yyvsp[0]); }
-#line 1330 "json.yacc.c" /* yacc.c:1661  */
+#line 83 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("KEY(FALSE_T)\n"); }
+#line 1339 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 17:
-#line 82 "json.y" /* yacc.c:1661  */
-    { (yyval)="true"; }
-#line 1336 "json.yacc.c" /* yacc.c:1661  */
+#line 84 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("KEY(NULL_T)\n"); }
+#line 1345 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 18:
-#line 83 "json.y" /* yacc.c:1661  */
-    { (yyval)="false"; }
-#line 1342 "json.yacc.c" /* yacc.c:1661  */
+#line 88 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("VALUE(STRING)\n"); }
+#line 1351 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 19:
-#line 84 "json.y" /* yacc.c:1661  */
-    { (yyval)="null"; }
-#line 1348 "json.yacc.c" /* yacc.c:1661  */
+#line 89 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("VALUE(NUMBER)\n"); }
+#line 1357 "json.yacc.c" /* yacc.c:1661  */
+    break;
+
+  case 20:
+#line 90 "json.y" /* yacc.c:1661  */
+    { (yyval)=(yyvsp[0]);printf("VALUE(OBJECT)\n"); }
+#line 1363 "json.yacc.c" /* yacc.c:1661  */
+    break;
+
+  case 21:
+#line 91 "json.y" /* yacc.c:1661  */
+    { (yyval)=(yyvsp[0]);printf("VALUE(ARRAY)\n"); }
+#line 1369 "json.yacc.c" /* yacc.c:1661  */
+    break;
+
+  case 22:
+#line 92 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("VALUE(TRUE_T)\n"); }
+#line 1375 "json.yacc.c" /* yacc.c:1661  */
+    break;
+
+  case 23:
+#line 93 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("VALUE(FALSE_T)\n"); }
+#line 1381 "json.yacc.c" /* yacc.c:1661  */
+    break;
+
+  case 24:
+#line 94 "json.y" /* yacc.c:1661  */
+    { (yyval)=yylval;printf("VALUE(NULL_T)\n"); }
+#line 1387 "json.yacc.c" /* yacc.c:1661  */
     break;
 
 
-#line 1352 "json.yacc.c" /* yacc.c:1661  */
+#line 1391 "json.yacc.c" /* yacc.c:1661  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1576,7 +1615,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 87 "json.y" /* yacc.c:1906  */
+#line 97 "json.y" /* yacc.c:1906  */
 
 
 /*int main()

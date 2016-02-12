@@ -60,7 +60,7 @@ plat_inline void plat_mem_release(void* mem)
 }
 
 
-plat_inline void plat_mem_copy(void* dest, void* src, uint size)
+plat_inline void plat_mem_copy(void* dest, const void* src, uint size)
 {
 #if !_NO_STD_INC_
 #ifdef __KERNEL__

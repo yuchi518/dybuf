@@ -1,13 +1,14 @@
 %{
-    // bison json.y
-    typedef char* YYSTYPE;
-    #define YYSTYPE_IS_DECLARED     1
 
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
     #include "cjson.h"
     #include "cjson_runtime.h"
+
+    // bison json.y
+    typedef void* YYSTYPE;
+    #define YYSTYPE_IS_DECLARED     1
 
 char *strconcat(char *str1, char *str2);
     int yylex();
@@ -24,64 +25,73 @@ char *strconcat(char *str1, char *str2);
 %%
 
 START
-    : ARRAY { printf("%s",$1); }
-    | OBJECT { printf("%s",$1); }
+    : ARRAY { /*printf("%s",$1);*/printf("START(ARRAY)\n"); }
+    | OBJECT { /*printf("%s",$1);*/printf("START(OBJECT)\n"); }
     ;
 
 OBJECT
-    : O_BEGIN O_END { $$ = "{}"; }
+    : O_BEGIN O_END { $$ = cjson_make_map();printf("OBJECT(O_BEGIN O_END)\n"); }
     | O_BEGIN MEMBERS O_END
         {
-            $$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
-            sprintf($$,"{%s}",$2);
+            printf("OBJECT(O_BEGIN MEMBERS O_END)\n");
+            /*$$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
+            sprintf($$,"{%s}",$2);*/
         }
     ;
 
 MEMBERS
-    : PAIR { $$ = $1; }
+    : PAIR { $$ = $1;printf("MEMBERS(PAIR)\n"); }
     | PAIR COMMA MEMBERS
         {
-            $$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-            sprintf($$,"%s,%s",$1,$3);
+            printf("MEMBERS(PAIR COMMA MEMBERS)\n");
+            //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
+            //sprintf($$,"%s,%s",$1,$3);
         }
     ;
 
-PAIR: STRING COLON VALUE {
-    $$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-    sprintf($$,"%s:%s",$1,$3);
+PAIR: KEY COLON VALUE {
+    printf("PAIR(STRING COLON VALUE)\n");
+    //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
+    //sprintf($$,"%s:%s",$1,$3);
   }
 ;
 
 ARRAY
-    : A_BEGIN A_END
-        {
-            $$ = (char *)malloc(sizeof(char)*(2+1));
-            sprintf($$,"[]");
-        }
+    : A_BEGIN A_END { $$ = cjson_make_array();printf("ARRAY(A_BEGIN A_END)\n"); }
     | A_BEGIN ELEMENTS A_END
         {
-            $$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
-            sprintf($$,"[%s]",$2);
+            printf("ARRAY(A_BEGIN ELEMENTS A_END)\n");
+            //$$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
+            //sprintf($$,"[%s]",$2);
         }
     ;
 
 ELEMENTS
-    : VALUE { $$ = $1; }
+    : VALUE { $$ = $1; printf("ELEMENTS(VALUE)\n"); }
     | VALUE COMMA ELEMENTS
         {
-            $$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-            sprintf($$,"%s,%s",$1,$3);
+            printf("ELEMENTS(VALUE COMMA ELEMENTS)\n");
+            //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
+            //sprintf($$,"%s,%s",$1,$3);
         }
     ;
 
+KEY
+    : STRING { $$=yylval;printf("KEY(STRING)\n"); }
+    | NUMBER { $$=yylval;printf("KEY(NUMBER)\n"); }
+    | TRUE_T { $$=yylval;printf("KEY(TRUE_T)\n"); }
+    | FALSE_T { $$=yylval;printf("KEY(FALSE_T)\n"); }
+    | NULL_T { $$=yylval;printf("KEY(NULL_T)\n"); }
+    ;
+
 VALUE
-    : STRING { $$=yylval; }
-    | NUMBER { $$=yylval; }
-    | OBJECT { $$=$1; }
-    | ARRAY { $$=$1; }
-    | TRUE_T { $$="true"; }
-    | FALSE_T { $$="false"; }
-    | NULL_T { $$="null"; }
+    : STRING { $$=yylval;printf("VALUE(STRING)\n"); }
+    | NUMBER { $$=yylval;printf("VALUE(NUMBER)\n"); }
+    | OBJECT { $$=$1;printf("VALUE(OBJECT)\n"); }
+    | ARRAY { $$=$1;printf("VALUE(ARRAY)\n"); }
+    | TRUE_T { $$=yylval;printf("VALUE(TRUE_T)\n"); }
+    | FALSE_T { $$=yylval;printf("VALUE(FALSE_T)\n"); }
+    | NULL_T { $$=yylval;printf("VALUE(NULL_T)\n"); }
     ;
 
 %%

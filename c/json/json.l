@@ -5,6 +5,7 @@
     // flex -o json.lex.c json.l
     #include "json.yacc.c"
     #include "plat_io.h"
+    #include "cjson_runtime.h"
 
     char *strclone(char *str);
 
@@ -17,9 +18,6 @@
         unsigned int src_size;
     } *curbs = 0;
 
-    int new_src(char* buff, unsigned int size);
-    int new_file(char* filename);
-    int pop_src(void);
 %}
 
 DIGIT1to9       [1-9]
@@ -27,11 +25,13 @@ DIGIT           [0-9]
 DIGITS          {DIGIT}+
 HEX_DIGIT       [0-9a-fA-F]
 HEX_DIGITS      {HEX_DIGIT}+
-INT             {DIGIT}|{DIGIT1to9}{DIGITS}|-{DIGIT}|-{DIGIT1to9}{DIGITS}|0x{HEX_DIGITS}
+INT10           {DIGIT}|{DIGIT1to9}{DIGITS}|-{DIGIT}|-{DIGIT1to9}{DIGITS}
+INT16           0x{HEX_DIGITS}
+INT             {INT10}|{INT16}
 FRAC            [.]{DIGITS}
 EXP             {E}{DIGITS}
 E               [eE][+-]?
-NUMBER          {INT}|{INT}{FRAC}|{INT}{EXP}|{INT}{FRAC}{EXP}
+DOUBLE          {INT10}{FRAC}|{INT10}{EXP}|{INT10}{FRAC}{EXP}
 UNESCAPEDCHAR   [ -!#-\[\]-~]
 ESCAPEDCHAR     \\["\\bfnrt/]
 UNICODECHAR     \\u{HEX_DIGIT}{HEX_DIGIT}{HEX_DIGIT}{HEX_DIGIT}
@@ -43,28 +43,37 @@ DBL_QUOTE       ["]
 %%
 
 {DBL_QUOTE}{DBL_QUOTE}|{DBL_QUOTE}{CHARS}{DBL_QUOTE} {
-    yylval=strclone(yytext);
+    yylval = cjson_make_string(yytext);
     return STRING;
 };
 
-{NUMBER} {
-    yylval=strclone(yytext);
+{INT} {
+    yylval = cjson_make_int_from_string(yytext);
+    return NUMBER;
+};
+
+{DOUBLE} {
+    yylval = cjson_make_double_from_string(yytext);
     return NUMBER;
 };
 
 true {
+    yylval = cjson_make_bool(true);
     return TRUE_T;
 };
 
 false {
+    yylval = cjson_make_bool(false);
     return FALSE_T;
 };
 
 null {
+    yylval = cjson_make_nil();
     return NULL_T;
 };
 
 nil {
+    yylval = cjson_make_nil();
     return NULL_T;
 };
 
@@ -104,7 +113,8 @@ nil {
         while((c = input()) && c != '\n') ;
     }
     yylineno++;
-    if(!new_file(yytext)) yyterminate(); /* no such file */ BEGIN INITIAL;
+    if(cjson_source_push_from_resource(yytext) != jserr_no_error)
+        yyterminate(); /* no such file */ BEGIN INITIAL;
 }
 
 <IFILE>.|\n {
@@ -112,7 +122,8 @@ nil {
 }
 
 <<EOF>> {
-    if(!pop_src()) yyterminate();
+    if(cjson_source_pop()!=jserr_no_error)
+        yyterminate();
 }
 
 ^\n { fprintf(yyout, "%4d %s", yylineno++, yytext); }
@@ -132,67 +143,4 @@ char *strclone(char *str)
     char *clone = (char *)malloc(sizeof(char)*(len+1));
     strcpy(clone,str);
     return clone;
-}
-
-int new_src(char *buff, unsigned int size)
-{
-    struct src_stack *bs = malloc(sizeof(struct src_stack));
-    if(!bs) { perror("malloc"); exit(1); }
-    bs->src_buffer = malloc(size);
-    if(!bs->src_buffer) { perror("malloc"); exit(1); }
-    bs->src_size = size;
-    memcpy(bs->src_buffer, buff, size);
-
-    /* remember state */
-    if(curbs) curbs->lineno = yylineno;
-    bs->prev = curbs;
-
-    /* set up current entry */
-    bs->bs = yy_scan_bytes(bs->src_buffer, bs->src_size);
-    yy_switch_to_buffer(bs->bs);
-    curbs = bs;
-    yylineno = 1;
-
-    return 1;
-}
-
-int new_file(char* filename)
-{
-    unsigned int size;
-    char *buf;
-
-    int r = plat_io_get_resource(filename, (void**)&buf, &size);
-
-    if (r) return r;
-    if (!size) return 0;  // no content
-
-    r = new_src(buf, size);
-    free(buf);
-
-    return r;
-}
-
-int pop_src(void)
-{
-    struct src_stack *bs = curbs;
-    struct src_stack *prevbs;
-
-    if(!bs) return 0;
-
-    /* get rid of current entry */
-
-    free(bs->src_buffer);
-    yy_delete_buffer(bs->bs);
-
-    /* switch back to previous */
-    prevbs = bs->prev;
-    free(bs);
-
-    if(!prevbs) return 0;
-
-    yy_switch_to_buffer(prevbs->bs);
-    curbs = prevbs;
-    yylineno = curbs->lineno;
-
-    return 1;
 }

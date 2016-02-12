@@ -27,10 +27,12 @@
 #include "cjson.h"
 
 
-struct jsobj* cjson_rt_create(void);
-void cjson_rt_destroy(struct jsobj* rt);
-void cjson_rt_add(struct jsobj* rt, struct jsobj* object);
+void cjson_rt_push_new_runtime(void);
+struct jsobj* cjson_rt_pop_last_runtime(void);
 
-
+enum jserr cjson_source_push_from_buffer(const char* buf, uint size);
+enum jserr cjson_source_push_from_resource(const char* resource_name);
+enum jserr cjson_source_pop(void);
+enum jserr cjson_source_analyze(void);
 
 #endif //DYBUF_C_CJSON_RUNTIME_H

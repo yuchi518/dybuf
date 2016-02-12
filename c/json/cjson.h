@@ -64,6 +64,7 @@ enum jserr
 {
     jserr_no_error          = 0,
     jserr_no_memory,
+    jserr_no_source,
     jserr_invalid_args,
     jserr_incorrect_map_alg,
 };
@@ -186,10 +187,12 @@ struct jsobj* cjson_clone_bool(struct jsobj_bool* bool_obj);
 enum jserr cjson_release_bool(struct jsobj_bool* bool_obj);
 
 struct jsobj* cjson_make_int(int value);
+struct jsobj* cjson_make_int_from_string(char* string);
 struct jsobj* cjson_clone_int(struct jsobj_int* int_obj);
 enum jserr cjson_release_int(struct jsobj_int* int_obj);
 
 struct jsobj* cjson_make_double(double value);
+struct jsobj* cjson_make_double_from_string(char* string);
 struct jsobj* cjson_clone_double(struct jsobj_double* double_obj);
 enum jserr cjson_release_double(struct jsobj_double* double_obj);
 

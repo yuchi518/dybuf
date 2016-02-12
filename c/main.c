@@ -24,18 +24,21 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <cjson_runtime.h>
 #include "dybuf.h"
 #include "cjson.h"
 
 void cjson_test(void);
+void cjson_parse_test(void);
 void dybuf_test(void);
 
 int main(int argc, char **argv)
 {
     srand(time(NULL));
 
-    cjson_test();
-    dybuf_test();
+    //cjson_test();
+    cjson_parse_test();
+    //dybuf_test();
 
     return 0;
 }
@@ -69,6 +72,20 @@ void cjson_test(void)
         printf("%p,", release_rec[i]);
     }
     printf("\n");
+}
+
+void cjson_parse_test(void)
+{
+    const char* json_text = "{\"abc\":1,\"efg\":[], 1:2}";
+    //const char* json_text = "[1]";
+    cjson_rt_push_new_runtime();
+
+    //cjson_source_push_from_resource("");
+    if (cjson_source_push_from_buffer(json_text, strlen(json_text)) == jserr_no_error)
+        cjson_source_analyze();
+
+    struct jsobj* rt = cjson_rt_pop_last_runtime();
+    cjson_release(rt);
 }
 
 void dybuf_test(void)
