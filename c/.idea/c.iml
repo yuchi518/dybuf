@@ -5,6 +5,8 @@
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/json/cjson.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/json/cjson_runtime.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/json/cjson_runtime.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/json/cjson.c" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
@@ -366,6 +368,8 @@
         </SOURCES>
         <excluded>
           <root url="file://$MODULE_DIR$/json/cjson.h" />
+          <root url="file://$MODULE_DIR$/json/cjson_runtime.h" />
+          <root url="file://$MODULE_DIR$/json/cjson_runtime.c" />
           <root url="file://$MODULE_DIR$/json/cjson.c" />
         </excluded>
       </library>

@@ -22,7 +22,7 @@ add_custom_target(RunGenerator DEPENDS json/json.yacc.c json/json.lex.c
         COMMENT "flex & bison")
 
 set(SOURCE_FILES main.c)
-add_library(json json/cjson.c)
+add_library(json json/cjson.c json/cjson_runtime.c)
 add_dependencies(json RunGenerator)
 
 add_executable(dybuf_c ${SOURCE_FILES})

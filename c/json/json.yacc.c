@@ -72,7 +72,7 @@
     #include <string.h>
     #include <stdlib.h>
     #include "cjson.h"
-
+    #include "cjson_runtime.h"
 
 char *strconcat(char *str1, char *str2);
     int yylex();

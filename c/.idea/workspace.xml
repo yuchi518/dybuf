@@ -16,16 +16,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1e72d53-9887-47e9-9372-2c6ef30259b4" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/platform/plat_io.h" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/platform/plat_mem.h" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/platform/plat_type.h" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/json/cjson_runtime.c" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/json/cjson_runtime.h" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/json/LICENSE" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/json/Makefile" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/c.iml" afterPath="$PROJECT_DIR$/.idea/c.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CMakeLists.txt" afterPath="$PROJECT_DIR$/CMakeLists.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dybuf.h" afterPath="$PROJECT_DIR$/dybuf.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/cjson.c" afterPath="$PROJECT_DIR$/json/cjson.c" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/cjson.h" afterPath="$PROJECT_DIR$/json/cjson.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.l" afterPath="$PROJECT_DIR$/json/json.l" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.lex.c" afterPath="$PROJECT_DIR$/json/json.lex.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.y" afterPath="$PROJECT_DIR$/json/json.y" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.yacc.c" afterPath="$PROJECT_DIR$/json/json.yacc.c" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/platform/plat_io.h" afterPath="$PROJECT_DIR$/platform/plat_io.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/platform/plat_mem.h" afterPath="$PROJECT_DIR$/platform/plat_mem.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/platform/plat_type.h" afterPath="$PROJECT_DIR$/platform/plat_type.h" />
     </list>
     <ignored path="c.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -46,14 +50,12 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="dybuf.h" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/dybuf.h">
+      <file leaf-file-name="CMakeLists.txt" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-37.22222">
-              <caret line="67" column="0" selection-start-line="67" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
-              <folding>
-                <element signature="e#904#926#0" expanded="true" />
-              </folding>
+            <state vertical-scroll-proportion="0.0">
+              <caret line="24" column="50" selection-start-line="24" selection-start-column="50" selection-end-line="24" selection-end-column="50" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -62,7 +64,7 @@
         <entry file="file://$PROJECT_DIR$/platform/plat_type.h">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="24" column="19" selection-start-line="23" selection-start-column="0" selection-end-line="40" selection-end-column="22" />
+              <caret line="27" column="71" selection-start-line="27" selection-start-column="71" selection-end-line="27" selection-end-column="71" />
               <folding />
             </state>
           </provider>
@@ -72,11 +74,12 @@
         <entry file="file://$PROJECT_DIR$/platform/plat_mem.h">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="56" column="1" selection-start-line="55" selection-start-column="0" selection-end-line="56" selection-end-column="1" />
+              <caret line="80" column="6" selection-start-line="80" selection-start-column="6" selection-end-line="80" selection-end-column="6" />
               <folding>
-                <element signature="e#947#960#0" expanded="true" />
-                <element signature="e#967#986#0" expanded="true" />
-                <element signature="e#1087#1099#0" expanded="true" />
+                <element signature="e#965#978#0" expanded="true" />
+                <element signature="e#985#1004#0" expanded="true" />
+                <element signature="e#1110#1122#0" expanded="true" />
+                <element signature="e#1151#1163#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -85,10 +88,10 @@
       <file leaf-file-name="plat_io.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/platform/plat_io.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-4.185185">
-              <caret line="34" column="36" selection-start-line="34" selection-start-column="16" selection-end-line="34" selection-end-column="36" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="39" column="13" selection-start-line="39" selection-start-column="13" selection-end-line="39" selection-end-column="13" />
               <folding>
-                <element signature="e#945#958#0" expanded="true" />
+                <element signature="e#963#976#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -97,8 +100,8 @@
       <file leaf-file-name="cjson.c" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/json/cjson.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="5" column="45" selection-start-line="5" selection-start-column="45" selection-end-line="5" selection-end-column="45" />
+            <state vertical-scroll-proportion="-4.740741">
+              <caret line="592" column="33" selection-start-line="592" selection-start-column="33" selection-end-line="592" selection-end-column="33" />
               <folding>
                 <element signature="e#853#872#0" expanded="true" />
               </folding>
@@ -110,7 +113,27 @@
         <entry file="file://$PROJECT_DIR$/json/cjson.h">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="26" column="22" selection-start-line="26" selection-start-column="22" selection-end-line="26" selection-end-column="22" />
+              <caret line="112" column="19" selection-start-line="112" selection-start-column="8" selection-end-line="112" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cjson_runtime.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/json/cjson_runtime.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="9" column="66" selection-start-line="9" selection-start-column="66" selection-end-line="9" selection-end-column="66" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cjson_runtime.h" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/json/cjson_runtime.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="57" />
               <folding />
             </state>
           </provider>
@@ -119,8 +142,8 @@
       <file leaf-file-name="json.y" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/json/json.y">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.32484075">
-              <caret line="17" column="14" selection-start-line="17" selection-start-column="14" selection-end-line="17" selection-end-column="14" />
+            <state vertical-scroll-proportion="0.05732484">
+              <caret line="3" column="37" selection-start-line="3" selection-start-column="37" selection-end-line="3" selection-end-column="37" />
               <folding />
             </state>
           </provider>
@@ -129,18 +152,8 @@
       <file leaf-file-name="json.l" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/json/json.l">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-88.74074">
-              <caret line="160" column="4" selection-start-line="160" selection-start-column="4" selection-end-line="160" selection-end-column="4" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="LICENSE" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/json/LICENSE">
-          <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="4" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+              <caret line="87" column="17" selection-start-line="87" selection-start-column="17" selection-end-line="87" selection-end-column="17" />
               <folding />
             </state>
           </provider>
@@ -162,17 +175,19 @@
         <option value="$PROJECT_DIR$/main.c" />
         <option value="$PROJECT_DIR$/json/src_stack.c" />
         <option value="$PROJECT_DIR$/json/src_stack.h" />
-        <option value="$PROJECT_DIR$/json/cjson.c" />
         <option value="$PROJECT_DIR$/json/json.y" />
-        <option value="$PROJECT_DIR$/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/json/cjson.h" />
         <option value="$PROJECT_DIR$/json/LICENSE" />
-        <option value="$PROJECT_DIR$/platform/plat_type.h" />
         <option value="$PROJECT_DIR$/dybuf.h" />
-        <option value="$PROJECT_DIR$/platform/plat_mem.h" />
         <option value="$PROJECT_DIR$/platform/plat_io.c" />
-        <option value="$PROJECT_DIR$/platform/plat_io.h" />
         <option value="$PROJECT_DIR$/json/json.l" />
+        <option value="$PROJECT_DIR$/CMakeLists.txt" />
+        <option value="$PROJECT_DIR$/platform/plat_mem.h" />
+        <option value="$PROJECT_DIR$/platform/plat_io.h" />
+        <option value="$PROJECT_DIR$/platform/plat_type.h" />
+        <option value="$PROJECT_DIR$/json/cjson.h" />
+        <option value="$PROJECT_DIR$/json/cjson.c" />
+        <option value="$PROJECT_DIR$/json/cjson_runtime.h" />
+        <option value="$PROJECT_DIR$/json/cjson_runtime.c" />
       </list>
     </option>
   </component>
@@ -379,6 +394,79 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/platform/plat_mem.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="80" column="6" selection-start-line="80" selection-start-column="6" selection-end-line="80" selection-end-column="6" />
+          <folding>
+            <element signature="e#965#978#0" expanded="true" />
+            <element signature="e#985#1004#0" expanded="true" />
+            <element signature="e#1110#1122#0" expanded="true" />
+            <element signature="e#1151#1163#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platform/plat_io.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="39" column="13" selection-start-line="39" selection-start-column="13" selection-end-line="39" selection-end-column="13" />
+          <folding>
+            <element signature="e#963#976#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/cjson.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="63" column="24" selection-start-line="63" selection-start-column="24" selection-end-line="63" selection-end-column="24" />
+          <folding>
+            <element signature="e#853#872#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/cjson.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="17" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/cjson_runtime.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/cjson_runtime.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.y">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="3" column="37" selection-start-line="3" selection-start-column="37" selection-end-line="3" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.l">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="87" column="17" selection-start-line="87" selection-start-column="17" selection-end-line="87" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -473,9 +561,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#904#926#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -521,9 +606,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="17" selection-end-column="3" />
-          <folding>
-            <element signature="e#904#926#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -547,9 +629,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#904#926#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -573,9 +652,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="767" column="22" selection-start-line="767" selection-start-column="22" selection-end-line="767" selection-end-column="22" />
-          <folding>
-            <element signature="e#904#926#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -599,9 +675,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#904#926#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -617,13 +690,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.60402685">
           <caret line="30" column="27" selection-start-line="30" selection-start-column="27" selection-end-line="30" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/Makefile">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.1409396">
-          <caret line="7" column="20" selection-start-line="7" selection-start-column="14" selection-end-line="7" selection-end-column="20" />
         </state>
       </provider>
     </entry>
@@ -651,36 +717,43 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/LICENSE">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="4" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/dybuf.h">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-37.22222">
           <caret line="67" column="0" selection-start-line="67" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
-          <folding>
-            <element signature="e#904#926#0" expanded="true" />
-          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="24" column="50" selection-start-line="24" selection-start-column="50" selection-end-line="24" selection-end-column="50" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/platform/plat_type.h">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="19" selection-start-line="23" selection-start-column="0" selection-end-line="40" selection-end-column="22" />
+          <caret line="27" column="71" selection-start-line="27" selection-start-column="71" selection-end-line="27" selection-end-column="71" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/platform/plat_io.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="39" column="13" selection-start-line="39" selection-start-column="13" selection-end-line="39" selection-end-column="13" />
+          <folding>
+            <element signature="e#963#976#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.l">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="87" column="17" selection-start-line="87" selection-start-column="17" selection-end-line="87" selection-end-column="17" />
           <folding />
         </state>
       </provider>
@@ -688,21 +761,12 @@
     <entry file="file://$PROJECT_DIR$/platform/plat_mem.h">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="56" column="1" selection-start-line="55" selection-start-column="0" selection-end-line="56" selection-end-column="1" />
+          <caret line="80" column="6" selection-start-line="80" selection-start-column="6" selection-end-line="80" selection-end-column="6" />
           <folding>
-            <element signature="e#947#960#0" expanded="true" />
-            <element signature="e#967#986#0" expanded="true" />
-            <element signature="e#1087#1099#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/cjson.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="45" selection-start-line="5" selection-start-column="45" selection-end-line="5" selection-end-column="45" />
-          <folding>
-            <element signature="e#853#872#0" expanded="true" />
+            <element signature="e#965#978#0" expanded="true" />
+            <element signature="e#985#1004#0" expanded="true" />
+            <element signature="e#1110#1122#0" expanded="true" />
+            <element signature="e#1151#1163#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -710,33 +774,41 @@
     <entry file="file://$PROJECT_DIR$/json/cjson.h">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="26" column="22" selection-start-line="26" selection-start-column="22" selection-end-line="26" selection-end-column="22" />
+          <caret line="112" column="19" selection-start-line="112" selection-start-column="8" selection-end-line="112" selection-end-column="19" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/platform/plat_io.h">
+    <entry file="file://$PROJECT_DIR$/json/cjson_runtime.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-4.185185">
-          <caret line="34" column="36" selection-start-line="34" selection-start-column="16" selection-end-line="34" selection-end-column="36" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="31" column="0" selection-start-line="31" selection-start-column="0" selection-end-line="31" selection-end-column="57" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/cjson_runtime.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="66" selection-start-line="9" selection-start-column="66" selection-end-line="9" selection-end-column="66" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/json/cjson.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-4.740741">
+          <caret line="592" column="33" selection-start-line="592" selection-start-column="33" selection-end-line="592" selection-end-column="33" />
           <folding>
-            <element signature="e#945#958#0" expanded="true" />
+            <element signature="e#853#872#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/json/json.l">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-88.74074">
-          <caret line="160" column="4" selection-start-line="160" selection-start-column="4" selection-end-line="160" selection-end-column="4" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/json/json.y">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.32484075">
-          <caret line="17" column="14" selection-start-line="17" selection-start-column="14" selection-end-line="17" selection-end-column="14" />
+        <state vertical-scroll-proportion="0.05732484">
+          <caret line="3" column="37" selection-start-line="3" selection-start-column="37" selection-end-line="3" selection-end-column="37" />
           <folding />
         </state>
       </provider>

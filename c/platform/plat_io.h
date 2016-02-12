@@ -26,14 +26,19 @@
 
 #include "plat_type.h"
 
+#if !_NO_STD_INC_
 #ifdef __KERNEL__
 // add header
 #else
 #include <stdio.h>
 #endif
+#endif
 
 plat_inline int plat_io_get_resource(char* resource_name, void** content_memory, uint* size)
 {
+#if _NO_STD_INC_
+    return -1;
+#else
     FILE *f;
 
     f = fopen(resource_name, "rb");
@@ -66,6 +71,7 @@ plat_inline int plat_io_get_resource(char* resource_name, void** content_memory,
     fclose(f);
 
     return 0;
+#endif
 }
 
 

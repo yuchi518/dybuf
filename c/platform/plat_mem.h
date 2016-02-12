@@ -26,47 +26,58 @@
 
 #include "plat_type.h"
 
+#if !_NO_STD_INC_
 #ifdef __KERNEL__
 // add header
 #else
 #include <stdlib.h>
 #include <string.h>
 #endif
-
+#endif
 
 plat_inline void* plat_mem_allocate(uint size)
 {
+#if _NO_STD_INC_
+    return NULL;
+#else
 #ifdef __KERNEL__
-    return null;
+    return NULL;
 #else
     return malloc(size);
+#endif
 #endif
 }
 
 
 plat_inline void plat_mem_release(void* mem)
 {
+#if !_NO_STD_INC_
 #ifdef __KERNEL__
 #else
     free(mem);
+#endif
 #endif
 }
 
 
 plat_inline void plat_mem_copy(void* dest, void* src, uint size)
 {
+#if !_NO_STD_INC_
 #ifdef __KERNEL__
 #else
     memcpy(dest, src, size);
+#endif
 #endif
 }
 
 
 plat_inline void plat_mem_move(void* dest, void* src, uint size)
 {
+#if !_NO_STD_INC_
 #ifdef __KERNEL__
 #else
     memmove(dest, src, size);
+#endif
 #endif
 }
 

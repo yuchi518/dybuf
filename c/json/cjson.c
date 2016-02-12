@@ -22,11 +22,8 @@
 //
 
 #include <string.h>
+#include "plat_mem.h"
 #include "cjson.h"
-
-/// ==== json yacc & lex
-#include "json.lex.c"
-
 
 
 
@@ -49,7 +46,7 @@ void cjson_memory_profile(void** alloc_record, unsigned int* alloc_idx, void** r
 }
 
 static inline void* cjson_memory_allocate(unsigned int size) {
-    void* mem = malloc(size);
+    void* mem = plat_mem_allocate(size);
     if (memory_profile_size && mem && (*memory_alloc_records_idx)<memory_profile_size) {
         memory_alloc_records[*memory_alloc_records_idx] = mem;
         ++(*memory_alloc_records_idx);
@@ -64,7 +61,7 @@ static inline void cjson_memory_release(void *mem)
             memory_release_records[*memory_release_records_idx] = mem;
             ++(*memory_release_records_idx);
         }
-        free(mem);
+        plat_mem_release(mem);
     }
 }
 
@@ -91,6 +88,7 @@ struct jsobj* cjson_make(enum jstype type)
         case jstype_string: return cjson_make_string("");
         case jstype_array: return cjson_make_array();
         case jstype_map: return cjson_make_map();
+        case jstype_rt: return cjson_make_runtime();
     }
     return cjson_make_nil();
 }
@@ -107,6 +105,7 @@ enum jserr cjson_release(struct jsobj* obj)
         case jstype_string: cjson_release_string(_obj2inst_s(obj));
         case jstype_array: cjson_release_array(_obj2inst_a(obj));
         case jstype_map: cjson_release_map(_obj2inst_m(obj));
+        case jstype_rt: cjson_release_runtime(_obj2inst_r(obj));
     }
     return jserr_invalid_args;
 }
@@ -123,6 +122,7 @@ struct jsobj* cjson_clone(struct jsobj* obj)
         case jstype_string: return cjson_clone_string(_obj2inst_s(obj));
         case jstype_array: return cjson_clone_array(_obj2inst_a(obj));
         case jstype_map: return cjson_clone_map(_obj2inst_m(obj));
+        case jstype_rt: return cjson_clone_runtime(_obj2inst_r(obj));
     }
     // TO-DO: print error
     obj->reference_count++;
@@ -150,6 +150,7 @@ int cjson_compare(struct jsobj* obj0, struct jsobj* obj1)
             case jstype_string: return strcmp(_obj2string(obj0), _obj2string(obj1));
             case jstype_array: return cjson_compare_array(_obj2inst_a(obj0), _obj2inst_a(obj1));
             case jstype_map: return cjson_compare_map(_obj2inst_m(obj0), _obj2inst_m(obj1));
+            case jstype_rt: return cjson_compare_runtime(_obj2inst_r(obj0), _obj2inst_r(obj1));
         }
         // TO-DO: print error
         return (int)obj0 - (int)obj1;
@@ -568,3 +569,61 @@ enum jserr cjson_release_map(struct jsobj_map* map_obj)
     return jserr_no_error;
 }
 
+/// ========== runtime ==========
+struct jsobj* cjson_make_runtime(void)
+{
+    struct jsobj_runtime* obj = cjson_memory_allocate(sizeof(*obj));
+    obj->base = (struct jsobj) {
+            .type = jstype_rt,
+            .should_copy = 0,
+            .reference_count = 1,
+            .wrapper = NULL,
+            .this = NULL,
+    };
+    obj->code = cjson_make_array();
+    return &(obj->base);
+}
+
+struct jsobj* cjson_clone_runtime(struct jsobj_runtime* rt_obj)
+{
+    struct jsobj_runtime* obj = cjson_memory_allocate(sizeof(*obj));
+    obj->base = (struct jsobj) {
+            .type = jstype_rt,
+            .should_copy = 0,
+            .reference_count = 1,
+            .wrapper = NULL,
+            .this = NULL,
+    };
+    obj->code = cjson_clone(rt_obj->code);
+    return &(obj->base);
+}
+
+int cjson_compare_runtime(struct jsobj_runtime* rt0, struct jsobj_runtime* rt1)
+{
+    int r;
+
+    r = cjson_compare(rt0->code, rt1->code);
+    if (r==0) return 0;
+
+    return r;
+}
+
+enum jserr cjson_runtime_add_code_segment(struct jsobj* rt, struct jsobj* code_segment)
+{
+    if (rt==nil || rt->type!=jstype_rt) return jserr_invalid_args;
+
+    cjson_array_add_object(_obj2inst_r(rt)->code, code_segment);
+
+    return jserr_no_error;
+}
+
+enum jserr cjson_release_runtime(struct jsobj_runtime* rt_obj)
+{
+    if (rt_obj==NULL) return jserr_invalid_args;
+
+    if ((--rt_obj->base.reference_count) <= 0) {
+        cjson_release(rt_obj->code);
+    }
+
+    return jserr_no_error;
+}

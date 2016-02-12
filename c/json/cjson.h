@@ -88,6 +88,7 @@ enum jstype
     //jstype_express,                     // expr is a closure with a return boolean value
     //jstype_lambda,                      // lambda is a functional closure with input/output values
 
+    jstype_rt           = 0x900,          // runtime, environment
 };
 
 struct jsobj
@@ -109,6 +110,7 @@ struct jsobj
 #define _obj2inst_s(ptr)    (_obj2inst(ptr, struct jsobj_string) )
 #define _obj2inst_a(ptr)    (_obj2inst(ptr, struct jsobj_array) )
 #define _obj2inst_m(ptr)    (_obj2inst(ptr, struct jsobj_map) )
+#define _obj2inst_r(ptr)    (_obj2inst(ptr, struct jsobj_runtime) )
 #define _obj2bool(ptr)       ( _obj2inst(ptr, struct jsobj_bool)->value )
 #define _obj2int(ptr)       ( _obj2inst(ptr, struct jsobj_int)->value )
 #define _obj2double(ptr)    ( _obj2inst(ptr, struct jsobj_double)->value )
@@ -163,6 +165,13 @@ struct jsobj_map
     struct map_pair* pairs;
 };
 
+struct jsobj_runtime
+{
+    struct jsobj base;
+    struct jsobj *code;
+};
+
+
 struct jsobj* cjson_clone(struct jsobj* obj);
 int cjson_compare(struct jsobj* obj0, struct jsobj* obj1);
 struct jsobj* cjson_make(enum jstype type);
@@ -200,6 +209,11 @@ int cjson_compare_map(struct jsobj_map* map0, struct jsobj_map* map1);      // i
 enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jsobj* value);
 enum jserr cjson_release_map(struct jsobj_map* map_obj);
 
+struct jsobj* cjson_make_runtime(void);
+struct jsobj* cjson_clone_runtime(struct jsobj_runtime* rt_obj);
+int cjson_compare_runtime(struct jsobj_runtime* rt0, struct jsobj_runtime* rt1);
+enum jserr cjson_runtime_add_code_segment(struct jsobj* rt, struct jsobj* code_segment);
+enum jserr cjson_release_runtime(struct jsobj_runtime* rt_obj);
 
 // debug
 void cjson_memory_profile(void** alloc_record, unsigned int* alloc_idx, void** release_record, unsigned int* release_idx, unsigned int size);
