@@ -28,7 +28,7 @@
 
 #if !_NO_STD_INC_
 #ifdef __KERNEL__
-// add header
+// TO-DO: add header
 #else
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +41,7 @@ plat_inline void* plat_mem_allocate(uint size)
     return NULL;
 #else
 #ifdef __KERNEL__
+    // TO-DO: implement
     return NULL;
 #else
     return malloc(size);
@@ -53,6 +54,7 @@ plat_inline void plat_mem_release(void* mem)
 {
 #if !_NO_STD_INC_
 #ifdef __KERNEL__
+    // TO-DO: implement
 #else
     free(mem);
 #endif
@@ -64,6 +66,7 @@ plat_inline void plat_mem_copy(void* dest, const void* src, uint size)
 {
 #if !_NO_STD_INC_
 #ifdef __KERNEL__
+    // TO-DO: implement
 #else
     memcpy(dest, src, size);
 #endif
@@ -75,11 +78,25 @@ plat_inline void plat_mem_move(void* dest, void* src, uint size)
 {
 #if !_NO_STD_INC_
 #ifdef __KERNEL__
+    // TO-DO: implement
 #else
     memmove(dest, src, size);
 #endif
 #endif
 }
+
+
+plat_inline void plat_mem_set(void* dest, char value, uint size)
+{
+#if !_NO_STD_INC_
+#ifdef __KERNEL__
+    // TO-DO: implement
+#else
+    memset(dest, value, size);
+#endif
+#endif
+}
+
 
 #endif //_PLAT_C_MEM_
 

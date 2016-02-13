@@ -84,6 +84,7 @@ enum jstype
     //jstype_object       = 0x100,
     jstype_array        = 0x101,
     jstype_map          = 0x102,
+    jstype_tuple        = 0x103,          // tuple is very like array, but it is fixed size
 
     //jstype_closure      = 0x200,
     //jstype_express,                     // expr is a closure with a return boolean value
@@ -111,6 +112,7 @@ struct jsobj
 #define _obj2inst_s(ptr)    (_obj2inst(ptr, struct jsobj_string) )
 #define _obj2inst_a(ptr)    (_obj2inst(ptr, struct jsobj_array) )
 #define _obj2inst_m(ptr)    (_obj2inst(ptr, struct jsobj_map) )
+#define _obj2inst_t(ptr)    (_obj2inst(ptr, struct jsobj_tuple) )
 #define _obj2inst_r(ptr)    (_obj2inst(ptr, struct jsobj_runtime) )
 #define _obj2bool(ptr)       ( _obj2inst(ptr, struct jsobj_bool)->value )
 #define _obj2int(ptr)       ( _obj2inst(ptr, struct jsobj_int)->value )
@@ -153,17 +155,18 @@ struct jsobj_array
     struct jsobj** values;
 };
 
-struct map_pair
+struct jsobj_tuple
 {
-    struct jsobj *key;
-    struct jsobj *value;
+    struct jsobj base;
+    unsigned int size;
+    struct jsobj** values;
 };
 
 struct jsobj_map
 {
     struct jsobj base;
     unsigned int capacity, size;
-    struct map_pair* pairs;
+    struct jsobj_tuple** pairs;
 };
 
 struct jsobj_runtime
@@ -205,6 +208,13 @@ struct jsobj* cjson_clone_array(struct jsobj_array* array_obj);
 int cjson_compare_array(struct jsobj_array* array0, struct jsobj_array* array1);
 enum jserr cjson_array_add_object(struct jsobj* array, struct jsobj* value);
 enum jserr cjson_release_array(struct jsobj_array* array_obj);
+
+struct jsobj* cjson_make_tuple(unsigned int size);
+struct jsobj* cjson_clone_tuple(struct jsobj_tuple* tuple_obj);
+int cjson_compare_tuple(struct jsobj_tuple* tuple0, struct jsobj_tuple* tuple1);
+enum jserr cjson_tuple_set_object(struct jsobj* tuple, unsigned int index, struct jsobj* value);
+struct jsobj* cjson_tuple_get_object(struct jsobj* tuple, unsigned int index);
+enum jserr cjson_release_tuple(struct jsobj_tuple* tuple_obj);
 
 struct jsobj* cjson_make_map(void);
 struct jsobj* cjson_clone_map(struct jsobj_map* map_obj);

@@ -40,40 +40,48 @@ OBJECT
     ;
 
 MEMBERS
-    : PAIR { $$ = $1;printf("MEMBERS(PAIR)\n"); }
-    | PAIR COMMA MEMBERS
-        {
-            printf("MEMBERS(PAIR COMMA MEMBERS)\n");
-            //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-            //sprintf($$,"%s,%s",$1,$3);
-        }
+    : PAIR {
+        $$ = $1;
+        printf("MEMBERS(PAIR)\n");
+    }
+    | PAIR COMMA MEMBERS {
+        printf("MEMBERS(PAIR COMMA MEMBERS)\n");
+        //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
+        //sprintf($$,"%s,%s",$1,$3);
+    }
     ;
 
 PAIR: KEY COLON VALUE {
-    printf("PAIR(STRING COLON VALUE)\n");
-    //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-    //sprintf($$,"%s:%s",$1,$3);
-  }
-;
+        printf("PAIR(STRING COLON VALUE)\n");
+        //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
+        //sprintf($$,"%s:%s",$1,$3);
+    }
+    ;
 
 ARRAY
-    : A_BEGIN A_END { $$ = cjson_make_array();printf("ARRAY(A_BEGIN A_END)\n"); }
-    | A_BEGIN ELEMENTS A_END
-        {
-            printf("ARRAY(A_BEGIN ELEMENTS A_END)\n");
-            //$$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
-            //sprintf($$,"[%s]",$2);
-        }
+    : A_BEGIN A_END {
+        $$ = cjson_make_array();
+        printf("ARRAY(A_BEGIN A_END)\n");
+    }
+    | A_BEGIN ELEMENTS A_END {
+        $$ = $2;
+        printf("ARRAY(A_BEGIN ELEMENTS A_END)\n");
+    }
     ;
 
 ELEMENTS
-    : VALUE { $$ = $1; printf("ELEMENTS(VALUE)\n"); }
-    | VALUE COMMA ELEMENTS
-        {
-            printf("ELEMENTS(VALUE COMMA ELEMENTS)\n");
-            //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-            //sprintf($$,"%s,%s",$1,$3);
-        }
+    : VALUE {
+        struct jsobj* arr = cjson_make_array();
+        cjson_array_add_object(arr, (struct jsobj*)$1);
+        $$ = arr;
+        printf("ELEMENTS(VALUE)\n");
+    }
+    | VALUE COMMA ELEMENTS {
+        struct jsobj* arr = (struct jsobj*)$3;
+        cjson_array_add_object(arr, (struct jsobj*)$1);
+        $$ = arr;
+        printf("ELEMENTS(VALUE COMMA ELEMENTS)\n");
+    }
     ;
 
 KEY

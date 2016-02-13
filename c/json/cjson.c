@@ -46,7 +46,9 @@ void cjson_memory_profile(void** alloc_record, unsigned int* alloc_idx, void** r
 
 static inline void* cjson_memory_allocate(unsigned int size) {
     void* mem = plat_mem_allocate(size);
-    if (memory_profile_size && mem && (*memory_alloc_records_idx)<memory_profile_size) {
+    if (!mem) return NULL;
+    plat_mem_set(mem, 0, size);
+    if (memory_profile_size && (*memory_alloc_records_idx)<memory_profile_size) {
         memory_alloc_records[*memory_alloc_records_idx] = mem;
         ++(*memory_alloc_records_idx);
     }
@@ -86,6 +88,7 @@ struct jsobj* cjson_make(enum jstype type)
         case jstype_double: return cjson_make_double(0);
         case jstype_string: return cjson_make_string("");
         case jstype_array: return cjson_make_array();
+        case jstype_tuple: return cjson_make_tuple(0);
         case jstype_map: return cjson_make_map();
         case jstype_rt: return cjson_make_runtime();
     }
@@ -103,6 +106,7 @@ enum jserr cjson_release(struct jsobj* obj)
         case jstype_double: cjson_release_double(_obj2inst_d(obj));
         case jstype_string: cjson_release_string(_obj2inst_s(obj));
         case jstype_array: cjson_release_array(_obj2inst_a(obj));
+        case jstype_tuple: cjson_release_tuple(_obj2inst_t(obj));
         case jstype_map: cjson_release_map(_obj2inst_m(obj));
         case jstype_rt: cjson_release_runtime(_obj2inst_r(obj));
     }
@@ -120,6 +124,7 @@ struct jsobj* cjson_clone(struct jsobj* obj)
         case jstype_double: return cjson_clone_double(_obj2inst_d(obj));
         case jstype_string: return cjson_clone_string(_obj2inst_s(obj));
         case jstype_array: return cjson_clone_array(_obj2inst_a(obj));
+        case jstype_tuple: return cjson_clone_tuple(_obj2inst_t(obj));
         case jstype_map: return cjson_clone_map(_obj2inst_m(obj));
         case jstype_rt: return cjson_clone_runtime(_obj2inst_r(obj));
     }
@@ -148,6 +153,7 @@ int cjson_compare(struct jsobj* obj0, struct jsobj* obj1)
             }
             case jstype_string: return strcmp(_obj2string(obj0), _obj2string(obj1));
             case jstype_array: return cjson_compare_array(_obj2inst_a(obj0), _obj2inst_a(obj1));
+            case jstype_tuple: return cjson_compare_tuple(_obj2inst_t(obj0), _obj2inst_t(obj1));
             case jstype_map: return cjson_compare_map(_obj2inst_m(obj0), _obj2inst_m(obj1));
             case jstype_rt: return cjson_compare_runtime(_obj2inst_r(obj0), _obj2inst_r(obj1));
         }
@@ -425,6 +431,123 @@ enum jserr cjson_release_array(struct jsobj_array* array_obj)
     return jserr_no_error;
 }
 
+/// ========== tuple =========
+struct jsobj* cjson_make_tuple(unsigned int size)
+{
+    unsigned int i;
+    struct jsobj_tuple* obj = cjson_memory_allocate(sizeof(*obj));
+    obj->base = (struct jsobj) {
+            .type = jstype_tuple,
+            .should_copy = 0,
+            .reference_count = 1,
+            .wrapper = NULL,
+            .this = NULL,
+    };
+    obj->values = cjson_memory_allocate(sizeof(obj->values[0]) * size);
+    obj->size = size;
+    for (i=0; i<size; i++)
+    {
+        obj->values[i] = cjson_make_nil();
+    }
+    return &(obj->base);
+}
+
+struct jsobj* cjson_clone_tuple(struct jsobj_tuple* tuple_obj)
+{
+    if (tuple_obj==NULL) return cjson_make_nil();
+    unsigned int size = tuple_obj->size, i;
+    struct jsobj_tuple* obj = cjson_memory_allocate(sizeof(*obj));
+    obj->base = (struct jsobj) {
+            .type = jstype_tuple,
+            .should_copy = 0,
+            .reference_count = 1,
+            .wrapper = NULL,
+            .this = NULL,
+    };
+    obj->values = cjson_memory_allocate(sizeof(obj->values[0]) * size);
+    obj->size = size;
+    for (i=0; i<size; i++)
+    {
+        obj->values[i] = cjson_clone(tuple_obj->values[i]);
+    }
+    return &(obj->base);
+}
+
+int cjson_compare_tuple(struct jsobj_tuple* tuple0, struct jsobj_tuple* tuple1)
+{
+    unsigned int size0 = tuple0->size,
+            size1 = tuple1->size;
+    unsigned int i;
+    if (size0==0 && size1==0) return 0;
+
+    for (i=0; i<size0&&i<size1; i++)
+    {
+        unsigned r = cjson_compare(tuple0->values[i], tuple1->values[i]);
+        if (r!=0) return r;
+    }
+    return (size0-size1);
+}
+
+enum jserr cjson_tuple_set_object(struct jsobj* tuple, unsigned int index, struct jsobj* value)
+{
+    if (tuple==NULL || tuple->type!=jstype_tuple) return jserr_invalid_args;
+
+    struct jsobj_tuple* obj = _obj2inst_t(tuple);
+
+    if (index >= obj->size)
+    {
+        unsigned int i;
+        struct jsobj** values = cjson_memory_allocate(sizeof(obj->values[0]) * (index+1));
+        plat_mem_copy(values, obj->values, sizeof(obj->values[0]) * obj->size);
+        for (i=obj->size; i<index+1; i++)
+        {
+            values[i] = cjson_make_nil();
+        }
+        plat_mem_release(obj->values);
+        obj->values = values;
+        obj->size = index+1;
+    }
+
+    struct jsobj* oldone = obj->values[index];  // avoid to release the same one
+    obj->values[index] = cjson_clone(value);
+    cjson_release(oldone);
+
+    return jserr_no_error;
+}
+
+struct jsobj* cjson_tuple_get_object(struct jsobj* tuple, unsigned int index)
+{
+    if (tuple==NULL || tuple->type!=jstype_tuple) {
+        // TO-DO: return a global nil object
+    }
+
+    struct jsobj_tuple* obj = _obj2inst_t(tuple);
+
+    if (index >= obj->size) {
+        // TO-DO: return a global nil object
+    }
+
+    return obj->values[index];
+}
+
+enum jserr cjson_release_tuple(struct jsobj_tuple* tuple_obj)
+{
+    if (tuple_obj==NULL) return jserr_invalid_args;
+
+    if ((--tuple_obj->base.reference_count) <= 0)
+    {
+        unsigned int i = 0;
+        for (i=0; i<tuple_obj->size; i++)
+        {
+            cjson_release(tuple_obj->values[i]);
+        }
+        cjson_memory_release(tuple_obj->values);
+        cjson_memory_release(tuple_obj);
+    }
+
+    return jserr_no_error;
+}
+
 /// ========== map ==========
 
 struct jsobj* cjson_make_map(void)
@@ -464,8 +587,7 @@ struct jsobj* cjson_clone_map(struct jsobj_map* map_obj)
     unsigned int i;
     for (i=0; i<map_obj->size; i++)
     {
-        obj->pairs[i].key = cjson_clone(map_obj->pairs[i].key);
-        obj->pairs[i].value = cjson_clone(map_obj->pairs[i].value);
+        obj->pairs[i] = _obj2inst_t(cjson_clone_tuple(map_obj->pairs[i]));
     }
 
     return &(obj->base);
@@ -477,18 +599,13 @@ int cjson_compare_map(struct jsobj_map* map0, struct jsobj_map* map1)
 
     for (i=0; i<map0->size && i<map1->size; i++)
     {
-        int r = cjson_compare(map0->pairs[i].key, map1->pairs[i].key);
+        int r = cjson_compare(cjson_tuple_get_object(&map0->pairs[i]->base,0), cjson_tuple_get_object(&map1->pairs[i]->base,0));
         if (r!=0) return r;
     }
 
     if (map0->size == map1->size) return 0;
     if (map0->size > map1->size) return 1;
     else return -1;
-}
-
-static int compar_pair(const void* pair0,const void* pair1)
-{
-    return cjson_compare(((struct map_pair*)pair0)->key, ((struct map_pair*)pair1)->key);
 }
 
 enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jsobj* value)
@@ -504,7 +621,7 @@ enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jso
     while (s < e)
     {
         m = (s+e) >> 1;
-        r = cjson_compare(key, obj->pairs[m].key);
+        r = cjson_compare(key, cjson_tuple_get_object(&obj->pairs[m]->base,0));
         if (r < 0)
         {
             e = m-1;
@@ -522,19 +639,21 @@ enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jso
         if (obj->size+1 > obj->capacity) {
             // create more space
             unsigned int capacity = obj->capacity+16;
-            struct map_pair* pairs = cjson_memory_allocate(sizeof(pairs[0]) * capacity);
+            struct jsobj_tuple** pairs = cjson_memory_allocate(sizeof(pairs[0]) * capacity);
             if (pairs==NULL) return jserr_no_memory;
             if (s>0) cjson_memory_copy(pairs, obj->pairs, sizeof(pairs[0])*(s-1));
-            pairs[s].key = cjson_clone(key);
-            pairs[s].value = cjson_clone(value);
+            pairs[s] = _obj2inst_t(cjson_make_tuple(2));
+            cjson_tuple_set_object(&pairs[s]->base, 0, key);
+            cjson_tuple_set_object(&pairs[s]->base, 1, value);
             if (s<obj->size) cjson_memory_copy(&pairs[s+1], &obj->pairs[s], sizeof(pairs[0])*(obj->size-s));
             cjson_memory_release(obj->pairs);
             obj->pairs = pairs;
             obj->capacity = capacity;
         } else {
             if (s<obj->size) cjson_memory_move(&obj->pairs[s+1], &obj->pairs[s], sizeof(obj->pairs[0])*(obj->size-s));
-            obj->pairs[s].key = cjson_clone(key);
-            obj->pairs[s].value = cjson_clone(value);
+            obj->pairs[s] = _obj2inst_t(cjson_make_tuple(2));
+            cjson_tuple_set_object(&obj->pairs[s]->base, 0, key);
+            cjson_tuple_set_object(&obj->pairs[s]->base, 1, value);
         }
 
         obj->size++;
@@ -542,12 +661,10 @@ enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jso
     else if (r==0)
     {
         // replace at m
-        struct map_pair pair = obj->pairs[m];
-        cjson_release(pair.key);
-        cjson_release(pair.value);
-        pair.key = cjson_clone(key);
-        pair.value = cjson_clone(value);
-        obj->pairs[m] = pair;
+        cjson_release_tuple(obj->pairs[m]);
+        obj->pairs[m] = _obj2inst_t(cjson_make_tuple(2));
+        cjson_tuple_set_object(&obj->pairs[m]->base, 0, key);
+        cjson_tuple_set_object(&obj->pairs[m]->base, 1, value);
     }
     else
     {
@@ -567,9 +684,7 @@ enum jserr cjson_release_map(struct jsobj_map* map_obj)
         unsigned int i=0;
         for(i=0; i<map_obj->size; i++)
         {
-            struct map_pair pair = map_obj->pairs[i];
-            cjson_release(pair.key);
-            cjson_release(pair.value);
+            cjson_release_tuple(map_obj->pairs[i]);
         }
         cjson_memory_release(map_obj->pairs);
         cjson_memory_release(map_obj);

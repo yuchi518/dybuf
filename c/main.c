@@ -36,9 +36,9 @@ int main(int argc, char **argv)
 {
     srand(time(NULL));
 
-    //cjson_test();
+    cjson_test();
     cjson_parse_test();
-    //dybuf_test();
+    dybuf_test();
 
     return 0;
 }
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 void cjson_test(void)
 {
     struct jsobj *obj;
-    enum jstype typs[] = {jstype_nil, jstype_int, jstype_double, jstype_string, jstype_array, jstype_map};
+    enum jstype typs[] = {jstype_nil, jstype_int, jstype_double, jstype_string, jstype_array, jstype_tuple, jstype_map};
     unsigned int i;
 
     unsigned int profile_size = 1024, alloc_idx, release_idx;
@@ -76,8 +76,9 @@ void cjson_test(void)
 
 void cjson_parse_test(void)
 {
-    const char* json_text = "{\"abc\":1,\"efg\":[], 1:2}";
+    //const char* json_text = "{\"abc\":1,\"efg\":[], 1:2}";
     //const char* json_text = "[1]";
+    const char* json_text = "[1,2.2,3e3,4,0xa]";
     cjson_rt_push_new_runtime();
 
     //cjson_source_push_from_resource("");
