@@ -29,6 +29,7 @@
 
 void cjson_rt_push_new_runtime(void);
 struct jsobj* cjson_rt_pop_last_runtime(void);
+struct jsobj* cjson_rt_add_code_segment(struct jsobj* segment);
 
 enum jserr cjson_source_push_from_buffer(const char* buf, uint size);
 enum jserr cjson_source_push_from_resource(const char* resource_name);

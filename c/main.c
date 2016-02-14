@@ -36,8 +36,27 @@ int main(int argc, char **argv)
 {
     srand(time(NULL));
 
+    unsigned int profile_size = 1024, alloc_idx, release_idx, i;
+    void** alloc_rec = malloc(profile_size*sizeof(alloc_rec[0]));
+    void** release_rec = malloc(profile_size*sizeof(release_rec[0]));
+    cjson_memory_profile(alloc_rec, &alloc_idx, release_rec, &release_idx, profile_size);
+
     cjson_test();
     cjson_parse_test();
+
+    printf("alloc: ");
+    for (i=0; i<alloc_idx; i++)
+    {
+        printf("%p,", alloc_rec[i]);
+    }
+    printf("\nrelease: ");
+    for (i=0; i<release_idx; i++)
+    {
+        printf("%p,", release_rec[i]);
+    }
+    printf("\n");
+
+
     dybuf_test();
 
     return 0;
@@ -49,40 +68,23 @@ void cjson_test(void)
     enum jstype typs[] = {jstype_nil, jstype_int, jstype_double, jstype_string, jstype_array, jstype_tuple, jstype_map};
     unsigned int i;
 
-    unsigned int profile_size = 1024, alloc_idx, release_idx;
-    void** alloc_rec = malloc(profile_size*sizeof(alloc_rec[0]));
-    void** release_rec = malloc(profile_size*sizeof(release_rec[0]));
-
-    cjson_memory_profile(alloc_rec, &alloc_idx, release_rec, &release_idx, profile_size);
-
     for (i=0; i<sizeof(typs)/sizeof(typs[0]); i++)
     {
         obj = cjson_make(typs[i]);
         cjson_release(obj);
     }
-
-
-    for (i=0; i<alloc_idx; i++)
-    {
-        printf("%p,", alloc_rec[i]);
-    }
-    printf("\n");
-    for (i=0; i<release_idx; i++)
-    {
-        printf("%p,", release_rec[i]);
-    }
-    printf("\n");
 }
 
 void cjson_parse_test(void)
 {
-    //const char* json_text = "{\"abc\":1,\"efg\":[], 1:2}";
-    //const char* json_text = "[1]";
-    const char* json_text = "[1,2.2,3e3,4,0xa]";
+    const char* json_text = "{\"abc\":1,\"efg\":[], 1:[1,2.2,3e3,4,0xa]}\n";
+    //const char* json_text = "[\n1]\n\0\0";
+    //const char* json_text = "[1,2.2,3e3,4,0xa,\"asdfs\"]\n";
+    //const char* json_text = "{1:2}\n";
     cjson_rt_push_new_runtime();
 
     //cjson_source_push_from_resource("");
-    if (cjson_source_push_from_buffer(json_text, strlen(json_text)) == jserr_no_error)
+    if (cjson_source_push_from_buffer(json_text, strlen(json_text)+1) == jserr_no_error)
         cjson_source_analyze();
 
     struct jsobj* rt = cjson_rt_pop_last_runtime();

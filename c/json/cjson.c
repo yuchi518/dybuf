@@ -29,10 +29,10 @@
 /// ============= cjson obj
 
 static unsigned int memory_profile_size = 0;
-static unsigned int* memory_alloc_records_idx;
-static unsigned int* memory_release_records_idx;
-static void** memory_alloc_records;
-static void** memory_release_records;
+static unsigned int* memory_alloc_records_idx = NULL;
+static unsigned int* memory_release_records_idx = NULL;
+static void** memory_alloc_records = NULL;
+static void** memory_release_records = NULL;
 void cjson_memory_profile(void** alloc_record, unsigned int* alloc_idx, void** release_record, unsigned int* release_idx, unsigned int size)
 {
     memory_profile_size = size;
@@ -245,7 +245,12 @@ struct jsobj* cjson_make_int(int value)
 
 struct jsobj* cjson_make_int_from_string(char* string)
 {
-    return cjson_make_int((int)strtol(string, NULL, 0));
+    if (string==NULL) return cjson_make_nil();
+    char* buf = plat_mem_allocate(strlen(string));
+    plat_mem_copy(buf, string, strlen(string));
+    int v = (int)strtol(buf, NULL, 0);
+    free(buf);
+    return cjson_make_int(v);
 }
 
 struct jsobj* cjson_clone_int(struct jsobj_int* int_obj)
@@ -392,8 +397,9 @@ int cjson_compare_array(struct jsobj_array* array0, struct jsobj_array* array1)
 
 enum jserr cjson_array_add_object(struct jsobj* array, struct jsobj* value)
 {
-    if (array==NULL || array->type!=jstype_array)
+    if (array==NULL || array->type!=jstype_array) {
         return jserr_invalid_args;
+    }
 
     struct jsobj_array* obj = _obj2inst(array, struct jsobj_array);
 
@@ -608,25 +614,25 @@ int cjson_compare_map(struct jsobj_map* map0, struct jsobj_map* map1)
     else return -1;
 }
 
-enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jsobj* value)
+enum jserr cjson_map_add_pair(struct jsobj *map, struct jsobj *key, struct jsobj *value)
 {
     if (map==NULL || map->type!=jstype_map)
         return jserr_invalid_args;
 
     struct jsobj_map* obj = _obj2inst(map, struct jsobj_map);
 
-    unsigned int s = 0, e = obj->size, m = 0;
+    int s = 0, e = obj->size, m = 0;
     int r = 0;
 
     while (s < e)
     {
         m = (s+e) >> 1;
         r = cjson_compare(key, cjson_tuple_get_object(&obj->pairs[m]->base,0));
-        if (r < 0)
+        if (r > 0)
         {
             e = m-1;
         }
-        else if (r > 0)
+        else if (r < 0)
         {
             s = m+1;
         }
@@ -673,6 +679,15 @@ enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jso
     }
 
     return jserr_no_error;
+}
+
+enum jserr cjson_map_add_tuple(struct jsobj *map, struct jsobj_tuple *pair)
+{
+    if (map==NULL || map->type!=jstype_map || pair==NULL || pair->size!=2) {
+        return jserr_invalid_args;
+    }
+
+    return cjson_map_add_pair(map, cjson_tuple_get_object(&pair->base, 0), cjson_tuple_get_object(&pair->base, 1));
 }
 
 enum jserr cjson_release_map(struct jsobj_map* map_obj)
@@ -747,6 +762,7 @@ enum jserr cjson_release_runtime(struct jsobj_runtime* rt_obj)
 
     if ((--rt_obj->base.reference_count) <= 0) {
         cjson_release(rt_obj->code);
+        cjson_memory_release(rt_obj);
     }
 
     return jserr_no_error;

@@ -102,9 +102,15 @@ struct jsobj
     struct jsobj * this;
 };
 
-#define _obj2inst(ptr, type) ({ \
-    const typeof( ((type *)0)->base ) *__mptr = (ptr); \
-    (type *)( (void *)__mptr - ((size_t) &((type *)0)->base) );})
+#ifdef __GNUC__
+#define member_type(type, member) __typeof__ (((type *)0)->member)
+#else
+#define member_type(type, member) const void
+#endif
+
+#define _obj2inst(ptr, type) ((type *)( \
+    (char *)(member_type(type, base) *){ ptr } - ((size_t) &((type *)0)->base) ))
+
 #define _obj2inst_n(ptr)    (_obj2inst(ptr, struct jsobj_nil) )
 #define _obj2inst_b(ptr)    (_obj2inst(ptr, struct jsobj_bool) )
 #define _obj2inst_i(ptr)    (_obj2inst(ptr, struct jsobj_int) )
@@ -219,7 +225,8 @@ enum jserr cjson_release_tuple(struct jsobj_tuple* tuple_obj);
 struct jsobj* cjson_make_map(void);
 struct jsobj* cjson_clone_map(struct jsobj_map* map_obj);
 int cjson_compare_map(struct jsobj_map* map0, struct jsobj_map* map1);      // if two map have the same keys in all pairs, they are the same.
-enum jserr cjson_map_add_object(struct jsobj* map, struct jsobj* key, struct jsobj* value);
+enum jserr cjson_map_add_pair(struct jsobj *map, struct jsobj *key, struct jsobj *value);
+enum jserr cjson_map_add_tuple(struct jsobj *map, struct jsobj_tuple *pair);
 enum jserr cjson_release_map(struct jsobj_map* map_obj);
 
 struct jsobj* cjson_make_runtime(void);

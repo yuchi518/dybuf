@@ -7,7 +7,7 @@
     #include "cjson_runtime.h"
 
     // bison json.y
-    typedef void* YYSTYPE;
+    typedef struct jsobj* YYSTYPE;
     #define YYSTYPE_IS_DECLARED     1
 
 char *strconcat(char *str1, char *str2);
@@ -25,36 +25,54 @@ char *strconcat(char *str1, char *str2);
 %%
 
 START
-    : ARRAY { /*printf("%s",$1);*/printf("START(ARRAY)\n"); }
-    | OBJECT { /*printf("%s",$1);*/printf("START(OBJECT)\n"); }
+    : ARRAY {
+        $$ = cjson_rt_add_code_segment($1);
+        cjson_release($1);
+        printf("START(ARRAY)\n");
+    }
+    | OBJECT {
+        $$ = cjson_rt_add_code_segment($1);
+        cjson_release($1);
+        printf("START(OBJECT)\n");
+    }
     ;
 
 OBJECT
-    : O_BEGIN O_END { $$ = cjson_make_map();printf("OBJECT(O_BEGIN O_END)\n"); }
-    | O_BEGIN MEMBERS O_END
-        {
-            printf("OBJECT(O_BEGIN MEMBERS O_END)\n");
-            /*$$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
-            sprintf($$,"{%s}",$2);*/
-        }
+    : O_BEGIN O_END {
+        $$ = cjson_make_map();
+        printf("OBJECT(O_BEGIN O_END)\n");
+    }
+    | O_BEGIN MEMBERS O_END {
+        $$ = $2;
+        printf("OBJECT(O_BEGIN MEMBERS O_END)\n");
+    }
     ;
 
 MEMBERS
     : PAIR {
-        $$ = $1;
+        struct jsobj* map = cjson_make_map();
+        cjson_map_add_tuple(map, _obj2inst_t($1));
+        cjson_release($1);
+        $$ = map;
         printf("MEMBERS(PAIR)\n");
     }
     | PAIR COMMA MEMBERS {
+        struct jsobj* map = $3;
+        cjson_map_add_tuple(map, _obj2inst_t($1));
+        cjson_release($1);
+        $$ = map;
         printf("MEMBERS(PAIR COMMA MEMBERS)\n");
-        //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-        //sprintf($$,"%s,%s",$1,$3);
     }
     ;
 
 PAIR: KEY COLON VALUE {
-        printf("PAIR(STRING COLON VALUE)\n");
-        //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-        //sprintf($$,"%s:%s",$1,$3);
+        struct jsobj* tuple = cjson_make_tuple(2);
+        cjson_tuple_set_object(tuple, 0, $1);
+        cjson_tuple_set_object(tuple, 1, $3);
+        cjson_release($1);
+        cjson_release($3);
+        $$ = tuple;
+        printf("PAIR(KEY COLON VALUE)\n");
     }
     ;
 
@@ -72,13 +90,16 @@ ARRAY
 ELEMENTS
     : VALUE {
         struct jsobj* arr = cjson_make_array();
-        cjson_array_add_object(arr, (struct jsobj*)$1);
+        cjson_array_add_object(arr, $1);
+        cjson_release($1);
         $$ = arr;
         printf("ELEMENTS(VALUE)\n");
     }
     | VALUE COMMA ELEMENTS {
+        // TO-DO: the order of items may not correct.
         struct jsobj* arr = (struct jsobj*)$3;
-        cjson_array_add_object(arr, (struct jsobj*)$1);
+        cjson_array_add_object(arr, $1);
+        cjson_release($1);
         $$ = arr;
         printf("ELEMENTS(VALUE COMMA ELEMENTS)\n");
     }
@@ -103,14 +124,6 @@ VALUE
     ;
 
 %%
-
-/*int main()
-{
-   printf("\n");
-   yyparse();
-   printf("\n");
-   return 0;
-}*/
 
 /*int yywrap()
 {

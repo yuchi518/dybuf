@@ -26,7 +26,7 @@
 
 /// ==== json yacc & lex
 #include "json.lex.c"
-
+static struct src_stack *curbs = NULL;
 
 static struct jsobj* rt_list[8];
 static uint rt_index = 0;
@@ -44,7 +44,20 @@ struct jsobj* cjson_rt_pop_last_runtime(void)
 {
     struct jsobj* rt;
 
-    rt = rt_list[rt_index--];
+    rt = rt_list[--rt_index];
+
+    return rt;
+}
+
+struct jsobj* cjson_rt_add_code_segment(struct jsobj* segment)
+{
+    struct jsobj* rt = NULL;
+
+    if (rt_index>0)
+    {
+        rt = rt_list[rt_index-1];
+        cjson_runtime_add_code_segment(rt, segment);
+    }
 
     return rt;
 }
@@ -55,7 +68,7 @@ enum jserr cjson_source_push_from_buffer(const char* buff, uint size)
     struct src_stack *bs = plat_mem_allocate(sizeof(*bs));
     if(!bs) return jserr_no_memory;
 
-    bs->src_buffer = plat_mem_allocate(size);
+    /*bs->src_buffer = plat_mem_allocate(size);
     if(!bs->src_buffer)
     {
         plat_mem_release(bs);
@@ -63,17 +76,18 @@ enum jserr cjson_source_push_from_buffer(const char* buff, uint size)
     }
 
     bs->src_size = size;
-    plat_mem_copy(bs->src_buffer, buff, size);
+    plat_mem_copy(bs->src_buffer, buff, size);*/
 
     /* remember state */
-    if(curbs) curbs->lineno = yylineno;
+    //if(curbs) curbs->lineno = yylineno;
     bs->prev = curbs;
 
     /* set up current entry */
-    bs->bs = yy_scan_bytes(bs->src_buffer, bs->src_size);
-    yy_switch_to_buffer(bs->bs);
+    //bs->bs = yy_scan_bytes(bs->src_buffer, bs->src_size);
+    bs->bs = yy_scan_bytes(buff, size);
+    if (curbs) yy_switch_to_buffer(bs->bs);
     curbs = bs;
-    yylineno = 1;
+    //yylineno = 1;
 
     return jserr_no_error;
 }
@@ -102,7 +116,7 @@ enum jserr cjson_source_pop(void)
     if(!bs) return jserr_no_source;
 
     /* get rid of current entry */
-    plat_mem_release(bs->src_buffer);
+    //plat_mem_release(bs->src_buffer);
     yy_delete_buffer(bs->bs);
 
     /* switch back to previous */
@@ -113,7 +127,7 @@ enum jserr cjson_source_pop(void)
 
     yy_switch_to_buffer(prevbs->bs);
     curbs = prevbs;
-    yylineno = curbs->lineno;
+    //yylineno = curbs->lineno;
 
     return jserr_no_error;
 }
@@ -121,7 +135,7 @@ enum jserr cjson_source_pop(void)
 enum jserr cjson_source_analyze(void)
 {
     yyparse();
-    yylex();
+    //yylex();
     return jserr_no_error;
 }
 

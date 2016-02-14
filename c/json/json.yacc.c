@@ -72,7 +72,7 @@
     #include "cjson_runtime.h"
 
     // bison json.y
-    typedef void* YYSTYPE;
+    typedef struct jsobj* YYSTYPE;
     #define YYSTYPE_IS_DECLARED     1
 
 char *strconcat(char *str1, char *str2);
@@ -439,9 +439,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    28,    28,    29,    33,    34,    43,    47,    54,    62,
-      66,    73,    79,    88,    89,    90,    91,    92,    96,    97,
-      98,    99,   100,   101,   102
+       0,    28,    28,    33,    41,    45,    52,    59,    68,    80,
+      84,    91,    98,   109,   110,   111,   112,   113,   117,   118,
+     119,   120,   121,   122,   123
 };
 #endif
 
@@ -1230,175 +1230,197 @@ yyreduce:
     {
         case 2:
 #line 28 "json.y" /* yacc.c:1661  */
-    { /*printf("%s",$1);*/printf("START(ARRAY)\n"); }
-#line 1235 "json.yacc.c" /* yacc.c:1661  */
+    {
+        (yyval) = cjson_rt_add_code_segment((yyvsp[0]));
+        cjson_release((yyvsp[0]));
+        printf("START(ARRAY)\n");
+    }
+#line 1239 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 3:
-#line 29 "json.y" /* yacc.c:1661  */
-    { /*printf("%s",$1);*/printf("START(OBJECT)\n"); }
-#line 1241 "json.yacc.c" /* yacc.c:1661  */
+#line 33 "json.y" /* yacc.c:1661  */
+    {
+        (yyval) = cjson_rt_add_code_segment((yyvsp[0]));
+        cjson_release((yyvsp[0]));
+        printf("START(OBJECT)\n");
+    }
+#line 1249 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 4:
-#line 33 "json.y" /* yacc.c:1661  */
-    { (yyval) = cjson_make_map();printf("OBJECT(O_BEGIN O_END)\n"); }
-#line 1247 "json.yacc.c" /* yacc.c:1661  */
+#line 41 "json.y" /* yacc.c:1661  */
+    {
+        (yyval) = cjson_make_map();
+        printf("OBJECT(O_BEGIN O_END)\n");
+    }
+#line 1258 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 5:
-#line 35 "json.y" /* yacc.c:1661  */
+#line 45 "json.y" /* yacc.c:1661  */
     {
-            printf("OBJECT(O_BEGIN MEMBERS O_END)\n");
-            /*$$ = (char *)malloc(sizeof(char)*(1+strlen($2)+1+1));
-            sprintf($$,"{%s}",$2);*/
-        }
-#line 1257 "json.yacc.c" /* yacc.c:1661  */
+        (yyval) = (yyvsp[-1]);
+        printf("OBJECT(O_BEGIN MEMBERS O_END)\n");
+    }
+#line 1267 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 6:
-#line 43 "json.y" /* yacc.c:1661  */
+#line 52 "json.y" /* yacc.c:1661  */
     {
-        (yyval) = (yyvsp[0]);
+        struct jsobj* map = cjson_make_map();
+        cjson_map_add_tuple(map, _obj2inst_t((yyvsp[0])));
+        cjson_release((yyvsp[0]));
+        (yyval) = map;
         printf("MEMBERS(PAIR)\n");
     }
-#line 1266 "json.yacc.c" /* yacc.c:1661  */
+#line 1279 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 7:
-#line 47 "json.y" /* yacc.c:1661  */
+#line 59 "json.y" /* yacc.c:1661  */
     {
+        struct jsobj* map = (yyvsp[0]);
+        cjson_map_add_tuple(map, _obj2inst_t((yyvsp[-2])));
+        cjson_release((yyvsp[-2]));
+        (yyval) = map;
         printf("MEMBERS(PAIR COMMA MEMBERS)\n");
-        //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-        //sprintf($$,"%s,%s",$1,$3);
     }
-#line 1276 "json.yacc.c" /* yacc.c:1661  */
+#line 1291 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 8:
-#line 54 "json.y" /* yacc.c:1661  */
+#line 68 "json.y" /* yacc.c:1661  */
     {
-        printf("PAIR(STRING COLON VALUE)\n");
-        //$$ = (char *)malloc(sizeof(char)*(strlen($1)+1+strlen($3)+1));
-        //sprintf($$,"%s:%s",$1,$3);
+        struct jsobj* tuple = cjson_make_tuple(2);
+        cjson_tuple_set_object(tuple, 0, (yyvsp[-2]));
+        cjson_tuple_set_object(tuple, 1, (yyvsp[0]));
+        cjson_release((yyvsp[-2]));
+        cjson_release((yyvsp[0]));
+        (yyval) = tuple;
+        printf("PAIR(KEY COLON VALUE)\n");
     }
-#line 1286 "json.yacc.c" /* yacc.c:1661  */
+#line 1305 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 9:
-#line 62 "json.y" /* yacc.c:1661  */
+#line 80 "json.y" /* yacc.c:1661  */
     {
         (yyval) = cjson_make_array();
         printf("ARRAY(A_BEGIN A_END)\n");
     }
-#line 1295 "json.yacc.c" /* yacc.c:1661  */
+#line 1314 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 10:
-#line 66 "json.y" /* yacc.c:1661  */
+#line 84 "json.y" /* yacc.c:1661  */
     {
         (yyval) = (yyvsp[-1]);
         printf("ARRAY(A_BEGIN ELEMENTS A_END)\n");
     }
-#line 1304 "json.yacc.c" /* yacc.c:1661  */
+#line 1323 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 11:
-#line 73 "json.y" /* yacc.c:1661  */
+#line 91 "json.y" /* yacc.c:1661  */
     {
         struct jsobj* arr = cjson_make_array();
-        cjson_array_add_object(arr, (struct jsobj*)(yyvsp[0]));
+        cjson_array_add_object(arr, (yyvsp[0]));
+        cjson_release((yyvsp[0]));
         (yyval) = arr;
         printf("ELEMENTS(VALUE)\n");
     }
-#line 1315 "json.yacc.c" /* yacc.c:1661  */
+#line 1335 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 12:
-#line 79 "json.y" /* yacc.c:1661  */
+#line 98 "json.y" /* yacc.c:1661  */
     {
+        // TO-DO: the order of items may not correct.
         struct jsobj* arr = (struct jsobj*)(yyvsp[0]);
-        cjson_array_add_object(arr, (struct jsobj*)(yyvsp[-2]));
+        cjson_array_add_object(arr, (yyvsp[-2]));
+        cjson_release((yyvsp[-2]));
         (yyval) = arr;
         printf("ELEMENTS(VALUE COMMA ELEMENTS)\n");
     }
-#line 1326 "json.yacc.c" /* yacc.c:1661  */
+#line 1348 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 13:
-#line 88 "json.y" /* yacc.c:1661  */
+#line 109 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("KEY(STRING)\n"); }
-#line 1332 "json.yacc.c" /* yacc.c:1661  */
+#line 1354 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 14:
-#line 89 "json.y" /* yacc.c:1661  */
+#line 110 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("KEY(NUMBER)\n"); }
-#line 1338 "json.yacc.c" /* yacc.c:1661  */
+#line 1360 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 15:
-#line 90 "json.y" /* yacc.c:1661  */
+#line 111 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("KEY(TRUE_T)\n"); }
-#line 1344 "json.yacc.c" /* yacc.c:1661  */
+#line 1366 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 16:
-#line 91 "json.y" /* yacc.c:1661  */
+#line 112 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("KEY(FALSE_T)\n"); }
-#line 1350 "json.yacc.c" /* yacc.c:1661  */
+#line 1372 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 17:
-#line 92 "json.y" /* yacc.c:1661  */
+#line 113 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("KEY(NULL_T)\n"); }
-#line 1356 "json.yacc.c" /* yacc.c:1661  */
+#line 1378 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 18:
-#line 96 "json.y" /* yacc.c:1661  */
+#line 117 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("VALUE(STRING)\n"); }
-#line 1362 "json.yacc.c" /* yacc.c:1661  */
+#line 1384 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 19:
-#line 97 "json.y" /* yacc.c:1661  */
+#line 118 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("VALUE(NUMBER)\n"); }
-#line 1368 "json.yacc.c" /* yacc.c:1661  */
+#line 1390 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 20:
-#line 98 "json.y" /* yacc.c:1661  */
+#line 119 "json.y" /* yacc.c:1661  */
     { (yyval)=(yyvsp[0]);printf("VALUE(OBJECT)\n"); }
-#line 1374 "json.yacc.c" /* yacc.c:1661  */
+#line 1396 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 21:
-#line 99 "json.y" /* yacc.c:1661  */
+#line 120 "json.y" /* yacc.c:1661  */
     { (yyval)=(yyvsp[0]);printf("VALUE(ARRAY)\n"); }
-#line 1380 "json.yacc.c" /* yacc.c:1661  */
+#line 1402 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 22:
-#line 100 "json.y" /* yacc.c:1661  */
+#line 121 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("VALUE(TRUE_T)\n"); }
-#line 1386 "json.yacc.c" /* yacc.c:1661  */
+#line 1408 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 23:
-#line 101 "json.y" /* yacc.c:1661  */
+#line 122 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("VALUE(FALSE_T)\n"); }
-#line 1392 "json.yacc.c" /* yacc.c:1661  */
+#line 1414 "json.yacc.c" /* yacc.c:1661  */
     break;
 
   case 24:
-#line 102 "json.y" /* yacc.c:1661  */
+#line 123 "json.y" /* yacc.c:1661  */
     { (yyval)=yylval;printf("VALUE(NULL_T)\n"); }
-#line 1398 "json.yacc.c" /* yacc.c:1661  */
+#line 1420 "json.yacc.c" /* yacc.c:1661  */
     break;
 
 
-#line 1402 "json.yacc.c" /* yacc.c:1661  */
+#line 1424 "json.yacc.c" /* yacc.c:1661  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1626,16 +1648,8 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 105 "json.y" /* yacc.c:1906  */
+#line 126 "json.y" /* yacc.c:1906  */
 
-
-/*int main()
-{
-   printf("\n");
-   yyparse();
-   printf("\n");
-   return 0;
-}*/
 
 /*int yywrap()
 {

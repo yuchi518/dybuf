@@ -552,10 +552,10 @@ char *yytext;
     {
         struct src_stack *prev;
         YY_BUFFER_STATE bs;
-        int lineno;
-        char* src_buffer;
-        unsigned int src_size;
-    } *curbs = 0;
+        //int lineno;
+        //char* src_buffer;
+        //unsigned int src_size;
+    };
 
 #line 561 "json.lex.c"
 
@@ -944,11 +944,11 @@ case 16:
 YY_RULE_SETUP
 #line 110 "json.l"
 {
-    {
+    /*{
         int c;
         while((c = input()) && c != '\n') ;
-    }
-    yylineno++;
+    }*/
+    //yylineno++;
     if(cjson_source_push_from_resource(yytext) != jserr_no_error)
         yyterminate(); /* no such file */ BEGIN INITIAL;
 }
@@ -958,7 +958,7 @@ case 17:
 YY_RULE_SETUP
 #line 120 "json.l"
 {
-    fprintf(stderr, "%4d bad include line\n", yylineno);
+    //fprintf(stderr, "%4d bad include line\n", yylineno);
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
@@ -973,27 +973,31 @@ case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
 #line 129 "json.l"
-{ fprintf(yyout, "%4d %s", yylineno++, yytext); }
+{
+    //fprintf(yyout, "%4d %s", yylineno++, yytext);
+}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 131 "json.l"
-{ fprintf(yyout, "%4d %s", yylineno, yytext); }
+#line 133 "json.l"
+{
+    //fprintf(yyout, "%4d %s", yylineno, yytext);
+}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 133 "json.l"
+#line 137 "json.l"
 {
     printf("Unexpected: %c\nExiting...\n",*yytext);
     exit(0);
-};
+}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 138 "json.l"
+#line 142 "json.l"
 ECHO;
 	YY_BREAK
-#line 997 "json.lex.c"
+#line 1001 "json.lex.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1991,7 +1995,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 138 "json.l"
+#line 142 "json.l"
 
 
 

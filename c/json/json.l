@@ -13,10 +13,10 @@
     {
         struct src_stack *prev;
         YY_BUFFER_STATE bs;
-        int lineno;
-        char* src_buffer;
-        unsigned int src_size;
-    } *curbs = 0;
+        //int lineno;
+        //char* src_buffer;
+        //unsigned int src_size;
+    };
 
 %}
 
@@ -108,17 +108,17 @@ nil {
 }
 
 <IFILE>[^ \t\n\">]+ {
-    {
+    /*{
         int c;
         while((c = input()) && c != '\n') ;
-    }
-    yylineno++;
+    }*/
+    //yylineno++;
     if(cjson_source_push_from_resource(yytext) != jserr_no_error)
         yyterminate(); /* no such file */ BEGIN INITIAL;
 }
 
 <IFILE>.|\n {
-    fprintf(stderr, "%4d bad include line\n", yylineno);
+    //fprintf(stderr, "%4d bad include line\n", yylineno);
 }
 
 <<EOF>> {
@@ -126,14 +126,18 @@ nil {
         yyterminate();
 }
 
-^\n { fprintf(yyout, "%4d %s", yylineno++, yytext); }
+^\n {
+    //fprintf(yyout, "%4d %s", yylineno++, yytext);
+}
 
-^. { fprintf(yyout, "%4d %s", yylineno, yytext); }
+^. {
+    //fprintf(yyout, "%4d %s", yylineno, yytext);
+}
 
 . {
     printf("Unexpected: %c\nExiting...\n",*yytext);
     exit(0);
-};
+}
 
 %%
 
