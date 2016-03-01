@@ -165,6 +165,8 @@ dyb_inline dybuf* dyb_refer(dybuf* dyb, byte* data, uint capacity, boolean for_w
 
     dyb->_position = 0;
     dyb->_mark = 0;
+
+    return dyb;
 }
 
 // for write mode
