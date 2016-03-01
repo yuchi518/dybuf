@@ -41,8 +41,8 @@ typedef boolean bool;
 typedef unsigned char byte;
 typedef unsigned int uint;
 
-#define null            (0)
-#define nil             (0)
+#define null            ((void*)0)
+#define nil             ((void*)0)
 #define plat_inline     static inline
 
 #endif //_PLAT_C_TYPE_

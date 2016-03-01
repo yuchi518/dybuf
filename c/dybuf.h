@@ -31,8 +31,12 @@
 
 #define CACHE_SIZE_UNIT         16
 
+#ifndef MAX
 #define MAX(a,b)                ((a)>=(b)?(a):(b))
+#endif
+#ifndef MIN
 #define MIN(a,b)                ((a)<=(b)?(a):(b))
+#endif
 
 /**
  *  Memory allocator, create a memory and
@@ -158,7 +162,7 @@ dyb_inline dybuf* dyb_refer(dybuf* dyb, byte* data, uint capacity, boolean for_w
     {
         dyb->_limit = capacity;
     }
-    
+
     dyb->_position = 0;
     dyb->_mark = 0;
 }
@@ -838,6 +842,19 @@ dyb_inline uint8_t* dyb_get_data_before_current_position(dybuf* dyb, uint* len)
 }
 
 /// ===== type, index manage
+
+enum {
+    typdex_typ_eof      = 0,
+    typdex_typ_bool,                // 1 byte boolean
+    typdex_typ_int,                 // variable size int64
+    typdex_typ_uint,                // variable size uint64
+    typdex_typ_float,               // 4 bytes float
+    typdex_typ_double,              // 8 bytes double
+    typdex_typ_string,              // variable length string
+    typdex_typ_bytes,               // variable length binary
+    typdex_typ_array,               // array of items
+    typdex_typ_map,                 // items map
+};
 
 dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8_t type, uint32_t index)
 {

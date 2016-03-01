@@ -31,6 +31,7 @@
 void cjson_test(void);
 void cjson_parse_test(void);
 void dybuf_test(void);
+void dybuf_test_ref(void);
 
 int main(int argc, char **argv)
 {
@@ -58,6 +59,7 @@ int main(int argc, char **argv)
 
 
     dybuf_test();
+    dybuf_test_ref();
 
     return 0;
 }
@@ -119,14 +121,14 @@ void dybuf_test(void)
         d1 = dyb_next_double(dyb1);
 
         if (v0 == v1)
-            printf("v0(%lld) == v1(%lld)\n", v0, v1);
+            ;//printf("v0(%lld) == v1(%lld)\n", v0, v1);
         else {
             printf("v0(%lld) != v1(%lld)\n", v0, v1);
             diff++;
         }
 
         if (d0 == d1)
-            printf("d0(%f) == d1(%f)\n", d0, d1);
+            ;//printf("d0(%f) == d1(%f)\n", d0, d1);
         else{
             printf("d0(%f) != d1(%f)\n", d0, d1);
             diff++;
@@ -134,6 +136,55 @@ void dybuf_test(void)
 
         dyb_release(&dyb0);
         dyb_release(dyb1);
+    }
+
+    printf("diff: %d\n", diff);
+}
+
+void dybuf_test_ref(void)
+{
+    dybuf dyb0, dyb1;
+    unsigned char data[32];
+    int i=0;
+    int64_t v0, v1;
+    double d0, d1;
+    //uint size;
+    int diff = 0;
+
+    for (i=0; i<1000; i++)
+    {
+        dyb_refer(&dyb0, data, 32, true);
+
+        v0 = rand();
+        v0 *= rand();
+        d0 = (double)v0/rand()/rand();
+
+        dyb_append_var_s64(&dyb0, v0);
+        dyb_append_double(&dyb0, d0);
+
+        //uint8_t* data = dyb_get_data_before_current_position(&dyb0, &size);
+        dyb_release(&dyb0);
+
+        dyb_refer(&dyb1, data, 32, true);
+
+        v1 = dyb_next_var_s64(&dyb1);
+        d1 = dyb_next_double(&dyb1);
+
+        if (v0 == v1)
+            ;//printf("v0(%lld) == v1(%lld)\n", v0, v1);
+        else {
+            printf("v0(%lld) != v1(%lld)\n", v0, v1);
+            diff++;
+        }
+
+        if (d0 == d1)
+            ;//printf("d0(%f) == d1(%f)\n", d0, d1);
+        else{
+            printf("d0(%f) != d1(%f)\n", d0, d1);
+            diff++;
+        }
+
+        dyb_release(&dyb1);
     }
 
     printf("diff: %d\n", diff);
