@@ -131,8 +131,37 @@ struct dybuf
     boolean _fixedCapacity;
 
     boolean _should_release_instance;
+    boolean _should_release_data;
 };
 typedef struct dybuf dybuf;
+
+// reference mode, use memory from outside and never release/create the memory
+dyb_inline dybuf* dyb_refer(dybuf* dyb, byte* data, uint capacity, boolean for_write)
+{
+    if (dyb == null || data == null)
+    {
+        // reference mode should pass dyb ad data
+        return null;
+    }
+
+    dyb->_data = data;
+    dyb->_capacity = capacity;
+    dyb->_fixedCapacity = true;
+    dyb->_should_release_instance = false;
+    dyb->_should_release_data = false;
+
+    if (for_write)
+    {
+        dyb->_limit = 0;
+    }
+    else
+    {
+        dyb->_limit = capacity;
+    }
+    
+    dyb->_position = 0;
+    dyb->_mark = 0;
+}
 
 // for write mode
 dyb_inline dybuf* dyb_create(dybuf* dyb, uint capacity)
@@ -155,6 +184,7 @@ dyb_inline dybuf* dyb_create(dybuf* dyb, uint capacity)
     dyb->_position = 0;
     dyb->_mark = 0;
     dyb->_fixedCapacity = false;
+    dyb->_should_release_data = true;
 
     return dyb;
 }
@@ -173,7 +203,10 @@ dyb_inline dybuf* dyb_copy(dybuf* dyb, byte* data, uint capacity, boolean no_cop
         if (dyb == null) return null;
         dyb->_should_release_instance = true;
     }
-
+    else
+    {
+        dyb->_should_release_instance = false;
+    }
 
     if (no_copy) {
         dyb->_data = data;
@@ -188,6 +221,7 @@ dyb_inline dybuf* dyb_copy(dybuf* dyb, byte* data, uint capacity, boolean no_cop
 
     dyb->_position = dyb->_mark = 0;
     dyb->_fixedCapacity = false;
+    dyb->_should_release_data = true;
 
     return dyb;
 }
@@ -196,7 +230,10 @@ dyb_inline void dyb_release(dybuf* dyb)
 {
     if (dyb == null) return;
 
-    dyb_mem_release(dyb->_data, dyb->_capacity);
+    if (dyb->_should_release_data)
+    {
+        dyb_mem_release(dyb->_data, dyb->_capacity);
+    }
 
     if (dyb->_should_release_instance)
     {

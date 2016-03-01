@@ -16,11 +16,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e1e72d53-9887-47e9-9372-2c6ef30259b4" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/c.iml" afterPath="$PROJECT_DIR$/.idea/c.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/dybuf.h" afterPath="$PROJECT_DIR$/dybuf.h" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.lex.c" afterPath="$PROJECT_DIR$/json/json.lex.c" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/json/json.yacc.c" afterPath="$PROJECT_DIR$/json/json.yacc.c" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/platform/plat_type.h" afterPath="$PROJECT_DIR$/platform/plat_type.h" />
     </list>
     <ignored path="c.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -76,10 +73,22 @@
       <file leaf-file-name="dybuf.h" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/dybuf.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.2678788">
-              <caret line="139" column="20" selection-start-line="139" selection-start-column="20" selection-end-line="139" selection-end-column="20" />
+            <state vertical-scroll-proportion="2.9018183">
+              <caret line="160" column="4" selection-start-line="160" selection-start-column="4" selection-end-line="160" selection-end-column="4" />
               <folding>
                 <element signature="e#904#926#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="json.lex.c" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/json/json.lex.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="33" column="0" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="61" />
+              <folding>
+                <element signature="e#1133#1966#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -352,14 +361,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/json/json.y">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="41" column="30" selection-start-line="41" selection-start-column="30" selection-end-line="41" selection-end-column="30" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/main.c">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -766,10 +767,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/json/json.lex.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="33" column="0" selection-start-line="33" selection-start-column="0" selection-end-line="33" selection-end-column="61" />
+          <folding>
+            <element signature="e#1133#1966#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/dybuf.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.2678788">
-          <caret line="139" column="20" selection-start-line="139" selection-start-column="20" selection-end-line="139" selection-end-column="20" />
+        <state vertical-scroll-proportion="2.9018183">
+          <caret line="160" column="4" selection-start-line="160" selection-start-column="4" selection-end-line="160" selection-end-column="4" />
           <folding>
             <element signature="e#904#926#0" expanded="true" />
           </folding>
