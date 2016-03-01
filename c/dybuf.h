@@ -128,13 +128,13 @@ struct dybuf
     uint _limit;
     uint _position;
     uint _mark;
-    boolean fixedCapacity;
+    boolean _fixedCapacity;
 
     boolean _should_release_instance;
 };
 typedef struct dybuf dybuf;
 
-
+// for write mode
 dyb_inline dybuf* dyb_create(dybuf* dyb, uint capacity)
 {
     if (dyb == null)
@@ -154,11 +154,12 @@ dyb_inline dybuf* dyb_create(dybuf* dyb, uint capacity)
     dyb->_limit = 0;
     dyb->_position = 0;
     dyb->_mark = 0;
-    dyb->fixedCapacity = false;
+    dyb->_fixedCapacity = false;
 
     return dyb;
 }
 
+// for read mode
 dyb_inline dybuf* dyb_copy(dybuf* dyb, byte* data, uint capacity, boolean no_copy)
 {
     if (data == null) {
@@ -186,7 +187,7 @@ dyb_inline dybuf* dyb_copy(dybuf* dyb, byte* data, uint capacity, boolean no_cop
     }
 
     dyb->_position = dyb->_mark = 0;
-    dyb->fixedCapacity = false;
+    dyb->_fixedCapacity = false;
 
     return dyb;
 }
@@ -210,7 +211,7 @@ dyb_inline int dyb_get_capacity(dybuf* dyb)
 
 dyb_inline dybuf* dyb_set_capacity(dybuf* dyb, uint newCapacity)
 {
-    if (dyb->fixedCapacity && newCapacity!=dyb->_capacity) {
+    if (dyb->_fixedCapacity && newCapacity!=dyb->_capacity) {
         // error
         return null;
     }

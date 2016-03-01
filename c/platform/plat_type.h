@@ -24,6 +24,8 @@
 #ifndef _PLAT_C_TYPE_
 #define _PLAT_C_TYPE_
 
+#include <stdint.h>
+
 #ifndef _NO_STD_INC_
 #define _NO_STD_INC_    0           // 0: use standard lib (c or system lib), 1: disable (use to test platform lib independence)
 #endif
