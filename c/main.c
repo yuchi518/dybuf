@@ -97,7 +97,7 @@ void dybuf_test(void)
 {
     dybuf dyb0, *dyb1;
     int i=0;
-    int64_t v0, v1;
+    int64 v0, v1;
     double d0, d1;
     uint size;
     int diff = 0;
@@ -113,7 +113,7 @@ void dybuf_test(void)
         dyb_append_var_s64(&dyb0, v0);
         dyb_append_double(&dyb0, d0);
 
-        uint8_t* data = dyb_get_data_before_current_position(&dyb0, &size);
+        uint8* data = dyb_get_data_before_current_position(&dyb0, &size);
 
         dyb1 = dyb_copy(null, data, size, false);
 
@@ -146,7 +146,7 @@ void dybuf_test_ref(void)
     dybuf dyb0, dyb1;
     unsigned char data[32];
     int i=0;
-    int64_t v0, v1;
+    int64 v0, v1;
     double d0, d1;
     //uint size;
     int diff = 0;

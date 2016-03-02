@@ -71,11 +71,11 @@ dyb_inline void dyb_mem_move(void* dest, void* src, uint size)
     plat_mem_move(dest, src, size);
 }
 
-dyb_inline uint32_t dyb_swap_u32(uint32_t value)
+dyb_inline uint32 dyb_swap_u32(uint32 value)
 {
     union{
-        uint32_t    u;
-        uint8_t     bs[4];
+        uint32    u;
+        uint8     bs[4];
     } v;
     //
 
@@ -84,7 +84,7 @@ dyb_inline uint32_t dyb_swap_u32(uint32_t value)
     {
         // little endian
         v.u = value;
-        uint8_t b;
+        uint8 b;
         b = v.bs[0]; v.bs[0] = v.bs[3]; v.bs[3] = b;
         b = v.bs[1]; v.bs[1] = v.bs[2]; v.bs[2] = b;
         return v.u;
@@ -93,18 +93,18 @@ dyb_inline uint32_t dyb_swap_u32(uint32_t value)
         return value;
 }
 
-dyb_inline uint64_t dyb_swap_u64(uint64_t value)
+dyb_inline uint64 dyb_swap_u64(uint64 value)
 {
     union {
-        uint64_t    u;
-        uint8_t     bs[8];
+        uint64    u;
+        uint8     bs[8];
     } v;
 
     const int i = 1;
     if (((char*)&i)[0]) {
         // little endian
         v.u = value;
-        uint8_t b;
+        uint8 b;
         b = v.bs[0]; v.bs[0] = v.bs[7]; v.bs[7] = b;
         b = v.bs[1]; v.bs[1] = v.bs[6]; v.bs[6] = b;
         b = v.bs[2]; v.bs[2] = v.bs[5]; v.bs[5] = b;
@@ -175,7 +175,7 @@ dyb_inline dybuf* dyb_create(dybuf* dyb, uint capacity)
     if (dyb == null)
     {
         uint size = sizeof(*dyb);
-        dyb = dyb_mem_alloc(&size, false);
+        dyb = (dybuf*)dyb_mem_alloc(&size, false);
         if (dyb == null) return null;
         dyb->_should_release_instance = true;
     }
@@ -184,7 +184,7 @@ dyb_inline dybuf* dyb_create(dybuf* dyb, uint capacity)
         dyb->_should_release_instance = false;
     }
 
-    dyb->_data = dyb_mem_alloc(&capacity, true);
+    dyb->_data = (byte*)dyb_mem_alloc(&capacity, true);
     dyb->_capacity = capacity;
     dyb->_limit = 0;
     dyb->_position = 0;
@@ -205,7 +205,7 @@ dyb_inline dybuf* dyb_copy(dybuf* dyb, byte* data, uint capacity, boolean no_cop
     if (dyb == null)
     {
         uint size = sizeof(*dyb);
-        dyb = dyb_mem_alloc(&size, false);
+        dyb = (dybuf*)dyb_mem_alloc(&size, false);
         if (dyb == null) return null;
         dyb->_should_release_instance = true;
     }
@@ -219,7 +219,7 @@ dyb_inline dybuf* dyb_copy(dybuf* dyb, byte* data, uint capacity, boolean no_cop
         dyb->_capacity = dyb->_limit = capacity;
     } else {
         uint origin_capacity = capacity;
-        dyb->_data = dyb_mem_alloc(&capacity, true);
+        dyb->_data = (byte*)dyb_mem_alloc(&capacity, true);
         dyb_mem_copy(dyb->_data, data, origin_capacity);
         dyb->_limit = origin_capacity;
         dyb->_capacity = capacity;
@@ -261,7 +261,7 @@ dyb_inline dybuf* dyb_set_capacity(dybuf* dyb, uint newCapacity)
 
     if (newCapacity == dyb->_capacity) return dyb;
 
-    byte *newData = dyb_mem_alloc(&newCapacity, true);
+    byte *newData = (byte*)dyb_mem_alloc(&newCapacity, true);
     dyb_mem_copy(newData, dyb->_data, MIN(dyb->_capacity, newCapacity));
     dyb_mem_release(dyb->_data, dyb->_capacity);
     dyb->_capacity = newCapacity;
@@ -437,53 +437,53 @@ dyb_inline boolean dyb_peek_bool(dybuf* dyb)
     return dyb->_data[dyb->_position]!=0?true:false;
 }
 
-dyb_inline uint8_t dyb_next_u8(dybuf* dyb)
+dyb_inline uint8 dyb_next_u8(dybuf* dyb)
 {
     return dyb->_data[dyb->_position++];
 }
 
-dyb_inline uint8_t dyb_peek_u8(dybuf* dyb)
+dyb_inline uint8 dyb_peek_u8(dybuf* dyb)
 {
     return dyb->_data[dyb->_position];
 }
 
-dyb_inline uint16_t dyb_next_u16(dybuf* dyb)
+dyb_inline uint16 dyb_next_u16(dybuf* dyb)
 {
-    uint16_t v = ((dyb->_data[dyb->_position++]&0x00ff)<<8);
+    uint16 v = ((dyb->_data[dyb->_position++]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position++]&0x00ff);
 
     return v;
 }
 
-dyb_inline uint16_t dyb_peek_u16(dybuf* dyb)
+dyb_inline uint16 dyb_peek_u16(dybuf* dyb)
 {
-    uint16_t v = ((dyb->_data[dyb->_position+0]&0x00ff)<<8);
+    uint16 v = ((dyb->_data[dyb->_position+0]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position+1]&0x00ff);
 
     return v;
 }
 
-dyb_inline uint32_t dyb_next_u24(dybuf* dyb)
+dyb_inline uint32 dyb_next_u24(dybuf* dyb)
 {
-    uint32_t v = ((dyb->_data[dyb->_position++]&0x00ff)<<16);
+    uint32 v = ((dyb->_data[dyb->_position++]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position++]&0x00ff);
 
     return v;
 }
 
-dyb_inline uint32_t dyb_peek_u24(dybuf* dyb)
+dyb_inline uint32 dyb_peek_u24(dybuf* dyb)
 {
-    uint32_t v = ((dyb->_data[dyb->_position+0]&0x00ff)<<16);
+    uint32 v = ((dyb->_data[dyb->_position+0]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position+1]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position+2]&0x00ff);
 
     return v;
 }
 
-dyb_inline uint32_t dyb_next_u32(dybuf* dyb)
+dyb_inline uint32 dyb_next_u32(dybuf* dyb)
 {
-    uint32_t v = ((dyb->_data[dyb->_position++]&0x00ff)<<24);
+    uint32 v = ((dyb->_data[dyb->_position++]&0x00ff)<<24);
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position++]&0x00ff);
@@ -491,9 +491,9 @@ dyb_inline uint32_t dyb_next_u32(dybuf* dyb)
     return v;
 }
 
-dyb_inline uint32_t dyb_peek_u32(dybuf* dyb)
+dyb_inline uint32 dyb_peek_u32(dybuf* dyb)
 {
-    uint32_t v = ((dyb->_data[dyb->_position+0]&0x00ff)<<24);
+    uint32 v = ((dyb->_data[dyb->_position+0]&0x00ff)<<24);
     v |= ((dyb->_data[dyb->_position+1]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position+2]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position+3]&0x00ff);
@@ -501,10 +501,10 @@ dyb_inline uint32_t dyb_peek_u32(dybuf* dyb)
     return v;
 }
 
-dyb_inline uint64_t dyb_next_u40(dybuf* dyb)
+dyb_inline uint64 dyb_next_u40(dybuf* dyb)
 {
-    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<32);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<24);		// be careful, type convert is necessary
+    uint64 v = ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<32);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<24);       // be careful, type convert is necessary
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position++]&0x00ff);
@@ -512,10 +512,10 @@ dyb_inline uint64_t dyb_next_u40(dybuf* dyb)
     return v;
 }
 
-dyb_inline uint64_t dyb_peek_u40(dybuf* dyb)
+dyb_inline uint64 dyb_peek_u40(dybuf* dyb)
 {
-    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position+0]&0x00ff)<<32);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+1]&0x00ff)<<24);		// be careful, type convert is necessary
+    uint64 v = ((uint64)(dyb->_data[dyb->_position+0]&0x00ff)<<32);
+    v |= ((uint64)(dyb->_data[dyb->_position+1]&0x00ff)<<24);       // be careful, type convert is necessary
     v |= ((dyb->_data[dyb->_position+2]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position+3]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position+4]&0x00ff);
@@ -523,11 +523,11 @@ dyb_inline uint64_t dyb_peek_u40(dybuf* dyb)
     return v;
 }
 
-dyb_inline uint64_t dyb_next_u48(dybuf* dyb)
+dyb_inline uint64 dyb_next_u48(dybuf* dyb)
 {
-    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<40);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<32);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<24);		// be careful, type convert is necessary
+    uint64 v = ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<40);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<32);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<24);       // be careful, type convert is necessary
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position++]&0x00ff);
@@ -535,11 +535,11 @@ dyb_inline uint64_t dyb_next_u48(dybuf* dyb)
     return v;
 }
 
-dyb_inline uint64_t dyb_peek_u48(dybuf* dyb)
+dyb_inline uint64 dyb_peek_u48(dybuf* dyb)
 {
-    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position+0]&0x00ff)<<40);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+1]&0x00ff)<<32);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+2]&0x00ff)<<24);		// be careful, type convert is necessary
+    uint64 v = ((uint64)(dyb->_data[dyb->_position+0]&0x00ff)<<40);
+    v |= ((uint64)(dyb->_data[dyb->_position+1]&0x00ff)<<32);
+    v |= ((uint64)(dyb->_data[dyb->_position+2]&0x00ff)<<24);       // be careful, type convert is necessary
     v |= ((dyb->_data[dyb->_position+3]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position+4]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position+5]&0x00ff);
@@ -547,12 +547,12 @@ dyb_inline uint64_t dyb_peek_u48(dybuf* dyb)
     return v;
 }
 
-dyb_inline uint64_t dyb_next_u56(dybuf* dyb)
+dyb_inline uint64 dyb_next_u56(dybuf* dyb)
 {
-    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<48);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<40);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<32);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<24);		// be careful, type convert is necessary
+    uint64 v = ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<48);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<40);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<32);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<24);       // be careful, type convert is necessary
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position++]&0x00ff);
@@ -560,12 +560,12 @@ dyb_inline uint64_t dyb_next_u56(dybuf* dyb)
     return v;
 }
 
-dyb_inline uint64_t dyb_peek_u56(dybuf* dyb)
+dyb_inline uint64 dyb_peek_u56(dybuf* dyb)
 {
-    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position+0]&0x00ff)<<48);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+1]&0x00ff)<<40);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+2]&0x00ff)<<32);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+3]&0x00ff)<<24);		// be careful, type convert is necessary
+    uint64 v = ((uint64)(dyb->_data[dyb->_position+0]&0x00ff)<<48);
+    v |= ((uint64)(dyb->_data[dyb->_position+1]&0x00ff)<<40);
+    v |= ((uint64)(dyb->_data[dyb->_position+2]&0x00ff)<<32);
+    v |= ((uint64)(dyb->_data[dyb->_position+3]&0x00ff)<<24);       // be careful, type convert is necessary
     v |= ((dyb->_data[dyb->_position+4]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position+5]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position+6]&0x00ff);
@@ -574,13 +574,13 @@ dyb_inline uint64_t dyb_peek_u56(dybuf* dyb)
 }
 
 
-dyb_inline uint64_t dyb_next_u64(dybuf* dyb)
+dyb_inline uint64 dyb_next_u64(dybuf* dyb)
 {
-    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<56);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<48);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<40);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<32);
-    v |= ((uint64_t)(dyb->_data[dyb->_position++]&0x00ff)<<24);		// be careful, type convert is necessary
+    uint64 v = ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<56);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<48);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<40);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<32);
+    v |= ((uint64)(dyb->_data[dyb->_position++]&0x00ff)<<24);       // be careful, type convert is necessary
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position++]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position++]&0x00ff);
@@ -588,13 +588,13 @@ dyb_inline uint64_t dyb_next_u64(dybuf* dyb)
     return v;
 }
 
-dyb_inline uint64_t dyb_peek_u64(dybuf* dyb)
+dyb_inline uint64 dyb_peek_u64(dybuf* dyb)
 {
-    uint64_t v = ((uint64_t)(dyb->_data[dyb->_position+0]&0x00ff)<<56);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+1]&0x00ff)<<48);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+2]&0x00ff)<<40);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+3]&0x00ff)<<32);
-    v |= ((uint64_t)(dyb->_data[dyb->_position+4]&0x00ff)<<24);		// be careful, type convert is necessary
+    uint64 v = ((uint64)(dyb->_data[dyb->_position+0]&0x00ff)<<56);
+    v |= ((uint64)(dyb->_data[dyb->_position+1]&0x00ff)<<48);
+    v |= ((uint64)(dyb->_data[dyb->_position+2]&0x00ff)<<40);
+    v |= ((uint64)(dyb->_data[dyb->_position+3]&0x00ff)<<32);
+    v |= ((uint64)(dyb->_data[dyb->_position+4]&0x00ff)<<24);       // be careful, type convert is necessary
     v |= ((dyb->_data[dyb->_position+5]&0x00ff)<<16);
     v |= ((dyb->_data[dyb->_position+6]&0x00ff)<<8);
     v |= (dyb->_data[dyb->_position+7]&0x00ff);
@@ -603,7 +603,7 @@ dyb_inline uint64_t dyb_peek_u64(dybuf* dyb)
 }
 
 
-dyb_inline uint8_t* dyb_next_data_with_1byte_len(dybuf* dyb, uint *len)
+dyb_inline uint8* dyb_next_data_with_1byte_len(dybuf* dyb, uint *len)
 {
     *len = dyb->_data[dyb->_position++];
 
@@ -611,13 +611,13 @@ dyb_inline uint8_t* dyb_next_data_with_1byte_len(dybuf* dyb, uint *len)
         return null;
     }
 
-    uint8_t* data = dyb->_data + dyb->_position;
+    uint8* data = dyb->_data + dyb->_position;
     dyb->_position += *len;
 
     return data;
 }
 
-dyb_inline uint8_t* dyb_next_data_with_2bytes_len(dybuf* dyb, uint *len)
+dyb_inline uint8* dyb_next_data_with_2bytes_len(dybuf* dyb, uint *len)
 {
     *len = dyb->_data[dyb->_position++];
     *len <<= 8;
@@ -627,19 +627,19 @@ dyb_inline uint8_t* dyb_next_data_with_2bytes_len(dybuf* dyb, uint *len)
         return null;
     }
 
-    uint8_t* data = dyb->_data + dyb->_position;
+    uint8* data = dyb->_data + dyb->_position;
     dyb->_position += *len;
 
     return data;
 }
 
-dyb_inline uint8_t* dyb_next_data_without_len(dybuf* dyb, uint len)
+dyb_inline uint8* dyb_next_data_without_len(dybuf* dyb, uint len)
 {
     if (len==0 || (dyb->_position + len) > dyb->_limit) {
         return null;
     }
 
-    uint8_t* data = dyb->_data + dyb->_position;
+    uint8* data = dyb->_data + dyb->_position;
     dyb->_position += len;
 
     return data;
@@ -669,7 +669,7 @@ dyb_inline dybuf* dyb_append_bool(dybuf* dyb, boolean value)
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_u8(dybuf* dyb, uint8_t value)
+dyb_inline dybuf* dyb_append_u8(dybuf* dyb, uint8 value)
 {
     if (dyb->_position+1 > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+1);
@@ -678,7 +678,7 @@ dyb_inline dybuf* dyb_append_u8(dybuf* dyb, uint8_t value)
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_u16(dybuf* dyb, uint16_t value)
+dyb_inline dybuf* dyb_append_u16(dybuf* dyb, uint16 value)
 {
     if (dyb->_position+2 > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+2);
@@ -688,7 +688,7 @@ dyb_inline dybuf* dyb_append_u16(dybuf* dyb, uint16_t value)
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_u24(dybuf* dyb, uint32_t value)
+dyb_inline dybuf* dyb_append_u24(dybuf* dyb, uint32 value)
 {
     if (dyb->_position+3 > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+3);
@@ -700,7 +700,7 @@ dyb_inline dybuf* dyb_append_u24(dybuf* dyb, uint32_t value)
 }
 
 
-dyb_inline dybuf* dyb_append_u32(dybuf* dyb, uint32_t value)
+dyb_inline dybuf* dyb_append_u32(dybuf* dyb, uint32 value)
 {
     if (dyb->_position+4 > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+4);
@@ -712,7 +712,7 @@ dyb_inline dybuf* dyb_append_u32(dybuf* dyb, uint32_t value)
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_u40(dybuf* dyb, uint64_t value)
+dyb_inline dybuf* dyb_append_u40(dybuf* dyb, uint64 value)
 {
     if (dyb->_position+5 > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+5);
@@ -729,7 +729,7 @@ dyb_inline dybuf* dyb_append_u40(dybuf* dyb, uint64_t value)
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_u48(dybuf* dyb, uint64_t value)
+dyb_inline dybuf* dyb_append_u48(dybuf* dyb, uint64 value)
 {
     if (dyb->_position+6 > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+6);
@@ -746,7 +746,7 @@ dyb_inline dybuf* dyb_append_u48(dybuf* dyb, uint64_t value)
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_u56(dybuf* dyb, uint64_t value)
+dyb_inline dybuf* dyb_append_u56(dybuf* dyb, uint64 value)
 {
     if (dyb->_position+7 > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+7);
@@ -764,7 +764,7 @@ dyb_inline dybuf* dyb_append_u56(dybuf* dyb, uint64_t value)
 }
 
 
-dyb_inline dybuf* dyb_append_u64(dybuf* dyb, uint64_t value)
+dyb_inline dybuf* dyb_append_u64(dybuf* dyb, uint64 value)
 {
     if (dyb->_position+8 > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+8);
@@ -781,7 +781,7 @@ dyb_inline dybuf* dyb_append_u64(dybuf* dyb, uint64_t value)
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_data_with_1byte_len(dybuf* dyb, uint8_t* data, uint length)
+dyb_inline dybuf* dyb_append_data_with_1byte_len(dybuf* dyb, uint8* data, uint length)
 {
     length &= 0x00ff;
 
@@ -799,7 +799,7 @@ dyb_inline dybuf* dyb_append_data_with_1byte_len(dybuf* dyb, uint8_t* data, uint
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_data_with_2bytes_len(dybuf* dyb, uint8_t* data, uint length)
+dyb_inline dybuf* dyb_append_data_with_2bytes_len(dybuf* dyb, uint8* data, uint length)
 {
     length &= 0x00ffff;
 
@@ -807,8 +807,8 @@ dyb_inline dybuf* dyb_append_data_with_2bytes_len(dybuf* dyb, uint8_t* data, uin
         dyb_set_limit(dyb, dyb->_position+length+2);
     }
 
-    dyb->_data[dyb->_position++] = (uint8_t)(length>>8);
-    dyb->_data[dyb->_position++] = (uint8_t)length;
+    dyb->_data[dyb->_position++] = (uint8)(length>>8);
+    dyb->_data[dyb->_position++] = (uint8)length;
 
     if (length > 0) {
         dyb_mem_copy(dyb->_data+dyb->_position, data, length);
@@ -818,7 +818,7 @@ dyb_inline dybuf* dyb_append_data_with_2bytes_len(dybuf* dyb, uint8_t* data, uin
     return dyb;
 }
 
-dyb_inline dybuf* dyb_append_data_without_len(dybuf* dyb, uint8_t* data, uint length)
+dyb_inline dybuf* dyb_append_data_without_len(dybuf* dyb, uint8* data, uint length)
 {
     if (dyb->_position+length > dyb->_limit) {
         dyb_set_limit(dyb, dyb->_position+length);
@@ -834,10 +834,10 @@ dyb_inline dybuf* dyb_append_data_without_len(dybuf* dyb, uint8_t* data, uint le
 
 dyb_inline dybuf* dyb_append_structure(dybuf* dyb, void* structure, uint size)
 {
-    return dyb_append_data_without_len(dyb, structure, size);
+    return dyb_append_data_without_len(dyb, (uint8*)structure, size);
 }
 
-dyb_inline uint8_t* dyb_get_data_before_current_position(dybuf* dyb, uint* len)
+dyb_inline uint8* dyb_get_data_before_current_position(dybuf* dyb, uint* len)
 {
     *len = dyb->_position;
     return dyb->_data;
@@ -858,16 +858,16 @@ enum {
     typdex_typ_map,                 // items map
 };
 
-dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8_t type, uint32_t index)
+dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint32 index)
 {
-    if (type <= 0x0f && index <= 0x07) {													// header:0x00(1bits), type:0~0x0F(4bits), index:0~0x7(3bits)
+    if (type <= 0x0f && index <= 0x07) {                                                    // header:0x00(1bits), type:0~0x0F(4bits), index:0~0x7(3bits)
         dyb_append_u8(dyb, (type<<3) | index);
-    } else if (type <= 0x1f && index <= 0x1FF) {									        // header:0x02(2bits), type:0~0x1F(5bits), index:0~0x01FF(9bits)
-        dyb_append_u16(dyb, 0x8000 | ((uint16_t)type<<9) | index);
-    } else if (type <= 0x3f && index <= 0x7FFF) {									        // header:0x06(3bits), type:0~0x3F(6bits), index:0~0x7FFF(15bits)
-        dyb_append_u24(dyb, 0xC00000 | ((uint32_t)type<<15) | index);
-    } else if (type <= 0x7f && index <= 0x1FFFFF) {								            // header:0x0E(4bits), type:0~0x7F(7bits), index:0~0x1FFFFF(21bits)
-        dyb_append_u32(dyb, 0xE0000000 | ((uint32_t)type<<21) | index);
+    } else if (type <= 0x1f && index <= 0x1FF) {                                            // header:0x02(2bits), type:0~0x1F(5bits), index:0~0x01FF(9bits)
+        dyb_append_u16(dyb, 0x8000 | ((uint16)type<<9) | index);
+    } else if (type <= 0x3f && index <= 0x7FFF) {                                           // header:0x06(3bits), type:0~0x3F(6bits), index:0~0x7FFF(15bits)
+        dyb_append_u24(dyb, 0xC00000 | ((uint32)type<<15) | index);
+    } else if (type <= 0x7f && index <= 0x1FFFFF) {                                         // header:0x0E(4bits), type:0~0x7F(7bits), index:0~0x1FFFFF(21bits)
+        dyb_append_u32(dyb, 0xE0000000 | ((uint32)type<<21) | index);
     } else {
         return null;
     }
@@ -875,24 +875,24 @@ dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8_t type, uint32_t index)
 }
 
 
-dyb_inline void dyb_next_typdex(dybuf* dyb, uint8_t* type, uint32_t* index)
+dyb_inline void dyb_next_typdex(dybuf* dyb, uint8* type, uint32* index)
 {
-    uint8_t header = dyb_peek_u8(dyb);
+    uint8 header = dyb_peek_u8(dyb);
     if ((header&0x80)==0) {
-        uint8_t v = dyb_next_u8(dyb);
+        uint8 v = dyb_next_u8(dyb);
         *type = (v >> 3) & 0x0F;
         *index = v & 0x07;
     } else if ((header&0x40)==0) {
-        uint16_t v = dyb_next_u16(dyb);
-        *type = (uint8_t)(v >> 9) & 0x1F;
+        uint16 v = dyb_next_u16(dyb);
+        *type = (uint8)(v >> 9) & 0x1F;
         *index = v & 0x01FF;
     } else if ((header&0x20)==0) {
-        uint32_t v = dyb_next_u24(dyb);
-        *type = (uint8_t)(v >> 15) & 0x3F;
+        uint32 v = dyb_next_u24(dyb);
+        *type = (uint8)(v >> 15) & 0x3F;
         *index = v & 0x7FFF;
     } else if ((header&0x10)==0) {
-        uint32_t v = dyb_next_u24(dyb);
-        *type = (uint8_t)(v >> 21) & 0x7F;
+        uint32 v = dyb_next_u24(dyb);
+        *type = (uint8)(v >> 21) & 0x7F;
         *index = v & 0x1FFFFF;
     } else {
         // error
@@ -901,7 +901,7 @@ dyb_inline void dyb_next_typdex(dybuf* dyb, uint8_t* type, uint32_t* index)
 
 
 /// var u64
-dyb_inline dybuf* dyb_append_var_u64(dybuf* dyb, uint64_t value)
+dyb_inline dybuf* dyb_append_var_u64(dybuf* dyb, uint64 value)
 {
     if (value<=0x7F) {
         dyb_append_u8(dyb, value);// 0 ~ 0x7F
@@ -912,11 +912,11 @@ dyb_inline dybuf* dyb_append_var_u64(dybuf* dyb, uint64_t value)
     } else if (value <= (0x1FFFFFUL+0x4080UL)) {
         // (0x3FFF+(0x7F+1)+1) ~ 0x1FFFFF+(0x3FFF+(0x7F+1)+1)
         // 0x4080 ~ 0x1FFFFF + 0x4080
-        dyb_append_u24(dyb, (uint32_t)(0xC00000UL | (value-0x4080UL)));
+        dyb_append_u24(dyb, (uint32)(0xC00000UL | (value-0x4080UL)));
     } else if (value <= (0x0FFFFFFFUL+0x204080UL)) {
         // (0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1) ~ 0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)
         // 0x204080 ~ 0x0FFFFFFF + 0x204080
-        dyb_append_u32(dyb, (uint32_t)(0xE0000000UL | (value-0x204080UL)));
+        dyb_append_u32(dyb, (uint32)(0xE0000000UL | (value-0x204080UL)));
     } else if (value <= (0x07FFFFFFFFUL+0x10204080UL)) {
         // (0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1) ~ 0x07FFFFFFFF+(0x0FFFFFFF+(0x1FFFFF+(0x3FFF+(0x7F+1)+1)+1)+1)
         // 0x10204080 ~ 0x07FFFFFFFF+0x10204080
@@ -941,9 +941,9 @@ dyb_inline dybuf* dyb_append_var_u64(dybuf* dyb, uint64_t value)
     return dyb;
 }
 
-dyb_inline uint64_t dyb_next_var_u64(dybuf* dyb)
+dyb_inline uint64 dyb_next_var_u64(dybuf* dyb)
 {
-    uint8_t b = dyb_next_u8(dyb);
+    uint8 b = dyb_next_u8(dyb);
     if ((b&0x80)==0) {
         return (b&0x7F);
     } else if ((b&0x40)==0) {
@@ -953,11 +953,11 @@ dyb_inline uint64_t dyb_next_var_u64(dybuf* dyb)
     } else if ((b&0x10)==0) {
         return (((b&0x0F)<<24) | (dyb_next_u24(dyb) & 0x00FFFFFFUL))+0x204080UL;
     } else if ((b&0x08)==0) {
-        return (((uint64_t)(b&0x07)<<32) | (dyb_next_u32(dyb) & 0x00FFFFFFFFUL))+0x10204080UL;
+        return (((uint64)(b&0x07)<<32) | (dyb_next_u32(dyb) & 0x00FFFFFFFFUL))+0x10204080UL;
     } else if ((b&0x04)==0) {
-        return (((uint64_t)(b&0x03)<<40) | (dyb_next_u40(dyb) & 0x00FFFFFFFFFFUL))+0x0810204080UL;
+        return (((uint64)(b&0x03)<<40) | (dyb_next_u40(dyb) & 0x00FFFFFFFFFFUL))+0x0810204080UL;
     } else if ((b&0x02)==0) {
-        return (((uint64_t)(b&0x01)<<48) | (dyb_next_u48(dyb) & 0x00FFFFFFFFFFFFUL))+0x040810204080UL;
+        return (((uint64)(b&0x01)<<48) | (dyb_next_u48(dyb) & 0x00FFFFFFFFFFFFUL))+0x040810204080UL;
     } else if ((b&0x01)==0) {
         return (dyb_next_u56(dyb) & 0x00FFFFFFFFFFFFFFUL)+0x02040810204080UL;
     } else {
@@ -966,43 +966,43 @@ dyb_inline uint64_t dyb_next_var_u64(dybuf* dyb)
 }
 
 
-dyb_inline dybuf* dyb_append_var_s64(dybuf* dyb, int64_t value)
+dyb_inline dybuf* dyb_append_var_s64(dybuf* dyb, int64 value)
 {
     dyb_append_var_u64(dyb, ((value << 1) ^ (value >> 63)));
     return dyb;
 }
 
-dyb_inline int64_t dyb_next_var_s64(dybuf* dyb)
+dyb_inline int64 dyb_next_var_s64(dybuf* dyb)
 {
-    uint64_t u = dyb_next_var_u64(dyb);
-    return ((u&0x01)==0)?((int64_t)((u>>1)&0x7FFFFFFFFFFFFFFF)):(((int64_t)((u>>1)&0x7FFFFFFFFFFFFFFF)) ^ 0xFFFFFFFFFFFFFFFF);
+    uint64 u = dyb_next_var_u64(dyb);
+    return ((u&0x01)==0)?((int64)((u>>1)&0x7FFFFFFFFFFFFFFF)):(((int64)((u>>1)&0x7FFFFFFFFFFFFFFF)) ^ 0xFFFFFFFFFFFFFFFF);
 }
 
 dyb_inline dybuf* dyb_append_float(dybuf* dyb, float value)
 {
-    dyb_append_u32(dyb, dyb_swap_u32(*(uint32_t*)&value));
+    dyb_append_u32(dyb, dyb_swap_u32(*(uint32*)&value));
     return dyb;
 }
 
 dyb_inline float dyb_next_float(dybuf* dyb)
 {
-    uint32_t v = dyb_swap_u32(dyb_next_u32(dyb));
+    uint32 v = dyb_swap_u32(dyb_next_u32(dyb));
     return *(float*)&v;
 }
 
 dyb_inline dybuf* dyb_append_double(dybuf* dyb, double value)
 {
-    dyb_append_u64(dyb, dyb_swap_u64(*(uint64_t*)&value));
+    dyb_append_u64(dyb, dyb_swap_u64(*(uint64*)&value));
     return dyb;
 }
 
 dyb_inline double dyb_next_double(dybuf* dyb)
 {
-    uint64_t v = dyb_swap_u64(dyb_next_u64(dyb));
+    uint64 v = dyb_swap_u64(dyb_next_u64(dyb));
     return *(double*)&v;
 }
 
-dyb_inline dybuf* dyb_append_data_with_var_len(dybuf* dyb, uint8_t* data, uint size)
+dyb_inline dybuf* dyb_append_data_with_var_len(dybuf* dyb, uint8* data, uint size)
 {
     dyb_append_var_u64(dyb, size);
     dyb_append_data_without_len(dyb, data, size);
@@ -1010,9 +1010,9 @@ dyb_inline dybuf* dyb_append_data_with_var_len(dybuf* dyb, uint8_t* data, uint s
     return dyb;
 }
 
-dyb_inline uint8_t* dyb_next_data_with_var_len(dybuf* dyb, uint* size)
+dyb_inline uint8* dyb_next_data_with_var_len(dybuf* dyb, uint* size)
 {
-    *size = (uint32_t)dyb_next_var_u64(dyb);
+    *size = (uint32)dyb_next_var_u64(dyb);
     return dyb_next_data_without_len(dyb, *size);
 }
 

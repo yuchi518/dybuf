@@ -24,8 +24,6 @@
 #ifndef _PLAT_C_TYPE_
 #define _PLAT_C_TYPE_
 
-#include <stdint.h>
-
 #ifndef _NO_STD_INC_
 #define _NO_STD_INC_    0           // 0: use standard lib (c or system lib), 1: disable (use to test platform lib independence)
 #endif
@@ -38,11 +36,19 @@ typedef enum {
 
 typedef boolean bool;
 
-typedef unsigned char byte;
-typedef unsigned int uint;
+typedef unsigned char       byte;
+typedef unsigned int        uint;
+typedef signed char         int8;
+typedef signed short        int16;
+typedef signed int          int32;
+typedef signed long long    int64;
+typedef unsigned char       uint8;
+typedef unsigned short      uint16;
+typedef unsigned int        uint32;
+typedef unsigned long long  uint64;
 
-#define null            ((void*)0)
-#define nil             ((void*)0)
+#define null            (0)
+#define nil             (0)
 #define plat_inline     static inline
 
 #endif //_PLAT_C_TYPE_
