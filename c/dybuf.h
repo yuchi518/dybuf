@@ -847,15 +847,17 @@ dyb_inline uint8* dyb_get_data_before_current_position(dybuf* dyb, uint* len)
 
 enum {
     typdex_typ_eof      = 0,
-    typdex_typ_bool,                // 1 byte boolean
-    typdex_typ_int,                 // variable size int64
-    typdex_typ_uint,                // variable size uint64
-    typdex_typ_float,               // 4 bytes float
-    typdex_typ_double,              // 8 bytes double
-    typdex_typ_string,              // variable length string
-    typdex_typ_bytes,               // variable length binary
-    typdex_typ_array,               // array of items
-    typdex_typ_map,                 // items map
+    typdex_typ_bool     = 1,                // 1 byte boolean
+    typdex_typ_int      = 2,                // variable size int64
+    typdex_typ_uint     = 3,                // variable size uint64
+#if !defined(__KERNEL__) && !defined(DISABLE_FP)
+    typdex_typ_float    = 4,                // 4 bytes float
+    typdex_typ_double   = 5,                // 8 bytes double
+#endif    
+    typdex_typ_string   = 6,                // variable length string
+    typdex_typ_bytes    = 7,                // variable length binary
+    typdex_typ_array    = 8,                // array of items
+    typdex_typ_map      = 9,                // items map
 };
 
 dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint32 index)
@@ -978,6 +980,7 @@ dyb_inline int64 dyb_next_var_s64(dybuf* dyb)
     return ((u&0x01)==0)?((int64)((u>>1)&0x7FFFFFFFFFFFFFFF)):(((int64)((u>>1)&0x7FFFFFFFFFFFFFFF)) ^ 0xFFFFFFFFFFFFFFFF);
 }
 
+#if !defined(__KERNEL__) && !defined(DISABLE_FP)
 dyb_inline dybuf* dyb_append_float(dybuf* dyb, float value)
 {
     dyb_append_u32(dyb, dyb_swap_u32(*(uint32*)&value));
@@ -1001,6 +1004,7 @@ dyb_inline double dyb_next_double(dybuf* dyb)
     uint64 v = dyb_swap_u64(dyb_next_u64(dyb));
     return *(double*)&v;
 }
+#endif
 
 dyb_inline dybuf* dyb_append_data_with_var_len(dybuf* dyb, uint8* data, uint size)
 {
