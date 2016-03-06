@@ -85,7 +85,7 @@ enum jserr cjson_source_push_from_buffer(const char* buff, uint size)
     /* set up current entry */
     //bs->bs = yy_scan_bytes(bs->src_buffer, bs->src_size);
     bs->bs = yy_scan_bytes(buff, size);
-    if (curbs) yy_switch_to_buffer(bs->bs);
+    yy_switch_to_buffer(bs->bs);
     curbs = bs;
     //yylineno = 1;
 

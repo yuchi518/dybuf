@@ -25,15 +25,19 @@ char *strconcat(char *str1, char *str2);
 %%
 
 START
+    : CODE_SEG
+    | CODE_SEG CODE_SEG
+
+CODE_SEG
     : ARRAY {
         $$ = cjson_rt_add_code_segment($1);
         cjson_release($1);
-        printf("START(ARRAY)\n");
+        printf("CODE_SEG(ARRAY)\n");
     }
     | OBJECT {
         $$ = cjson_rt_add_code_segment($1);
         cjson_release($1);
-        printf("START(OBJECT)\n");
+        printf("CODE_SEG(OBJECT)\n");
     }
     ;
 
@@ -125,10 +129,10 @@ VALUE
 
 %%
 
-/*int yywrap()
+int yywrap()
 {
    return 1;
-}*/
+}
 
 void yyerror (char const *s)
 {

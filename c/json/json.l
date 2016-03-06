@@ -1,4 +1,3 @@
-%option noyywrap
 %x IFILE
 
 %{
@@ -41,6 +40,37 @@ DBL_QUOTE       ["]
 
 
 %%
+
+^[ \t]*import[ \t]*\( {
+    BEGIN(IFILE);
+}
+
+<IFILE>[ \t]*
+
+<IFILE>[^ \t]+\) {
+    //yylineno++;
+    const char* json_text = "[1]\n";
+    printf("import file: %s\n", yytext);
+    if (cjson_source_push_from_buffer(json_text, strlen(json_text)+1) != jserr_no_error)
+    //if(cjson_source_push_from_resource(yytext) != jserr_no_error)
+        yyterminate(); /* no such file */
+    BEGIN(INITIAL);
+}
+
+<IFILE>[ \t]*[^\n]+ {
+    printf("\n***\nbad include: %s\n", yytext);
+    yyterminate();
+}
+
+
+
+<<EOF>> {
+    printf("EOF\n");
+    if(cjson_source_pop()!=jserr_no_error)
+        yyterminate();
+}
+
+
 
 {DBL_QUOTE}{DBL_QUOTE}|{DBL_QUOTE}{CHARS}{DBL_QUOTE} {
     yylval = cjson_make_string(yytext);
@@ -103,28 +133,6 @@ nil {
 
 [ \t]+ /* ignore whitespace */;
 
-^"#"[ \t]*include[ \t]*\[\"<] {
-    BEGIN IFILE;
-}
-
-<IFILE>[^ \t\n\">]+ {
-    /*{
-        int c;
-        while((c = input()) && c != '\n') ;
-    }*/
-    //yylineno++;
-    if(cjson_source_push_from_resource(yytext) != jserr_no_error)
-        yyterminate(); /* no such file */ BEGIN INITIAL;
-}
-
-<IFILE>.|\n {
-    //fprintf(stderr, "%4d bad include line\n", yylineno);
-}
-
-<<EOF>> {
-    if(cjson_source_pop()!=jserr_no_error)
-        yyterminate();
-}
 
 ^\n {
     //fprintf(yyout, "%4d %s", yylineno++, yytext);
