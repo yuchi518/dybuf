@@ -310,13 +310,8 @@ dyb_inline uint dyb_get_limit(dybuf* dyb)
     return dyb->_limit;
 }
 
-dyb_inline dybuf* dyb_set_limit(dybuf* dyb, int newLimit)
+dyb_inline dybuf* dyb_set_limit(dybuf* dyb, uint newLimit)
 {
-    if (newLimit < 0) {
-        // error
-        return null;
-    }
-
     if (newLimit > dyb->_capacity) {
         if (dyb_set_capacity(dyb, newLimit) == null) {
             // error
@@ -977,7 +972,7 @@ dyb_inline dybuf* dyb_append_var_s64(dybuf* dyb, int64 value)
 dyb_inline int64 dyb_next_var_s64(dybuf* dyb)
 {
     uint64 u = dyb_next_var_u64(dyb);
-    return ((u&0x01)==0)?((int64)((u>>1)&0x7FFFFFFFFFFFFFFF)):(((int64)((u>>1)&0x7FFFFFFFFFFFFFFF)) ^ 0xFFFFFFFFFFFFFFFF);
+    return ((u&0x01)==0)?((int64)((u>>1)&0x7FFFFFFFFFFFFFFFUL)):((int64)(((u>>1)&0x7FFFFFFFFFFFFFFFUL) ^ 0xFFFFFFFFFFFFFFFFL));
 }
 
 #if !defined(__KERNEL__) && !defined(DISABLE_FP)
@@ -1016,9 +1011,11 @@ dyb_inline dybuf* dyb_append_data_with_var_len(dybuf* dyb, uint8* data, uint siz
 
 dyb_inline uint8* dyb_next_data_with_var_len(dybuf* dyb, uint* size)
 {
-    *size = (uint32)dyb_next_var_u64(dyb);
+    uint len = (uint)dyb_next_var_u64(dyb);
+    if (size) *size = len;
     return dyb_next_data_without_len(dyb, *size);
 }
+
 
 
 #endif //DYBUF_C_DYBUF_H
