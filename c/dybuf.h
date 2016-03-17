@@ -29,7 +29,7 @@
 
 #define dyb_inline              plat_inline
 
-#define CACHE_SIZE_UNIT         16
+#define CACHE_SIZE_UNIT         16U
 
 #ifndef MAX
 #define MAX(a,b)                ((a)>=(b)?(a):(b))
@@ -142,10 +142,22 @@ typedef struct dybuf dybuf;
 // reference mode, use memory from outside and never release/create the memory
 dyb_inline dybuf* dyb_refer(dybuf* dyb, byte* data, uint capacity, boolean for_write)
 {
-    if (dyb == null || data == null)
+    if (data == null)
     {
-        // reference mode should pass dyb ad data
+        // reference mode should pass data
         return null;
+    }
+
+    if (dyb == null)
+    {
+        uint size = sizeof(*dyb);
+        dyb = (dybuf*)dyb_mem_alloc(&size, false);
+        if (dyb == null) return null;
+        dyb->_should_release_instance = true;
+    }
+    else
+    {
+        dyb->_should_release_instance = false;
     }
 
     dyb->_data = data;
@@ -853,6 +865,7 @@ enum {
     typdex_typ_bytes    = 7,                // variable length binary
     typdex_typ_array    = 8,                // array of items
     typdex_typ_map      = 9,                // items map
+    typdex_typ_version  = 0xf,              // version
 };
 
 dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint32 index)
@@ -874,28 +887,60 @@ dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint32 index)
 
 dyb_inline void dyb_next_typdex(dybuf* dyb, uint8* type, uint32* index)
 {
-    uint8 header = dyb_peek_u8(dyb);
-    if ((header&0x80)==0) {
+    uint8 typ = dyb_peek_u8(dyb);
+    uint32 idx = 0;
+    
+    if ((typ&0x80)==0) {
         uint8 v = dyb_next_u8(dyb);
-        *type = (v >> 3) & 0x0F;
-        *index = v & 0x07;
-    } else if ((header&0x40)==0) {
+        typ = (v >> 3) & 0x0F;
+        idx = v & 0x07;
+    } else if ((typ&0x40)==0) {
         uint16 v = dyb_next_u16(dyb);
-        *type = (uint8)(v >> 9) & 0x1F;
-        *index = v & 0x01FF;
-    } else if ((header&0x20)==0) {
+        typ = (uint8)(v >> 9) & 0x1F;
+        idx = v & 0x01FF;
+    } else if ((typ&0x20)==0) {
         uint32 v = dyb_next_u24(dyb);
-        *type = (uint8)(v >> 15) & 0x3F;
-        *index = v & 0x7FFF;
-    } else if ((header&0x10)==0) {
+        typ = (uint8)(v >> 15) & 0x3F;
+        idx = v & 0x7FFF;
+    } else if ((typ&0x10)==0) {
         uint32 v = dyb_next_u24(dyb);
-        *type = (uint8)(v >> 21) & 0x7F;
-        *index = v & 0x1FFFFF;
+        typ = (uint8)(v >> 21) & 0x7F;
+        idx = v & 0x1FFFFF;
     } else {
         // error
     }
+
+    if (type) *type = typ;
+    if (index) *index = idx;
 }
 
+dyb_inline void dyb_peek_typdex(dybuf* dyb, uint8* type, uint32* index)
+{
+    uint8 typ = dyb_peek_u8(dyb);
+    uint32 idx = 0;
+
+    if ((typ&0x80)==0) {
+        uint8 v = dyb_peek_u8(dyb);
+        typ = (v >> 3) & 0x0F;
+        idx = v & 0x07;
+    } else if ((typ&0x40)==0) {
+        uint16 v = dyb_peek_u16(dyb);
+        typ = (uint8)(v >> 9) & 0x1F;
+        idx = v & 0x01FF;
+    } else if ((typ&0x20)==0) {
+        uint32 v = dyb_peek_u24(dyb);
+        typ = (uint8)(v >> 15) & 0x3F;
+        idx = v & 0x7FFF;
+    } else if ((typ&0x10)==0) {
+        uint32 v = dyb_peek_u24(dyb);
+        typ = (uint8)(v >> 21) & 0x7F;
+        idx = v & 0x1FFFFF;
+    } else {
+        // error
+    }
+    if (type) *type = typ;
+    if (index) *index = idx;
+}
 
 /// var u64
 dyb_inline dybuf* dyb_append_var_u64(dybuf* dyb, uint64 value)
@@ -1013,9 +1058,24 @@ dyb_inline uint8* dyb_next_data_with_var_len(dybuf* dyb, uint* size)
 {
     uint len = (uint)dyb_next_var_u64(dyb);
     if (size) *size = len;
-    return dyb_next_data_without_len(dyb, *size);
+    return dyb_next_data_without_len(dyb, len);
 }
 
+
+dyb_inline dybuf* dyb_append_cstring_with_var_len(dybuf* dyb, char* string, uint size)
+{
+    dyb_append_var_u64(dyb, size+1);
+    dyb_append_data_without_len(dyb, (uint8*)string, size+1);
+
+    return dyb;
+}
+
+dyb_inline char* dyb_next_cstring_with_var_len(dybuf* dyb, uint* size)
+{
+    uint len = (uint)dyb_next_var_u64(dyb);
+    if (size) *size = len;
+    return (char*)dyb_next_data_without_len(dyb, len);
+}
 
 
 #endif //DYBUF_C_DYBUF_H
