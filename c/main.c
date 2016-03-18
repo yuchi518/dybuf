@@ -26,12 +26,14 @@
 #include <stdlib.h>
 #include <cjson_runtime.h>
 #include "dybuf.h"
+#include "dypkt.h"
 #include "cjson.h"
 
 void cjson_test(void);
 void cjson_parse_test(void);
 void dybuf_test(void);
 void dybuf_test_ref(void);
+void dypkt_test(void);
 
 int main(int argc, char **argv)
 {
@@ -60,6 +62,7 @@ int main(int argc, char **argv)
 
     dybuf_test();
     dybuf_test_ref();
+    dypkt_test();
 
     return 0;
 }
@@ -188,4 +191,101 @@ void dybuf_test_ref(void)
     }
 
     printf("diff: %d\n", diff);
+}
+
+void dypkt_test(void)
+{
+    uint8 mem[1024];
+    dypkt* dyp0 = dyp_pack(null, mem, 1024);
+    dypkt* dyp1;
+    uint index = 0;
+    uint size;
+    dype type;
+    dyp_append_version(dyp0, 0x01020304u);
+    dyp_append_protocol(dyp0, "json");
+    dyp_append_bool(dyp0, index++, true);
+    dyp_append_int(dyp0, index++, (int64)-1ll);
+    dyp_append_uint(dyp0, index++, (uint64)-1ll);
+    dyp_append_cstring(dyp0, index++, "I love dybuf lib!!");
+    dyp_append_float(dyp0, index++, 0.1);
+    dyp_append_double(dyp0, index++, 0.2);
+    dyp_append_eof(dyp0);
+
+    size = dyp_get_position(dyp0);
+    dyp_release(dyp0);
+
+    dyp1 = dyp_unpack(null, mem, size, false);
+
+    while(dyp_get_remainder(dyp1)>0)
+    {
+        type = dyp_next_type(dyp1, &index);
+        if (type==dype_f) printf("_f.");
+        else printf("%2d.", index);
+        switch (type)
+        {
+            case dype_f:
+            {
+                switch((dype_fid)index)
+                {
+                    case dype_f_eof:
+                    {
+                        dyp_next_eof(dyp1);
+                        printf("eof\n");
+                        break;
+                    }
+                    case dype_f_version:
+                    {
+                        printf("version: %llx\n", dyp_next_version(dyp1));
+                        break;
+                    }
+                    case dype_f_protocol:
+                    {
+                        printf("protocol: %s\n", dyp_next_protocol(dyp1, null));
+                        break;
+                    }
+                }
+                break;
+            }
+            case dype_bool:
+            {
+                printf("boolean: %s\n", dyp_next_bool(dyp1)?"true":"false");
+                break;
+            }
+            case dype_int:
+            {
+                printf("int: %llx\n", dyp_next_int(dyp1));
+                break;
+            }
+            case dype_uint:
+            {
+                printf("uint: %llx\n", dyp_next_uint(dyp1));
+                break;
+            }
+            case dype_float:
+            {
+                printf("float: %f\n", dyp_next_float(dyp1));
+                break;
+            }
+            case dype_double:
+            {
+                printf("double: %f\n", dyp_next_double(dyp1));
+                break;
+            }
+            case dype_string:
+            {
+                printf("cstr: %s\n", dyp_next_cstring(dyp1, null));
+                break;
+            }
+            case dype_bytes:
+            {
+                // todo
+                break;
+            }
+        }
+    }
+
+    printf("remainder: %u\n", dyp_get_remainder(dyp1));
+    printf("size: %u ? %u\n", size, dyp_get_position(dyp1));
+
+    dyp_release(dyp1);
 }

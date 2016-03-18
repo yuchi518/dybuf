@@ -26,6 +26,7 @@
 
 #include "plat_type.h"
 #include "plat_mem.h"
+#include "plat_string.h"
 
 #define dyb_inline              plat_inline
 
@@ -853,7 +854,7 @@ dyb_inline uint8* dyb_get_data_before_current_position(dybuf* dyb, uint* len)
 /// ===== type, index manage
 
 enum {
-    typdex_typ_eof      = 0,
+    typdex_typ_f        = 0,                // functions
     typdex_typ_bool     = 1,                // 1 byte boolean
     typdex_typ_int      = 2,                // variable size int64
     typdex_typ_uint     = 3,                // variable size uint64
@@ -865,10 +866,9 @@ enum {
     typdex_typ_bytes    = 7,                // variable length binary
     typdex_typ_array    = 8,                // array of items
     typdex_typ_map      = 9,                // items map
-    typdex_typ_version  = 0xf,              // version
 };
 
-dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint32 index)
+dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint index)
 {
     if (type <= 0x0f && index <= 0x07) {                                                    // header:0x00(1bits), type:0~0x0F(4bits), index:0~0x7(3bits)
         dyb_append_u8(dyb, (type<<3) | index);
@@ -885,10 +885,10 @@ dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint32 index)
 }
 
 
-dyb_inline void dyb_next_typdex(dybuf* dyb, uint8* type, uint32* index)
+dyb_inline void dyb_next_typdex(dybuf* dyb, uint8* type, uint* index)
 {
     uint8 typ = dyb_peek_u8(dyb);
-    uint32 idx = 0;
+    uint idx = 0;
     
     if ((typ&0x80)==0) {
         uint8 v = dyb_next_u8(dyb);
@@ -914,10 +914,10 @@ dyb_inline void dyb_next_typdex(dybuf* dyb, uint8* type, uint32* index)
     if (index) *index = idx;
 }
 
-dyb_inline void dyb_peek_typdex(dybuf* dyb, uint8* type, uint32* index)
+dyb_inline void dyb_peek_typdex(dybuf* dyb, uint8* type, uint* index)
 {
     uint8 typ = dyb_peek_u8(dyb);
-    uint32 idx = 0;
+    uint idx = 0;
 
     if ((typ&0x80)==0) {
         uint8 v = dyb_peek_u8(dyb);
@@ -1062,8 +1062,9 @@ dyb_inline uint8* dyb_next_data_with_var_len(dybuf* dyb, uint* size)
 }
 
 
-dyb_inline dybuf* dyb_append_cstring_with_var_len(dybuf* dyb, char* string, uint size)
+dyb_inline dybuf* dyb_append_cstring_with_var_len(dybuf* dyb, const char* string)
 {
+    uint size = plat_cstr_length(string);
     dyb_append_var_u64(dyb, size+1);
     dyb_append_data_without_len(dyb, (uint8*)string, size+1);
 
@@ -1073,7 +1074,7 @@ dyb_inline dybuf* dyb_append_cstring_with_var_len(dybuf* dyb, char* string, uint
 dyb_inline char* dyb_next_cstring_with_var_len(dybuf* dyb, uint* size)
 {
     uint len = (uint)dyb_next_var_u64(dyb);
-    if (size) *size = len;
+    if (size) *size = (len-1);
     return (char*)dyb_next_data_without_len(dyb, len);
 }
 

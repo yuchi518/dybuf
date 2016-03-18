@@ -29,7 +29,7 @@ typedef struct dybuf dypkt;
 
 enum dype
 {
-    dype_eof            = typdex_typ_eof,
+    dype_f              = typdex_typ_f,                     // functions: index is function id
     dype_bool           = typdex_typ_bool,                  // 1 byte boolean
     dype_int            = typdex_typ_int,                   // variable size int64
     dype_uint           = typdex_typ_uint,                  // variable size uint64
@@ -41,10 +41,17 @@ enum dype
     dype_bytes          = typdex_typ_bytes,                 // variable length binary
     //dype_array        = typdex_typ_array,                 // array of items
     //dype_map          = typdex_typ_map,                   // items map
-    dype_version        = typdex_typ_version,               // version
 };
 typedef enum dype dype;
 
+// function id
+enum dype_fid
+{
+    dype_f_eof           = 0,            // without any parameters
+    dype_f_version       = 1,            // with a variable uint (max:uint64) parameter
+    dype_f_protocol      = 2,            // with a variable length cstring parameter
+};
+typedef enum dype_fid dype_fid;
 
 /**
  *  
@@ -87,15 +94,23 @@ dyb_inline uint dyp_get_remainder(dypkt* dyp)
 
 /// ===== pack functions =====
 
-dyb_inline dypkt* dyp_append_version(dypkt* dyp, uint32 version)
+dyb_inline dypkt* dyp_append_version(dypkt* dyp, uint64 version)
 {
-    dyb_append_typdex(dyp, dype_version, version);
+    dyb_append_typdex(dyp, dype_f, dype_f_version);
+    dyb_append_var_u64(dyp, version);
     return dyp;
 }
 
 dyb_inline dypkt* dyp_append_eof(dypkt* dyp)
 {
-    dyb_append_typdex(dyp, dype_eof, 0);
+    dyb_append_typdex(dyp, dype_f, dype_f_eof);
+    return dyp;
+}
+
+dyb_inline dypkt* dyp_append_protocol(dypkt* dyp, char* protocol_name)
+{
+    dyb_append_typdex(dyp, dype_f, dype_f_protocol);
+    dyb_append_cstring_with_var_len(dyp, protocol_name);
     return dyp;
 }
 
@@ -138,10 +153,10 @@ dyb_inline dypkt* dyp_append_double(dypkt* dyp, uint32 index, double value)
 
 #endif
 
-dyb_inline dypkt* dyp_append_cstring(dypkt* dyp, uint32 index, char* string, uint size)
+dyb_inline dypkt* dyp_append_cstring(dypkt* dyp, uint32 index, const char* string)
 {
     dyb_append_typdex(dyp, dype_string, index);
-    dyb_append_cstring_with_var_len(dyp, string, size);
+    dyb_append_cstring_with_var_len(dyp, string);
     return dyp;
 }
 
@@ -155,21 +170,27 @@ dyb_inline dypkt* dyp_append_data(dypkt* dyp, uint32 index, uint8* data, uint si
 
 
 /// ===== next functions =====
-dyb_inline dype dyp_next_type(dypkt* dyp, uint32 *index)
+dyb_inline dype dyp_next_type(dypkt* dyp, uint *index)
 {
     uint8 typ;
-    uint32 idx;
+    uint idx;
 
     dyb_peek_typdex(dyp, &typ, &idx);
     if (index) *index = idx;
     return (dype)typ;
 }
 
-dyb_inline uint32 dyp_next_version(dypkt* dyp)
+dyb_inline uint64 dyp_next_version(dypkt* dyp)
 {
-    uint32 idx;
-    dyb_next_typdex(dyp, null, &idx);
-    return idx;
+    dyb_next_typdex(dyp, null, null);
+    uint64 ver = dyb_next_var_u64(dyp);
+    return ver;
+}
+
+dyb_inline char* dyp_next_protocol(dypkt* dyp, uint* size)
+{
+    dyb_next_typdex(dyp, null, null);
+    return dyb_next_cstring_with_var_len(dyp, size);
 }
 
 dyb_inline void dyp_next_eof(dypkt* dyp)
@@ -197,13 +218,13 @@ dyb_inline uint64 dyp_next_uint(dypkt* dyp)
 
 #if !defined(__KERNEL__) && !defined(DISABLE_FP)
 
-dyb_inline float dyp_next_int(dypkt* dyp)
+dyb_inline float dyp_next_float(dypkt* dyp)
 {
     dyb_next_typdex(dyp, null, null);
     return dyb_next_float(dyp);
 }
 
-dyb_inline double dyp_next_int(dypkt* dyp)
+dyb_inline double dyp_next_double(dypkt* dyp)
 {
     dyb_next_typdex(dyp, null, null);
     return dyb_next_double(dyp);
