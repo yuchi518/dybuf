@@ -1,5 +1,5 @@
-# dybuf, dypkt - C language
-This is C library for dybuf and dypkt.
+# dybuf, dypkt - C library
+This is C library of dybuf and dypkt.
 
 ### Version
 0.0.1
@@ -13,9 +13,9 @@ C lib version uses a number of open source projects to generate json parser, if 
 
 ### System Requirements
 
-If you run the test code, system should meet the following requirements.
+If you want to run the test code, your system should meet the following requirements.
 - CMake (https://cmake.org)
-- Mac OS (Verified), Linux, etc.
+- Mac OS, Linux, etc.
 
 ### Run test code
 
