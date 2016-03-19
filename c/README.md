@@ -38,11 +38,13 @@ Run test code:
    * platform/plat_mem.h
    * platform/plat_string.h
 
-2. Use dypkt API for pack. (Write to memory)
+2. Include the header file
 
-        // Create a dypkt structure pointer, also create a 1024 bytes memory
-        dypkt* dyp = dyp_pack(null, null, 1024);
-        // Or, create a dypkt structure pointer, refer to a 1024 bytes memory
+       #include "dypkt.h"
+
+3. Use dypkt API for pack. (Write to memory)
+
+        // Create a dypkt structure pointer, refer to a 1024 bytes memory
         uint8 mem[1024];
         dypkt* dyp = dyp_pack(null, mem, 1024);
         // Option, append version & protocol information
@@ -59,7 +61,7 @@ Run test code:
         // Now, you can send mem to remote or save to file.
         fwrite(mem, size, 0, fid);          // write to fid
 
-3. Use dypkt API for unpack. (Read from memory)
+4. Use dypkt API for unpack. (Read from memory)
 
         // Receive the data form remote or read from file.
         uint8 mem[1024];
