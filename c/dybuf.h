@@ -854,30 +854,31 @@ dyb_inline uint8* dyb_get_data_before_current_position(dybuf* dyb, uint* len)
 /// ===== type, index manage
 
 enum {
-    typdex_typ_f        = 0,                // functions
+    typdex_typ_none     = 0,                // none, empty
     typdex_typ_bool     = 1,                // 1 byte boolean
     typdex_typ_int      = 2,                // variable size int64
     typdex_typ_uint     = 3,                // variable size uint64
-#if !defined(__KERNEL__) && !defined(DISABLE_FP)
-    typdex_typ_float    = 4,                // 4 bytes float
-    typdex_typ_double   = 5,                // 8 bytes double
+#if !defined(DISABLE_FP)
+    typdex_typ_float    = 6,                // 4 bytes float
+    typdex_typ_double   = 7,                // 8 bytes double
 #endif    
-    typdex_typ_string   = 6,                // variable length string
-    typdex_typ_bytes    = 7,                // variable length binary
-    typdex_typ_array    = 8,                // array of items
-    typdex_typ_map      = 9,                // items map
+    typdex_typ_string   = 0xa,              // variable length string
+    typdex_typ_bytes    = 0xb,              // variable length binary
+    typdex_typ_array    = 0xc,              // array of items
+    typdex_typ_map      = 0xd,              // items map
+    typdex_typ_f        = 0xf,              // functions
 };
 
 dyb_inline dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint index)
 {
     if (type <= 0x0f && index <= 0x07) {                                                    // header:0x00(1bits), type:0~0x0F(4bits), index:0~0x7(3bits)
         dyb_append_u8(dyb, (type<<3) | index);
-    } else if (type <= 0x1f && index <= 0x1FF) {                                            // header:0x02(2bits), type:0~0x1F(5bits), index:0~0x01FF(9bits)
-        dyb_append_u16(dyb, 0x8000 | ((uint16)type<<9) | index);
-    } else if (type <= 0x3f && index <= 0x7FFF) {                                           // header:0x06(3bits), type:0~0x3F(6bits), index:0~0x7FFF(15bits)
-        dyb_append_u24(dyb, 0xC00000 | ((uint32)type<<15) | index);
-    } else if (type <= 0x7f && index <= 0x1FFFFF) {                                         // header:0x0E(4bits), type:0~0x7F(7bits), index:0~0x1FFFFF(21bits)
-        dyb_append_u32(dyb, 0xE0000000 | ((uint32)type<<21) | index);
+    } else if (type <= 0x3F && index <= 0x0FF) {                                            // header:0x02(2bits), type:0~0x3F(6bits), index:0~0x00FF(8bits)
+        dyb_append_u16(dyb, 0x8000 | ((uint16)type<<8) | index);
+    } else if (type <= 0xFF && index <= 0x1FFF) {                                           // header:0x06(3bits), type:0~0xFF(8bits), index:0~0x1FFF(13bits)
+        dyb_append_u24(dyb, 0xC00000 | ((uint32)type<<13) | index);
+    } else if (type <= 0xFF && index <= 0x0FFFFF) {                                         // header:0x0E(4bits), type:0~0xFF(8bits), index:0~0x0FFFFF(20bits)
+        dyb_append_u32(dyb, 0xE0000000 | ((uint32)type << 20) | index);
     } else {
         return null;
     }
@@ -896,16 +897,16 @@ dyb_inline void dyb_next_typdex(dybuf* dyb, uint8* type, uint* index)
         idx = v & 0x07;
     } else if ((typ&0x40)==0) {
         uint16 v = dyb_next_u16(dyb);
-        typ = (uint8)(v >> 9) & 0x1F;
-        idx = v & 0x01FF;
+        typ = (uint8)(v >> 8) & 0x3F;
+        idx = v & 0x00FF;
     } else if ((typ&0x20)==0) {
         uint32 v = dyb_next_u24(dyb);
-        typ = (uint8)(v >> 15) & 0x3F;
-        idx = v & 0x7FFF;
+        typ = (uint8)(v >> 13) & 0xFF;
+        idx = v & 0x1FFF;
     } else if ((typ&0x10)==0) {
-        uint32 v = dyb_next_u24(dyb);
-        typ = (uint8)(v >> 21) & 0x7F;
-        idx = v & 0x1FFFFF;
+        uint32 v = dyb_next_u32(dyb);
+        typ = (uint8)(v >> 20) & 0xFF;
+        idx = v & 0x0FFFFF;
     } else {
         // error
     }
@@ -925,16 +926,16 @@ dyb_inline void dyb_peek_typdex(dybuf* dyb, uint8* type, uint* index)
         idx = v & 0x07;
     } else if ((typ&0x40)==0) {
         uint16 v = dyb_peek_u16(dyb);
-        typ = (uint8)(v >> 9) & 0x1F;
-        idx = v & 0x01FF;
+        typ = (uint8)(v >> 8) & 0x3F;
+        idx = v & 0x00FF;
     } else if ((typ&0x20)==0) {
         uint32 v = dyb_peek_u24(dyb);
-        typ = (uint8)(v >> 15) & 0x3F;
-        idx = v & 0x7FFF;
+        typ = (uint8)(v >> 13) & 0xFF;
+        idx = v & 0x1FFF;
     } else if ((typ&0x10)==0) {
-        uint32 v = dyb_peek_u24(dyb);
-        typ = (uint8)(v >> 21) & 0x7F;
-        idx = v & 0x1FFFFF;
+        uint32 v = dyb_peek_u32(dyb);
+        typ = (uint8)(v >> 20) & 0xFF;
+        idx = v & 0x0FFFFF;
     } else {
         // error
     }
@@ -1020,7 +1021,7 @@ dyb_inline int64 dyb_next_var_s64(dybuf* dyb)
     return ((u&0x01)==0)?((int64)((u>>1)&0x7FFFFFFFFFFFFFFFUL)):((int64)(((u>>1)&0x7FFFFFFFFFFFFFFFUL) ^ 0xFFFFFFFFFFFFFFFFL));
 }
 
-#if !defined(__KERNEL__) && !defined(DISABLE_FP)
+#if !defined(DISABLE_FP)
 dyb_inline dybuf* dyb_append_float(dybuf* dyb, float value)
 {
     dyb_append_u32(dyb, dyb_swap_u32(*(uint32*)&value));

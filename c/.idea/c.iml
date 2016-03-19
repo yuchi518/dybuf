@@ -13,8 +13,6 @@
     <orderEntry type="module-library">
       <library name="Header Search Paths">
         <CLASSES>
-          <root url="file://$MODULE_DIR$/platform" />
-          <root url="file://$MODULE_DIR$/json" />
           <root url="file:///usr/local/include" />
           <root url="file://$APPLICATION_HOME_DIR$/bin" />
           <root url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/AudioToolbox.framework/Headers" />
@@ -190,8 +188,6 @@
           <root url="file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/7.0.2/include" />
         </CLASSES>
         <SOURCES>
-          <root url="file://$MODULE_DIR$/platform" />
-          <root url="file://$MODULE_DIR$/json" />
           <root url="file:///usr/local/include" />
           <root url="file://$APPLICATION_HOME_DIR$/bin" />
           <root url="file:///Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk/System/Library/Frameworks/AudioToolbox.framework/Headers" />
@@ -366,12 +362,6 @@
           <root url="file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include" />
           <root url="file:///Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/7.0.2/include" />
         </SOURCES>
-        <excluded>
-          <root url="file://$MODULE_DIR$/json/cjson.h" />
-          <root url="file://$MODULE_DIR$/json/cjson_runtime.h" />
-          <root url="file://$MODULE_DIR$/json/cjson_runtime.c" />
-          <root url="file://$MODULE_DIR$/json/cjson.c" />
-        </excluded>
       </library>
     </orderEntry>
   </component>

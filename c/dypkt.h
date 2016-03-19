@@ -29,27 +29,32 @@ typedef struct dybuf dypkt;
 
 enum dype
 {
-    dype_f              = typdex_typ_f,                     // functions: index is function id
+    dype_none           = typdex_typ_none,                  // none, empty
     dype_bool           = typdex_typ_bool,                  // 1 byte boolean
     dype_int            = typdex_typ_int,                   // variable size int64
     dype_uint           = typdex_typ_uint,                  // variable size uint64
-#if !defined(__KERNEL__) && !defined(DISABLE_FP)
+#if !defined(DISABLE_FP)
     dype_float          = typdex_typ_float,                 // 4 bytes float
     dype_double         = typdex_typ_double,                // 8 bytes double
 #endif    
     dype_string         = typdex_typ_string,                // variable length string (include '\0')
     dype_bytes          = typdex_typ_bytes,                 // variable length binary
-    //dype_array        = typdex_typ_array,                 // array of items
-    //dype_map          = typdex_typ_map,                   // items map
+    dype_array          = typdex_typ_array,                 // array of items
+    // not supported yet
+    dype_map            = typdex_typ_map,                   // items map
+    dype_f              = typdex_typ_f,                     // functions: index is function id
 };
 typedef enum dype dype;
 
 // function id
 enum dype_fid
 {
+    // for dypkt
     dype_f_eof           = 0,            // without any parameters
-    dype_f_version       = 1,            // with a variable uint (max:uint64) parameter
-    dype_f_protocol      = 2,            // with a variable length cstring parameter
+    dype_f_version       = 1,            // dypkt version, with a variable uint (max:uint64) parameter
+    // for third party
+    dype_f_protocol      = 7,            // protocol name, with a variable length cstring parameter
+    dype_f_proto_version = 8,            // protocol version, with a variable uint (max:uint64) parameter
 };
 typedef enum dype_fid dype_fid;
 
@@ -114,6 +119,13 @@ dyb_inline dypkt* dyp_append_protocol(dypkt* dyp, char* protocol_name)
     return dyp;
 }
 
+dyb_inline dypkt* dyp_append_protocol_version(dypkt* dyp, uint64 version)
+{
+    dyb_append_typdex(dyp, dype_f, dype_f_proto_version);
+    dyb_append_var_u64(dyp, version);
+    return dyp;
+}
+
 dyb_inline dypkt* dyp_append_bool(dypkt* dyp, uint32 index, boolean value)
 {
     dyb_append_typdex(dyp, dype_bool, index);
@@ -135,7 +147,7 @@ dyb_inline dypkt* dyp_append_uint(dypkt* dyp, uint32 index, uint64 value)
     return dyp;
 }
 
-#if !defined(__KERNEL__) && !defined(DISABLE_FP)
+#if !defined(DISABLE_FP)
 
 dyb_inline dypkt* dyp_append_float(dypkt* dyp, uint32 index, float value)
 {
@@ -193,6 +205,13 @@ dyb_inline char* dyp_next_protocol(dypkt* dyp, uint* size)
     return dyb_next_cstring_with_var_len(dyp, size);
 }
 
+dyb_inline uint64 dyp_next_protocol_version(dypkt* dyp)
+{
+    dyb_next_typdex(dyp, null, null);
+    uint64 ver = dyb_next_var_u64(dyp);
+    return ver;
+}
+
 dyb_inline void dyp_next_eof(dypkt* dyp)
 {
     dyb_next_typdex(dyp, null, null);
@@ -216,7 +235,7 @@ dyb_inline uint64 dyp_next_uint(dypkt* dyp)
     return dyb_next_var_u64(dyp);
 }
 
-#if !defined(__KERNEL__) && !defined(DISABLE_FP)
+#if !defined(DISABLE_FP)
 
 dyb_inline float dyp_next_float(dypkt* dyp)
 {

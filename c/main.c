@@ -201,8 +201,8 @@ void dypkt_test(void)
     uint index = 0;
     uint size;
     dype type;
-    dyp_append_version(dyp0, 0x01020304u);
     dyp_append_protocol(dyp0, "json");
+    dyp_append_protocol_version(dyp0, 0x01020304u);
     dyp_append_bool(dyp0, index++, true);
     dyp_append_int(dyp0, index++, (int64)-1ll);
     dyp_append_uint(dyp0, index++, (uint64)-1ll);
@@ -241,6 +241,11 @@ void dypkt_test(void)
                     case dype_f_protocol:
                     {
                         printf("protocol: %s\n", dyp_next_protocol(dyp1, null));
+                        break;
+                    }
+                    case dype_f_proto_version:
+                    {
+                        printf("proto_ver: %llx\n", dyp_next_protocol_version(dyp1));
                         break;
                     }
                 }
