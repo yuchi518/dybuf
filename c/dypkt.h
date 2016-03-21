@@ -39,9 +39,10 @@ enum dype
 #endif    
     dype_string         = typdex_typ_string,                // variable length string (include '\0')
     dype_bytes          = typdex_typ_bytes,                 // variable length binary
-    dype_array          = typdex_typ_array,                 // array of items
     // not supported yet
+    dype_array          = typdex_typ_array,                 // array of items
     dype_map            = typdex_typ_map,                   // items map
+    // functions, options
     dype_f              = typdex_typ_f,                     // functions: index is function id
 };
 typedef enum dype dype;
