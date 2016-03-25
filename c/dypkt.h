@@ -75,7 +75,7 @@ dyb_inline dypkt* dyp_unpack(dypkt* dyp, byte* data, uint len, boolean clone)
 {
     if (data)
     {
-        if (clone) return dyb_copy(dyp, data, len, true);
+        if (clone) return dyb_copy(dyp, data, len, false/*it means copy*/);
         else return dyb_refer(dyp, data, len, false);
     }
     return null;
