@@ -164,7 +164,6 @@ dyb_inline dybuf* dyb_refer(dybuf* dyb, byte* data, uint capacity, boolean for_w
     dyb->_data = data;
     dyb->_capacity = capacity;
     dyb->_fixedCapacity = true;
-    dyb->_should_release_instance = false;
     dyb->_should_release_data = false;
 
     if (for_write)
