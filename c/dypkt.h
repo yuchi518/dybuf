@@ -60,7 +60,7 @@ enum dype_fid
 typedef enum dype_fid dype_fid;
 
 /**
- *  data: If null, create memory, else refer to it (Use in one block, don't keep it).
+ *  data: If null, create memory, else refer to it (Not owner).
  */
 dyb_inline dypkt* dyp_pack(dypkt* dyp, byte* data, uint capacity)
 {
@@ -69,7 +69,7 @@ dyb_inline dypkt* dyp_pack(dypkt* dyp, byte* data, uint capacity)
 }
 
 /**
- *  data: If null, create
+ *  data: If null, error. If clone is true, copy to a new memory, else refer to it (Not owner).
  */
 dyb_inline dypkt* dyp_unpack(dypkt* dyp, byte* data, uint len, boolean clone)
 {
