@@ -44,7 +44,9 @@ plat_inline void* plat_mem_allocate(uint size)
     // TO-DO: implement
     return NULL;
 #else
-    return malloc(size);
+    void* mem = malloc(size);
+    if (mem) memset(mem, 0, size);
+    return mem;
 #endif
 #endif
 }
@@ -56,7 +58,7 @@ plat_inline void plat_mem_release(void* mem)
 #ifdef __KERNEL__
     // TO-DO: implement
 #else
-    free(mem);
+    if (mem) free(mem);
 #endif
 #endif
 }

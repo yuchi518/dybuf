@@ -32,7 +32,7 @@
 typedef enum {
     false = 0,
     true,
-} boolean;
+} __attribute__((packed)) boolean;
 
 typedef boolean bool;
 
