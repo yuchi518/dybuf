@@ -23,7 +23,7 @@ add_custom_command(OUTPUT json/json.lex.c
 add_custom_target(RunGenerator DEPENDS json/json.yacc.c json/json.lex.c
         COMMENT "flex & bison")
 
-set(SOURCE_FILES main.c)
+set(SOURCE_FILES main.c platform/plat_mgn_mem.h)
 add_library(json json/cjson.c json/cjson_runtime.c)
 add_dependencies(json RunGenerator)
 

@@ -28,17 +28,18 @@
 #include "dybuf.h"
 #include "dypkt.h"
 #include "cjson.h"
+#include "plat_mgn_mem.h"
 
 void cjson_test(void);
 void cjson_parse_test(void);
 void dybuf_test(void);
 void dybuf_test_ref(void);
 void dypkt_test(void);
+void mgn_m_test(void);
 
 int main(int argc, char **argv)
 {
     srand(time(NULL));
-
     unsigned int profile_size = 1024, alloc_idx, release_idx, i;
     void** alloc_rec = malloc(profile_size*sizeof(alloc_rec[0]));
     void** release_rec = malloc(profile_size*sizeof(release_rec[0]));
@@ -63,6 +64,8 @@ int main(int argc, char **argv)
     dybuf_test();
     dybuf_test_ref();
     dypkt_test();
+
+    mgn_m_test();
 
     return 0;
 }
@@ -293,4 +296,23 @@ void dypkt_test(void)
     printf("size: %u ? %u\n", size, dyp_get_position(dyp1));
 
     dyp_release(dyp1);
+}
+
+
+void mgn_m_test(void)
+{
+    mgn_memory_pool pool = NULL;
+
+    void *m = NULL, *m2, *m3;
+    m = mgn_mem_alloc(&pool, NULL, 100);
+    m2 = mgn_mem_alloc(&pool, NULL, 100);
+    m3 = mgn_mem_alloc(&pool, NULL, 100);
+    m = mgn_mem_alloc(&pool, m, 120);
+    mgn_mem_retain(&pool, m3);
+    mgn_mem_release(&pool, m);
+    mgn_mem_release(&pool, m3);
+    mgn_mem_autorelease(&pool, m3);
+    mgn_mem_release_unused(&pool);
+    mgn_mem_release_all(&pool);
+
 }
