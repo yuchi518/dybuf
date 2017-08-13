@@ -10,7 +10,7 @@
     typedef struct jsobj* YYSTYPE;
     #define YYSTYPE_IS_DECLARED     1
 
-char *strconcat(char *str1, char *str2);
+    char *strconcat(char *str1, char *str2);
     int yylex();
     void yyerror (char const *s);
 %}
