@@ -1,0 +1,46 @@
+[build-system]
+requires = [
+    "setuptools>=68",
+    "wheel",
+    "Cython>=0.29.37",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dybuf"
+version = "0.1.0"
+description = "Python bindings for the dybuf dynamic buffer library."
+readme = "README.md"
+authors = [{ name = "Yuchi", email = "yuchi518@gmail.com" }]
+maintainers = [{ name = "Yuchi", email = "yuchi518@gmail.com" }]
+license = { file = "LICENSE" }
+keywords = ["buffer", "binary", "cython"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: C",
+    "Programming Language :: Cython",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.8"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/yuchi518/dybuf"
+Issues = "https://github.com/yuchi518/dybuf/issues"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+dybuf = []
+
+[tool.pytest.ini_options]
+testpaths = ["src/dybuf/tests"]
