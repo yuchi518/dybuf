@@ -96,18 +96,47 @@ def test_to_bytes_returns_written_data():
     assert buf.limit == 2
 
 
-def test_random_uint64_roundtrip_with_seed():
+def test_random_var_uint_roundtrip_with_seed():
     seed = 20250219
     rng = random.Random(seed)
     values = [rng.getrandbits(64) for _ in range(10_000)]
 
     buf = DyBuf(capacity=128)
     for value in values:
-        buf.append_uint64(value)
+        buf.append_var_uint(value)
+
+    buf.append_var_uint(0)
+    buf.append_var_uint((1 << 64) - 1)
 
     buf.flip()
 
     for expected in values:
-        assert buf.next_uint64() == expected
+        assert buf.next_var_uint() == expected
+
+    assert buf.next_var_uint() == 0
+    assert buf.next_var_uint() == (1 << 64) - 1
+
+    assert buf.remaining() == 0
+
+
+def test_random_var_int_roundtrip_with_seed():
+    seed = 42
+    rng = random.Random(seed)
+    values = [rng.randint(-(1 << 63) + 1, (1 << 63) - 1) for _ in range(10_000)]
+
+    buf = DyBuf(capacity=128)
+    for value in values:
+        buf.append_var_int(value)
+
+    buf.append_var_int(-(1 << 63) + 1)
+    buf.append_var_int((1 << 63) - 1)
+
+    buf.flip()
+
+    for expected in values:
+        assert buf.next_var_int() == expected
+
+    assert buf.next_var_int() == -(1 << 63) + 1
+    assert buf.next_var_int() == (1 << 63) - 1
 
     assert buf.remaining() == 0

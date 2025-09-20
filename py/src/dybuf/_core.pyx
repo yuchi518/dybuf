@@ -170,6 +170,12 @@ cdef class DyBuf:
     def append_uint64(self, unsigned long long value):
         _ensure_success(dyb_append_u64(self._buffer, <uint64>value))
 
+    def append_var_uint(self, unsigned long long value):
+        _ensure_success(dyb_append_var_u64(self._buffer, <uint64>value))
+
+    def append_var_int(self, long long value):
+        _ensure_success(dyb_append_var_s64(self._buffer, <int64>value))
+
     def next_bool(self):
         _ensure_readable(self._buffer, 1)
         return bool(dyb_next_bool(self._buffer))
@@ -241,6 +247,12 @@ cdef class DyBuf:
     def peek_uint64(self):
         _ensure_readable(self._buffer, 8)
         return dyb_peek_u64(self._buffer)
+
+    def next_var_uint(self):
+        return dyb_next_var_u64(self._buffer)
+
+    def next_var_int(self):
+        return dyb_next_var_s64(self._buffer)
 
     def __len__(self):
         return dyb_get_limit(self._buffer)

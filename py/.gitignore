@@ -8,6 +8,7 @@ build/
 dist/
 *.egg-info/
 **/*.egg-info/
+docs/_build/
 
 # Cython generated sources and extensions
 src/dybuf/_core.c
