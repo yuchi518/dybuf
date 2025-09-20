@@ -29,12 +29,17 @@
 #endif
 
 
-typedef enum {
-    false = 0,
-    true,
-} __attribute__((packed)) boolean;
+typedef unsigned char boolean;
 
-typedef boolean bool;
+#ifndef __cplusplus
+typedef unsigned char bool;
+#ifndef true
+#define true ((bool)1)
+#endif
+#ifndef false
+#define false ((bool)0)
+#endif
+#endif
 
 typedef unsigned char       byte;
 typedef unsigned int        uint;
@@ -52,6 +57,3 @@ typedef unsigned long long  uint64;
 #define plat_inline     static inline
 
 #endif //_PLAT_C_TYPE_
-
-
-
