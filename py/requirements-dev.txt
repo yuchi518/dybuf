@@ -1,0 +1,4 @@
+Cython>=0.29.37
+build>=1.0.0
+cibuildwheel>=2.16.0
+pytest>=7.0.0

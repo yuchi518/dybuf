@@ -1,0 +1,22 @@
+# Python cache and test output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+**/*.egg-info/
+
+# Cython generated sources and extensions
+src/dybuf/_core.c
+*.so
+
+# IDE and project files
+*.iml
+.idea/
+.vscode/
+
+# macOS metadata
+.DS_Store
