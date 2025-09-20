@@ -65,7 +65,7 @@ jobs:
           find dist -name "*.whl" -exec cp {} upload/ \;
           find dist -name "*.tar.gz" -exec cp {} upload/ \;
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.8.11
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: upload
           password: ${{ secrets.PYPI_API_TOKEN }}
