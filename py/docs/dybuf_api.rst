@@ -140,6 +140,22 @@ All append methods advance the write cursor and grow ``limit`` if necessary.
    signed 64-bit integers respectively.
 
 
+Variable-Length Data Methods
+----------------------------
+
+These helpers serialize arbitrary byte buffers or encoded strings with a
+varint-prefixed length.
+
+.. method:: DyBuf.append_var_bytes(data)
+.. method:: DyBuf.append_var_string(text, encoding='utf-8')
+
+   ``append_var_bytes`` accepts any bytes-like object and prefixes it with a
+   variable-length size. ``append_var_string`` first encodes the Python string
+   using the specified encoding (default UTF-8) and writes the resulting bytes
+   with the same length-prefixed format. Any codec supported by
+   :py:meth:`str.encode` can be used.
+
+
 Integer Read/Peek Methods
 -------------------------
 
@@ -168,6 +184,13 @@ The ``next_*`` methods consume bytes while the ``peek_*`` counterparts leave
 .. method:: DyBuf.next_var_int()
 
    Raise :class:`EOFError` if insufficient bytes remain in the buffer.
+
+.. method:: DyBuf.next_var_bytes()
+.. method:: DyBuf.next_var_string(encoding='utf-8')
+
+   Read data written with :meth:`append_var_bytes` or
+   :meth:`append_var_string`. ``next_var_string`` decodes the retrieved bytes
+   using the provided encoding (default UTF-8).
 
 
 Python Special Methods

@@ -176,6 +176,22 @@ cdef class DyBuf:
     def append_var_int(self, long long value):
         _ensure_success(dyb_append_var_s64(self._buffer, <int64>value))
 
+    def append_var_bytes(self, object data):
+        cdef const unsigned char[::1] mv_view
+        cdef const unsigned char* ptr = NULL
+        cdef Py_ssize_t length
+
+        mv = memoryview(data).cast('B')
+        mv_view = mv
+        length = mv.nbytes
+        if length:
+            ptr = &mv_view[0]
+        _ensure_success(dyb_append_data_with_var_len(self._buffer, <uint8*>ptr, <uint>length))
+
+    def append_var_string(self, str text, encoding="utf-8"):
+        cdef bytes encoded = text.encode(encoding)
+        self.append_var_bytes(encoded)
+
     def next_bool(self):
         _ensure_readable(self._buffer, 1)
         return bool(dyb_next_bool(self._buffer))
@@ -253,6 +269,18 @@ cdef class DyBuf:
 
     def next_var_int(self):
         return dyb_next_var_s64(self._buffer)
+
+    def next_var_bytes(self):
+        cdef uint size = 0
+        cdef uint8* ptr
+        ptr = dyb_next_data_with_var_len(self._buffer, &size)
+        if ptr == NULL and size != 0:
+            raise EOFError("not enough data in buffer")
+        return PyBytes_FromStringAndSize(<char*>ptr, size)
+
+    def next_var_string(self, encoding="utf-8"):
+        cdef bytes data = self.next_var_bytes()
+        return data.decode(encoding)
 
     def __len__(self):
         return dyb_get_limit(self._buffer)

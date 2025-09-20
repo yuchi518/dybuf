@@ -140,3 +140,53 @@ def test_random_var_int_roundtrip_with_seed():
     assert buf.next_var_int() == (1 << 63) - 1
 
     assert buf.remaining() == 0
+
+
+def test_var_bytes_roundtrip():
+    payloads = [
+        b"",
+        b"abc",
+        bytes(range(10)),
+        bytes(range(256)),
+    ]
+
+    buf = DyBuf(capacity=32)
+    for payload in payloads:
+        buf.append_var_bytes(payload)
+
+    buf.flip()
+
+    for expected in payloads:
+        assert buf.next_var_bytes() == expected
+
+    assert buf.remaining() == 0
+
+
+def test_var_string_roundtrip_utf8():
+    strings = ["", "hello", "你好", "🙂"]
+
+    buf = DyBuf(capacity=32)
+    for s in strings:
+        buf.append_var_string(s)
+
+    buf.flip()
+
+    for expected in strings:
+        assert buf.next_var_string() == expected
+
+    assert buf.remaining() == 0
+
+
+def test_var_string_custom_encoding_roundtrip():
+    strings = ["αβ", "測試"]
+
+    buf = DyBuf(capacity=32)
+    for s in strings:
+        buf.append_var_string(s, encoding="utf-16-le")
+
+    buf.flip()
+
+    for expected in strings:
+        assert buf.next_var_string(encoding="utf-16-le") == expected
+
+    assert buf.remaining() == 0
