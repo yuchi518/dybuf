@@ -22,10 +22,12 @@ pip install dybuf
 ```python
 from dybuf import DyBuf
 
-buf = DyBuf(capacity=64)
-buf.append_uint16(0x1234)
-buf.append_uint32(0xDEADBEEF)
-buf.append_bool(True)
+buf = (
+    DyBuf(capacity=64)
+    .append_uint16(0x1234)
+    .append_uint32(0xDEADBEEF)
+    .append_bool(True)
+)
 
 buf.flip()  # prepare for reading
 print(hex(buf.next_uint16()))  # 0x1234
@@ -43,8 +45,7 @@ print(buf.next_bool())         # True
 from dybuf import DyBuf, TYPDEX_TYP_INT, TYPDEX_TYP_STRING
 
 buf = DyBuf(capacity=32)
-buf.append_typdex(TYPDEX_TYP_INT, 3)
-buf.append_typdex(TYPDEX_TYP_STRING, 0x42)
+buf.append_typdex(TYPDEX_TYP_INT, 3).append_typdex(TYPDEX_TYP_STRING, 0x42)
 
 buf.flip()
 

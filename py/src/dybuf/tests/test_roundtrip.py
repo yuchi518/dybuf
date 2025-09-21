@@ -244,3 +244,22 @@ def test_typdex_incomplete_payload_raises_eof():
 
     with pytest.raises(EOFError):
         buf.next_typdex()
+
+
+def test_append_methods_support_chaining():
+    buf = (
+        DyBuf(capacity=16)
+        .append_uint8(0xAA)
+        .append_uint16(0xBEEF)
+        .append_var_uint(42)
+        .append_var_string("hi")
+        .append_typdex(TYPDEX_TYP_UINT, 7)
+    )
+
+    buf.flip()
+
+    assert buf.next_uint8() == 0xAA
+    assert buf.next_uint16() == 0xBEEF
+    assert buf.next_var_uint() == 42
+    assert buf.next_var_string() == "hi"
+    assert buf.next_typdex() == (TYPDEX_TYP_UINT, 7)

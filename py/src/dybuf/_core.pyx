@@ -110,6 +110,7 @@ cdef class DyBuf:
 
     def ensure_capacity(self, unsigned int new_capacity):
         _ensure_success(dyb_set_capacity(self._buffer, new_capacity))
+        return self
 
     def to_bytes(self):
         cdef unsigned int length = dyb_get_limit(self._buffer)
@@ -124,6 +125,7 @@ cdef class DyBuf:
         if n:
             ptr = &mv_view[0]
         _ensure_success(dyb_append_data_without_len(self._buffer, <uint8*>ptr, <uint>n))
+        return self
 
     def read(self, size=None):
         cdef unsigned int amount
@@ -144,48 +146,59 @@ cdef class DyBuf:
 
     def append_bool(self, bint value):
         _ensure_success(dyb_append_bool(self._buffer, value))
+        return self
 
     def append_uint8(self, unsigned int value):
         if value > 0xFF:
             raise ValueError("value out of range for uint8")
         _ensure_success(dyb_append_u8(self._buffer, <uint8>value))
+        return self
 
     def append_uint16(self, unsigned int value):
         if value > 0xFFFF:
             raise ValueError("value out of range for uint16")
         _ensure_success(dyb_append_u16(self._buffer, <uint16>value))
+        return self
 
     def append_uint24(self, unsigned int value):
         if value > 0xFFFFFF:
             raise ValueError("value out of range for uint24")
         _ensure_success(dyb_append_u24(self._buffer, <uint32>value))
+        return self
 
     def append_uint32(self, unsigned int value):
         _ensure_success(dyb_append_u32(self._buffer, <uint32>value))
+        return self
 
     def append_uint40(self, unsigned long long value):
         if value > ((1 << 40) - 1):
             raise ValueError("value out of range for uint40")
         _ensure_success(dyb_append_u40(self._buffer, <uint64>value))
+        return self
 
     def append_uint48(self, unsigned long long value):
         if value > ((1 << 48) - 1):
             raise ValueError("value out of range for uint48")
         _ensure_success(dyb_append_u48(self._buffer, <uint64>value))
+        return self
 
     def append_uint56(self, unsigned long long value):
         if value > ((1 << 56) - 1):
             raise ValueError("value out of range for uint56")
         _ensure_success(dyb_append_u56(self._buffer, <uint64>value))
+        return self
 
     def append_uint64(self, unsigned long long value):
         _ensure_success(dyb_append_u64(self._buffer, <uint64>value))
+        return self
 
     def append_var_uint(self, unsigned long long value):
         _ensure_success(dyb_append_var_u64(self._buffer, <uint64>value))
+        return self
 
     def append_var_int(self, long long value):
         _ensure_success(dyb_append_var_s64(self._buffer, <int64>value))
+        return self
 
     def append_var_bytes(self, object data):
         cdef const unsigned char[::1] mv_view
@@ -198,16 +211,19 @@ cdef class DyBuf:
         if length:
             ptr = &mv_view[0]
         _ensure_success(dyb_append_data_with_var_len(self._buffer, <uint8*>ptr, <uint>length))
+        return self
 
     def append_var_string(self, str text, encoding="utf-8"):
         cdef bytes encoded = text.encode(encoding)
         self.append_var_bytes(encoded)
+        return self
 
     def append_typdex(self, unsigned int type, unsigned int index):
         if type > 0xFF:
             raise ValueError("typdex type must fit in 8 bits")
         if dyb_append_typdex(self._buffer, <uint8>type, <uint>index) == NULL:
             raise ValueError("typdex index is out of supported range")
+        return self
 
     cdef void _ensure_typdex_available(self):
         cdef uint remaining = dyb_get_remainder(self._buffer)

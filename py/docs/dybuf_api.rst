@@ -118,7 +118,8 @@ All append methods advance the write cursor and grow ``limit`` if necessary.
 
 .. method:: DyBuf.append_bool(value)
 
-   Append ``value`` encoded as a single byte.
+   Append ``value`` encoded as a single byte. Returns ``self`` to support
+   fluent call chains.
 
 .. method:: DyBuf.append_uint8(value)
 .. method:: DyBuf.append_uint16(value)
@@ -133,7 +134,8 @@ All append methods advance the write cursor and grow ``limit`` if necessary.
 
    Append unsigned integers using big-endian network byte order. Each method
    validates that ``value`` fits the declared bit-width and raises
-   :class:`ValueError` otherwise.
+   :class:`ValueError` otherwise. All appenders return ``self`` so they can be
+   chained fluently.
 
    ``append_var_uint`` and ``append_var_int`` use the library's variable-length
    encoding (similar to protobuf varints) to store unsigned or zig-zag encoded
@@ -153,7 +155,7 @@ varint-prefixed length.
    variable-length size. ``append_var_string`` first encodes the Python string
    using the specified encoding (default UTF-8) and writes the resulting bytes
    with the same length-prefixed format. Any codec supported by
-   :py:meth:`str.encode` can be used.
+   :py:meth:`str.encode` can be used. Both methods return ``self`` for chaining.
 
 
 Integer Read/Peek Methods
@@ -204,7 +206,8 @@ related protocols to describe schema metadata or function identifiers.
 
    Append a typdex marker. ``type`` must fit within 8 bits. The method selects
    the smallest encoding that can represent ``index`` and raises
-   :class:`ValueError` if no encoding is available.
+   :class:`ValueError` if no encoding is available. Returns ``self`` for
+   chaining with other append operations.
 
 .. method:: DyBuf.peek_typdex()
 .. method:: DyBuf.next_typdex()
