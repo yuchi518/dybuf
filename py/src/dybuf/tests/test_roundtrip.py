@@ -2,7 +2,12 @@ import random
 
 import pytest
 
-from dybuf import DyBuf
+from dybuf import (
+    DyBuf,
+    TYPDEX_TYP_INT,
+    TYPDEX_TYP_STRING,
+    TYPDEX_TYP_UINT,
+)
 
 
 def test_roundtrip_operations():
@@ -190,3 +195,52 @@ def test_var_string_custom_encoding_roundtrip():
         assert buf.next_var_string(encoding="utf-16-le") == expected
 
     assert buf.remaining() == 0
+
+
+def test_typdex_roundtrip_four_encodings():
+    entries = [
+        (TYPDEX_TYP_INT, 3),
+        (TYPDEX_TYP_STRING, 0x42),
+        (0x50, 0x1234),
+        (0x80, 0x20000),
+    ]
+
+    buf = DyBuf(capacity=32)
+    for entry in entries:
+        buf.append_typdex(*entry)
+
+    buf.flip()
+
+    for expected in entries:
+        assert buf.peek_typdex() == expected
+        assert buf.next_typdex() == expected
+
+    assert buf.remaining() == 0
+
+
+def test_typdex_append_rejects_invalid_values():
+    buf = DyBuf(capacity=8)
+
+    with pytest.raises(ValueError):
+        buf.append_typdex(0x1FF, 0)
+
+    with pytest.raises(ValueError):
+        buf.append_typdex(TYPDEX_TYP_UINT, 0x200000)
+
+
+def test_typdex_invalid_header_raises_value_error():
+    buf = DyBuf(capacity=4)
+    buf.write(b"\xff")
+    buf.flip()
+
+    with pytest.raises(ValueError):
+        buf.next_typdex()
+
+
+def test_typdex_incomplete_payload_raises_eof():
+    buf = DyBuf(capacity=4)
+    buf.write(bytes([0x80]))
+    buf.flip()
+
+    with pytest.raises(EOFError):
+        buf.next_typdex()

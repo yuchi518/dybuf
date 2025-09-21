@@ -77,3 +77,19 @@ cdef extern from "dybuf.h":
 
     uint8* dyb_next_data_without_len(dybuf* dyb, uint len)
     dybuf* dyb_append_data_without_len(dybuf* dyb, uint8* data, uint length)
+
+    cdef const unsigned int typdex_typ_none
+    cdef const unsigned int typdex_typ_bool
+    cdef const unsigned int typdex_typ_int
+    cdef const unsigned int typdex_typ_uint
+    cdef const unsigned int typdex_typ_float
+    cdef const unsigned int typdex_typ_double
+    cdef const unsigned int typdex_typ_string
+    cdef const unsigned int typdex_typ_bytes
+    cdef const unsigned int typdex_typ_array
+    cdef const unsigned int typdex_typ_map
+    cdef const unsigned int typdex_typ_f
+
+    dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint index)
+    void dyb_next_typdex(dybuf* dyb, uint8* type, uint* index)
+    void dyb_peek_typdex(dybuf* dyb, uint8* type, uint* index)

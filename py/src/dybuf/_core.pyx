@@ -10,6 +10,17 @@ cdef inline void _ensure_readable(dybuf* buffer, unsigned int amount):
     if dyb_get_remainder(buffer) < amount:
         raise EOFError("not enough data in buffer")
 
+cdef inline unsigned int _required_typdex_length(uint8 header):
+    if (header & 0x80) == 0:
+        return 1
+    elif (header & 0x40) == 0:
+        return 2
+    elif (header & 0x20) == 0:
+        return 3
+    elif (header & 0x10) == 0:
+        return 4
+    return 0
+
 cdef class DyBuf:
     cdef dybuf* _buffer
     cdef object _keep_alive
@@ -192,6 +203,39 @@ cdef class DyBuf:
         cdef bytes encoded = text.encode(encoding)
         self.append_var_bytes(encoded)
 
+    def append_typdex(self, unsigned int type, unsigned int index):
+        if type > 0xFF:
+            raise ValueError("typdex type must fit in 8 bits")
+        if dyb_append_typdex(self._buffer, <uint8>type, <uint>index) == NULL:
+            raise ValueError("typdex index is out of supported range")
+
+    cdef void _ensure_typdex_available(self):
+        cdef uint remaining = dyb_get_remainder(self._buffer)
+        cdef uint8 header
+        cdef unsigned int needed
+        if remaining == 0:
+            raise EOFError("not enough data in buffer")
+        header = dyb_peek_u8(self._buffer)
+        needed = _required_typdex_length(header)
+        if needed == 0:
+            raise ValueError("invalid typdex header")
+        if remaining < needed:
+            raise EOFError("not enough data in buffer")
+
+    def next_typdex(self):
+        cdef uint8 typ = 0
+        cdef uint index = 0
+        self._ensure_typdex_available()
+        dyb_next_typdex(self._buffer, &typ, &index)
+        return typ, index
+
+    def peek_typdex(self):
+        cdef uint8 typ = 0
+        cdef uint index = 0
+        self._ensure_typdex_available()
+        dyb_peek_typdex(self._buffer, &typ, &index)
+        return typ, index
+
     def next_bool(self):
         _ensure_readable(self._buffer, 1)
         return bool(dyb_next_bool(self._buffer))
@@ -287,3 +331,15 @@ cdef class DyBuf:
 
     def __repr__(self):
         return f"DyBuf(capacity={dyb_get_capacity(self._buffer)}, limit={dyb_get_limit(self._buffer)}, position={dyb_get_position(self._buffer)})"
+
+TYPDEX_TYP_NONE = typdex_typ_none
+TYPDEX_TYP_BOOL = typdex_typ_bool
+TYPDEX_TYP_INT = typdex_typ_int
+TYPDEX_TYP_UINT = typdex_typ_uint
+TYPDEX_TYP_FLOAT = typdex_typ_float
+TYPDEX_TYP_DOUBLE = typdex_typ_double
+TYPDEX_TYP_STRING = typdex_typ_string
+TYPDEX_TYP_BYTES = typdex_typ_bytes
+TYPDEX_TYP_ARRAY = typdex_typ_array
+TYPDEX_TYP_MAP = typdex_typ_map
+TYPDEX_TYP_F = typdex_typ_f

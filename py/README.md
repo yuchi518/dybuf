@@ -35,6 +35,26 @@ print(buf.next_bool())         # True
 
 `write()` and `read()` let you work directly with arbitrary byte payloads, while `position`, `limit`, and `capacity` expose the cursor-style API provided by the original library.
 
+## Typdex markers
+
+`DyBuf` also exposes helpers for working with the library's **typdex** encodings—a compact representation of a logical type paired with an index. These markers are commonly used by higher-level protocols such as `dypkt` to describe field layouts or function identifiers.
+
+```python
+from dybuf import DyBuf, TYPDEX_TYP_INT, TYPDEX_TYP_STRING
+
+buf = DyBuf(capacity=32)
+buf.append_typdex(TYPDEX_TYP_INT, 3)
+buf.append_typdex(TYPDEX_TYP_STRING, 0x42)
+
+buf.flip()
+
+assert buf.peek_typdex() == (TYPDEX_TYP_INT, 3)
+assert buf.next_typdex() == (TYPDEX_TYP_INT, 3)
+assert buf.next_typdex() == (TYPDEX_TYP_STRING, 0x42)
+```
+
+The constants `TYPDEX_TYP_*` mirror the underlying C enums. `append_typdex` validates that the type fits in 8 bits and the index can be represented by the packed encoding. `next_typdex` and `peek_typdex` raise `EOFError` for truncated markers and `ValueError` when encountering a malformed header.
+
 ## Developing locally
 
 Create a virtual environment and install the build requirements:
