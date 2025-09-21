@@ -7,7 +7,7 @@
 ## Projects in this repository
 
 - **C** implementation (stable): [`/c`](c)
-- **Python** bindings (published as `dybuf` on PyPI, latest release `0.1.0` and evolving): [`/py`](py)
+- **Python** bindings (published as `dybuf` on PyPI, latest release `0.2.0` and evolving): [`/py`](py)
 - **Java** bindings (complete): [`/java`](java)
 - **JavaScript** bindings: coming soon
 - **Objective-C** bindings: planned

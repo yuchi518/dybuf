@@ -27,4 +27,4 @@ __all__ = [
     "TYPDEX_TYP_MAP",
     "TYPDEX_TYP_F",
 ]
-__version__ = "0.1.0"
+__version__ = "0.2.0"
