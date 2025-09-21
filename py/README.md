@@ -22,10 +22,12 @@ pip install dybuf
 ```python
 from dybuf import DyBuf
 
-buf = DyBuf(capacity=64)
-buf.append_uint16(0x1234)
-buf.append_uint32(0xDEADBEEF)
-buf.append_bool(True)
+buf = (
+    DyBuf(capacity=64)
+    .append_uint16(0x1234)
+    .append_uint32(0xDEADBEEF)
+    .append_bool(True)
+)
 
 buf.flip()  # prepare for reading
 print(hex(buf.next_uint16()))  # 0x1234
@@ -34,6 +36,25 @@ print(buf.next_bool())         # True
 ```
 
 `write()` and `read()` let you work directly with arbitrary byte payloads, while `position`, `limit`, and `capacity` expose the cursor-style API provided by the original library.
+
+## Typdex markers
+
+`DyBuf` also exposes helpers for working with the library's **typdex** encodings—a compact representation of a logical type paired with an index. These markers are commonly used by higher-level protocols such as `dypkt` to describe field layouts or function identifiers.
+
+```python
+from dybuf import DyBuf, TYPDEX_TYP_INT, TYPDEX_TYP_STRING
+
+buf = DyBuf(capacity=32)
+buf.append_typdex(TYPDEX_TYP_INT, 3).append_typdex(TYPDEX_TYP_STRING, 0x42)
+
+buf.flip()
+
+assert buf.peek_typdex() == (TYPDEX_TYP_INT, 3)
+assert buf.next_typdex() == (TYPDEX_TYP_INT, 3)
+assert buf.next_typdex() == (TYPDEX_TYP_STRING, 0x42)
+```
+
+The constants `TYPDEX_TYP_*` mirror the underlying C enums. `append_typdex` validates that the type fits in 8 bits and the index can be represented by the packed encoding. `next_typdex` and `peek_typdex` raise `EOFError` for truncated markers and `ValueError` when encountering a malformed header.
 
 ## Developing locally
 
@@ -68,7 +89,7 @@ open docs/_build/html/index.html  # or use your preferred viewer
 
 ## Automated releases
 
-A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.1.0`) to trigger the pipeline.
+A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.2.0`) to trigger the pipeline.
 
 ## Licensing
 

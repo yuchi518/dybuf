@@ -118,7 +118,8 @@ All append methods advance the write cursor and grow ``limit`` if necessary.
 
 .. method:: DyBuf.append_bool(value)
 
-   Append ``value`` encoded as a single byte.
+   Append ``value`` encoded as a single byte. Returns ``self`` to support
+   fluent call chains.
 
 .. method:: DyBuf.append_uint8(value)
 .. method:: DyBuf.append_uint16(value)
@@ -133,7 +134,8 @@ All append methods advance the write cursor and grow ``limit`` if necessary.
 
    Append unsigned integers using big-endian network byte order. Each method
    validates that ``value`` fits the declared bit-width and raises
-   :class:`ValueError` otherwise.
+   :class:`ValueError` otherwise. All appenders return ``self`` so they can be
+   chained fluently.
 
    ``append_var_uint`` and ``append_var_int`` use the library's variable-length
    encoding (similar to protobuf varints) to store unsigned or zig-zag encoded
@@ -153,7 +155,7 @@ varint-prefixed length.
    variable-length size. ``append_var_string`` first encodes the Python string
    using the specified encoding (default UTF-8) and writes the resulting bytes
    with the same length-prefixed format. Any codec supported by
-   :py:meth:`str.encode` can be used.
+   :py:meth:`str.encode` can be used. Both methods return ``self`` for chaining.
 
 
 Integer Read/Peek Methods
@@ -191,6 +193,52 @@ The ``next_*`` methods consume bytes while the ``peek_*`` counterparts leave
    Read data written with :meth:`append_var_bytes` or
    :meth:`append_var_string`. ``next_var_string`` decodes the retrieved bytes
    using the provided encoding (default UTF-8).
+
+
+Typdex Helpers
+--------------
+
+``DyBuf`` can emit and inspect **typdex** markers—compact encodings of a logical
+type identifier paired with an index. These are typically used by ``dypkt`` and
+related protocols to describe schema metadata or function identifiers.
+
+.. method:: DyBuf.append_typdex(type, index)
+
+   Append a typdex marker. ``type`` must fit within 8 bits. The method selects
+   the smallest encoding that can represent ``index`` and raises
+   :class:`ValueError` if no encoding is available. Returns ``self`` for
+   chaining with other append operations.
+
+.. method:: DyBuf.peek_typdex()
+.. method:: DyBuf.next_typdex()
+
+   Inspect or consume the next typdex marker, returning a ``(type, index)``
+   tuple. Both helpers raise :class:`EOFError` when insufficient bytes remain
+   and :class:`ValueError` if the header bits do not describe a valid typdex
+   encoding.
+
+
+Typdex Constants
+----------------
+
+The module re-exports the canonical typdex type identifiers from the C library
+for convenience:
+
+.. data:: TYPDEX_TYP_NONE
+.. data:: TYPDEX_TYP_BOOL
+.. data:: TYPDEX_TYP_INT
+.. data:: TYPDEX_TYP_UINT
+.. data:: TYPDEX_TYP_FLOAT
+.. data:: TYPDEX_TYP_DOUBLE
+.. data:: TYPDEX_TYP_STRING
+.. data:: TYPDEX_TYP_BYTES
+.. data:: TYPDEX_TYP_ARRAY
+.. data:: TYPDEX_TYP_MAP
+.. data:: TYPDEX_TYP_F
+
+These constants can be passed to :meth:`DyBuf.append_typdex` (or compared with
+the values returned by :meth:`DyBuf.peek_typdex`) to avoid hard-coding numeric
+literals.
 
 
 Python Special Methods

@@ -10,6 +10,17 @@ cdef inline void _ensure_readable(dybuf* buffer, unsigned int amount):
     if dyb_get_remainder(buffer) < amount:
         raise EOFError("not enough data in buffer")
 
+cdef inline unsigned int _required_typdex_length(uint8 header):
+    if (header & 0x80) == 0:
+        return 1
+    elif (header & 0x40) == 0:
+        return 2
+    elif (header & 0x20) == 0:
+        return 3
+    elif (header & 0x10) == 0:
+        return 4
+    return 0
+
 cdef class DyBuf:
     cdef dybuf* _buffer
     cdef object _keep_alive
@@ -99,6 +110,7 @@ cdef class DyBuf:
 
     def ensure_capacity(self, unsigned int new_capacity):
         _ensure_success(dyb_set_capacity(self._buffer, new_capacity))
+        return self
 
     def to_bytes(self):
         cdef unsigned int length = dyb_get_limit(self._buffer)
@@ -113,6 +125,7 @@ cdef class DyBuf:
         if n:
             ptr = &mv_view[0]
         _ensure_success(dyb_append_data_without_len(self._buffer, <uint8*>ptr, <uint>n))
+        return self
 
     def read(self, size=None):
         cdef unsigned int amount
@@ -133,48 +146,59 @@ cdef class DyBuf:
 
     def append_bool(self, bint value):
         _ensure_success(dyb_append_bool(self._buffer, value))
+        return self
 
     def append_uint8(self, unsigned int value):
         if value > 0xFF:
             raise ValueError("value out of range for uint8")
         _ensure_success(dyb_append_u8(self._buffer, <uint8>value))
+        return self
 
     def append_uint16(self, unsigned int value):
         if value > 0xFFFF:
             raise ValueError("value out of range for uint16")
         _ensure_success(dyb_append_u16(self._buffer, <uint16>value))
+        return self
 
     def append_uint24(self, unsigned int value):
         if value > 0xFFFFFF:
             raise ValueError("value out of range for uint24")
         _ensure_success(dyb_append_u24(self._buffer, <uint32>value))
+        return self
 
     def append_uint32(self, unsigned int value):
         _ensure_success(dyb_append_u32(self._buffer, <uint32>value))
+        return self
 
     def append_uint40(self, unsigned long long value):
         if value > ((1 << 40) - 1):
             raise ValueError("value out of range for uint40")
         _ensure_success(dyb_append_u40(self._buffer, <uint64>value))
+        return self
 
     def append_uint48(self, unsigned long long value):
         if value > ((1 << 48) - 1):
             raise ValueError("value out of range for uint48")
         _ensure_success(dyb_append_u48(self._buffer, <uint64>value))
+        return self
 
     def append_uint56(self, unsigned long long value):
         if value > ((1 << 56) - 1):
             raise ValueError("value out of range for uint56")
         _ensure_success(dyb_append_u56(self._buffer, <uint64>value))
+        return self
 
     def append_uint64(self, unsigned long long value):
         _ensure_success(dyb_append_u64(self._buffer, <uint64>value))
+        return self
 
     def append_var_uint(self, unsigned long long value):
         _ensure_success(dyb_append_var_u64(self._buffer, <uint64>value))
+        return self
 
     def append_var_int(self, long long value):
         _ensure_success(dyb_append_var_s64(self._buffer, <int64>value))
+        return self
 
     def append_var_bytes(self, object data):
         cdef const unsigned char[::1] mv_view
@@ -187,10 +211,46 @@ cdef class DyBuf:
         if length:
             ptr = &mv_view[0]
         _ensure_success(dyb_append_data_with_var_len(self._buffer, <uint8*>ptr, <uint>length))
+        return self
 
     def append_var_string(self, str text, encoding="utf-8"):
         cdef bytes encoded = text.encode(encoding)
         self.append_var_bytes(encoded)
+        return self
+
+    def append_typdex(self, unsigned int type, unsigned int index):
+        if type > 0xFF:
+            raise ValueError("typdex type must fit in 8 bits")
+        if dyb_append_typdex(self._buffer, <uint8>type, <uint>index) == NULL:
+            raise ValueError("typdex index is out of supported range")
+        return self
+
+    cdef void _ensure_typdex_available(self):
+        cdef uint remaining = dyb_get_remainder(self._buffer)
+        cdef uint8 header
+        cdef unsigned int needed
+        if remaining == 0:
+            raise EOFError("not enough data in buffer")
+        header = dyb_peek_u8(self._buffer)
+        needed = _required_typdex_length(header)
+        if needed == 0:
+            raise ValueError("invalid typdex header")
+        if remaining < needed:
+            raise EOFError("not enough data in buffer")
+
+    def next_typdex(self):
+        cdef uint8 typ = 0
+        cdef uint index = 0
+        self._ensure_typdex_available()
+        dyb_next_typdex(self._buffer, &typ, &index)
+        return typ, index
+
+    def peek_typdex(self):
+        cdef uint8 typ = 0
+        cdef uint index = 0
+        self._ensure_typdex_available()
+        dyb_peek_typdex(self._buffer, &typ, &index)
+        return typ, index
 
     def next_bool(self):
         _ensure_readable(self._buffer, 1)
@@ -287,3 +347,15 @@ cdef class DyBuf:
 
     def __repr__(self):
         return f"DyBuf(capacity={dyb_get_capacity(self._buffer)}, limit={dyb_get_limit(self._buffer)}, position={dyb_get_position(self._buffer)})"
+
+TYPDEX_TYP_NONE = typdex_typ_none
+TYPDEX_TYP_BOOL = typdex_typ_bool
+TYPDEX_TYP_INT = typdex_typ_int
+TYPDEX_TYP_UINT = typdex_typ_uint
+TYPDEX_TYP_FLOAT = typdex_typ_float
+TYPDEX_TYP_DOUBLE = typdex_typ_double
+TYPDEX_TYP_STRING = typdex_typ_string
+TYPDEX_TYP_BYTES = typdex_typ_bytes
+TYPDEX_TYP_ARRAY = typdex_typ_array
+TYPDEX_TYP_MAP = typdex_typ_map
+TYPDEX_TYP_F = typdex_typ_f
