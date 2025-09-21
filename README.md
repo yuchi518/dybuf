@@ -1,22 +1,24 @@
-# dybuf, dypkt
-**dybuf** lib is a dynamic buffer library, it can be used to mainpulate memory easily. You don't need to care how the data to put into memory. It also supports variable size integer/unsigned integer to reduce data size.
+# dybuf / dypkt
 
-**dypkt** lib is a wrapper of dybuf lib. It helps to mainpulate memory more structurally.
+**dybuf** is a dynamic buffer library that makes binary memory manipulation easy. It supports fixed-width integers, booleans, raw bytes, and compact variable-length encodings so you can focus on protocol logic instead of manual pointer math.
 
+**dypkt** builds upon dybuf to provide a higher-level packet abstraction for structured data handling.
 
-### Version
-0.0.1
+## Projects in this repository
 
-### Programming Language
+- **C** implementation (stable): [`/c`](c)
+- **Python** bindings (published as `dybuf` on PyPI, latest release `0.1.0` and evolving): [`/py`](py)
+- **Java** bindings (complete): [`/java`](java)
+- **JavaScript** bindings: coming soon
+- **Objective-C** bindings: planned
 
-- C: [dybuf-c](https://github.com/yuchi518/dybuf/tree/master/c "dybuf-c")
-- ObjC: ongoing
-- Java: ongoing
+## Roadmap
 
-### ToDo
-- Java, Objective-C lib
+- Publish the initial JavaScript bindings
+- Continue expanding the Python feature set and releases
+- Finish Objective-C bindings
 - Binary JSON converter
 
-License
----
+## License
+
 GPLv2
