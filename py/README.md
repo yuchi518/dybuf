@@ -5,7 +5,8 @@ Python bindings for the [`dybuf`](../c/dybuf.h) dynamic buffer library implement
 ## Key features
 
 - Thin, fast wrapper around the original `dybuf` implementation.
-- Supports reading and writing unsigned integers (8–64 bits), booleans, and raw byte payloads.
+- Supports reading and writing unsigned integers (8–64 bits), booleans, raw byte payloads, and the library’s compact `var_u64`/`var_s64` varints.
+- Exposes typdex markers so higher-level protocols can tag fields without hauling in a full protobuf-style schema.
 - Compatible with Windows, Linux, and macOS thanks to compiled extension modules.
 - Designed for publishing on PyPI with automated release workflows.
 
@@ -110,7 +111,7 @@ open docs/_build/html/index.html  # or use your preferred viewer
 
 ## Automated releases
 
-A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.2.0`) to trigger the pipeline.
+A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.3.0`) to trigger the pipeline.
 
 ## Licensing
 
