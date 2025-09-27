@@ -5,7 +5,8 @@ Python bindings for the [`dybuf`](../c/dybuf.h) dynamic buffer library implement
 ## Key features
 
 - Thin, fast wrapper around the original `dybuf` implementation.
-- Supports reading and writing unsigned integers (8–64 bits), booleans, and raw byte payloads.
+- Supports reading and writing unsigned integers (8–64 bits), booleans, raw byte payloads, and the library’s compact `var_u64`/`var_s64` varints.
+- Exposes typdex markers so higher-level protocols can tag fields without hauling in a full protobuf-style schema.
 - Compatible with Windows, Linux, and macOS thanks to compiled extension modules.
 - Designed for publishing on PyPI with automated release workflows.
 
@@ -36,6 +37,27 @@ print(buf.next_bool())         # True
 ```
 
 `write()` and `read()` let you work directly with arbitrary byte payloads, while `position`, `limit`, and `capacity` expose the cursor-style API provided by the original library.
+
+## Variable-length integers
+
+`DyBuf` supports zig-zag encoded signed integers and unsigned integers using the same compact varint scheme the C library exposes. These helpers keep the payload small for numbers that fit in a few bits.
+
+```python
+from dybuf import DyBuf
+
+buf = (
+    DyBuf(capacity=32)
+    .append_var_s64(-123)
+    .append_var_u64(300)
+)
+
+buf.flip()
+
+print(buf.next_var_s64())  # -123
+print(buf.next_var_u64())  # 300
+```
+
+Use `append_var_s64` / `next_var_s64` when you need negative values; the encoding automatically performs zig-zag conversion under the hood. For values that are always non-negative, stick to `append_var_u64` / `next_var_u64` to avoid the extra zig-zag step. The legacy `append_var_int` / `next_var_int` and `append_var_uint` / `next_var_uint` aliases still work but emit `DeprecationWarning` so callers can migrate. The same encoding also powers `append_var_bytes` and `append_var_string`, which prefix their payload with a varint length field for round-tripping arbitrary byte sequences.
 
 ## Typdex markers
 
@@ -89,7 +111,7 @@ open docs/_build/html/index.html  # or use your preferred viewer
 
 ## Automated releases
 
-A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.2.0`) to trigger the pipeline.
+A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.3.0`) to trigger the pipeline.
 
 ## Licensing
 

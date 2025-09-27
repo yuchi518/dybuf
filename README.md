@@ -2,12 +2,14 @@
 
 **dybuf** is a dynamic buffer library that makes binary memory manipulation easy. It supports fixed-width integers, booleans, raw bytes, and compact variable-length encodings so you can focus on protocol logic instead of manual pointer math.
 
+Its signature helpers—`var_u64`/`var_s64` varints and **typdex** markers—let you pack indices and payload lengths efficiently without adopting a full protobuf-style schema. The result is a lightweight, self-contained binary format that still trims message size for the common cases you care about.
+
 **dypkt** builds upon dybuf to provide a higher-level packet abstraction for structured data handling.
 
 ## Projects in this repository
 
 - **C** implementation (stable): [`/c`](c)
-- **Python** bindings (published as `dybuf` on PyPI, latest release `0.2.0` and evolving): [`/py`](py)
+- **Python** bindings (published as `dybuf` on PyPI, latest release `0.3.0` and evolving): [`/py`](py)
 - **Java** bindings (complete): [`/java`](java)
 - **JavaScript** bindings: coming soon
 - **Objective-C** bindings: planned
