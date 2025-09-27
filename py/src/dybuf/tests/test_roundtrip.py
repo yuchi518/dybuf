@@ -108,18 +108,18 @@ def test_random_var_uint_roundtrip_with_seed():
 
     buf = DyBuf(capacity=128)
     for value in values:
-        buf.append_var_uint(value)
+        buf.append_var_u64(value)
 
-    buf.append_var_uint(0)
-    buf.append_var_uint((1 << 64) - 1)
+    buf.append_var_u64(0)
+    buf.append_var_u64((1 << 64) - 1)
 
     buf.flip()
 
     for expected in values:
-        assert buf.next_var_uint() == expected
+        assert buf.next_var_u64() == expected
 
-    assert buf.next_var_uint() == 0
-    assert buf.next_var_uint() == (1 << 64) - 1
+    assert buf.next_var_u64() == 0
+    assert buf.next_var_u64() == (1 << 64) - 1
 
     assert buf.remaining() == 0
 
@@ -131,20 +131,42 @@ def test_random_var_int_roundtrip_with_seed():
 
     buf = DyBuf(capacity=128)
     for value in values:
-        buf.append_var_int(value)
+        buf.append_var_s64(value)
 
-    buf.append_var_int(-(1 << 63) + 1)
-    buf.append_var_int((1 << 63) - 1)
+    buf.append_var_s64(-(1 << 63) + 1)
+    buf.append_var_s64((1 << 63) - 1)
 
     buf.flip()
 
     for expected in values:
-        assert buf.next_var_int() == expected
+        assert buf.next_var_s64() == expected
 
-    assert buf.next_var_int() == -(1 << 63) + 1
-    assert buf.next_var_int() == (1 << 63) - 1
+    assert buf.next_var_s64() == -(1 << 63) + 1
+    assert buf.next_var_s64() == (1 << 63) - 1
 
     assert buf.remaining() == 0
+
+
+def test_var_uint_alias_emits_deprecation_warning():
+    buf = DyBuf(capacity=16)
+    with pytest.deprecated_call():
+        buf.append_var_uint(123)
+
+    buf.flip()
+
+    with pytest.deprecated_call():
+        assert buf.next_var_uint() == 123
+
+
+def test_var_int_alias_emits_deprecation_warning():
+    buf = DyBuf(capacity=16)
+    with pytest.deprecated_call():
+        buf.append_var_int(-42)
+
+    buf.flip()
+
+    with pytest.deprecated_call():
+        assert buf.next_var_int() == -42
 
 
 def test_var_bytes_roundtrip():
@@ -251,7 +273,7 @@ def test_append_methods_support_chaining():
         DyBuf(capacity=16)
         .append_uint8(0xAA)
         .append_uint16(0xBEEF)
-        .append_var_uint(42)
+        .append_var_u64(42)
         .append_var_string("hi")
         .append_typdex(TYPDEX_TYP_UINT, 7)
     )
@@ -260,6 +282,6 @@ def test_append_methods_support_chaining():
 
     assert buf.next_uint8() == 0xAA
     assert buf.next_uint16() == 0xBEEF
-    assert buf.next_var_uint() == 42
+    assert buf.next_var_u64() == 42
     assert buf.next_var_string() == "hi"
     assert buf.next_typdex() == (TYPDEX_TYP_UINT, 7)

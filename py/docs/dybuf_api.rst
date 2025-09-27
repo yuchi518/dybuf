@@ -129,6 +129,8 @@ All append methods advance the write cursor and grow ``limit`` if necessary.
 .. method:: DyBuf.append_uint48(value)
 .. method:: DyBuf.append_uint56(value)
 .. method:: DyBuf.append_uint64(value)
+.. method:: DyBuf.append_var_u64(value)
+.. method:: DyBuf.append_var_s64(value)
 .. method:: DyBuf.append_var_uint(value)
 .. method:: DyBuf.append_var_int(value)
 
@@ -137,9 +139,11 @@ All append methods advance the write cursor and grow ``limit`` if necessary.
    :class:`ValueError` otherwise. All appenders return ``self`` so they can be
    chained fluently.
 
-   ``append_var_uint`` and ``append_var_int`` use the library's variable-length
+   ``append_var_u64`` and ``append_var_s64`` use the library's variable-length
    encoding (similar to protobuf varints) to store unsigned or zig-zag encoded
-   signed 64-bit integers respectively.
+   signed 64-bit integers respectively. ``append_var_uint`` and
+   ``append_var_int`` remain as backwards-compatible aliases but emit
+   :class:`DeprecationWarning`.
 
 
 Variable-Length Data Methods
@@ -182,10 +186,16 @@ The ``next_*`` methods consume bytes while the ``peek_*`` counterparts leave
 .. method:: DyBuf.peek_uint56()
 .. method:: DyBuf.next_uint64()
 .. method:: DyBuf.peek_uint64()
+.. method:: DyBuf.next_var_u64()
+.. method:: DyBuf.next_var_s64()
 .. method:: DyBuf.next_var_uint()
 .. method:: DyBuf.next_var_int()
 
    Raise :class:`EOFError` if insufficient bytes remain in the buffer.
+
+   ``next_var_u64`` and ``next_var_s64`` decode unsigned and zig-zag encoded
+   signed integers respectively. The legacy ``next_var_uint`` and
+   ``next_var_int`` aliases emit :class:`DeprecationWarning`.
 
 .. method:: DyBuf.next_var_bytes()
 .. method:: DyBuf.next_var_string(encoding='utf-8')

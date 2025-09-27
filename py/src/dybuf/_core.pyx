@@ -1,5 +1,7 @@
 # cython: language_level=3, boundscheck=False, wraparound=False
 
+import warnings
+
 from cpython.bytes cimport PyBytes_FromStringAndSize
 
 cdef inline void _ensure_success(dybuf* result):
@@ -192,13 +194,29 @@ cdef class DyBuf:
         _ensure_success(dyb_append_u64(self._buffer, <uint64>value))
         return self
 
-    def append_var_uint(self, unsigned long long value):
+    def append_var_u64(self, unsigned long long value):
         _ensure_success(dyb_append_var_u64(self._buffer, <uint64>value))
         return self
 
-    def append_var_int(self, long long value):
+    def append_var_uint(self, unsigned long long value):
+        warnings.warn(
+            "append_var_uint is deprecated; use append_var_u64 instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.append_var_u64(value)
+
+    def append_var_s64(self, long long value):
         _ensure_success(dyb_append_var_s64(self._buffer, <int64>value))
         return self
+
+    def append_var_int(self, long long value):
+        warnings.warn(
+            "append_var_int is deprecated; use append_var_s64 instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.append_var_s64(value)
 
     def append_var_bytes(self, object data):
         cdef const unsigned char[::1] mv_view
@@ -324,11 +342,27 @@ cdef class DyBuf:
         _ensure_readable(self._buffer, 8)
         return dyb_peek_u64(self._buffer)
 
-    def next_var_uint(self):
+    def next_var_u64(self):
         return dyb_next_var_u64(self._buffer)
 
-    def next_var_int(self):
+    def next_var_uint(self):
+        warnings.warn(
+            "next_var_uint is deprecated; use next_var_u64 instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.next_var_u64()
+
+    def next_var_s64(self):
         return dyb_next_var_s64(self._buffer)
+
+    def next_var_int(self):
+        warnings.warn(
+            "next_var_int is deprecated; use next_var_s64 instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.next_var_s64()
 
     def next_var_bytes(self):
         cdef uint size = 0

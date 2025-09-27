@@ -37,6 +37,27 @@ print(buf.next_bool())         # True
 
 `write()` and `read()` let you work directly with arbitrary byte payloads, while `position`, `limit`, and `capacity` expose the cursor-style API provided by the original library.
 
+## Variable-length integers
+
+`DyBuf` supports zig-zag encoded signed integers and unsigned integers using the same compact varint scheme the C library exposes. These helpers keep the payload small for numbers that fit in a few bits.
+
+```python
+from dybuf import DyBuf
+
+buf = (
+    DyBuf(capacity=32)
+    .append_var_s64(-123)
+    .append_var_u64(300)
+)
+
+buf.flip()
+
+print(buf.next_var_s64())  # -123
+print(buf.next_var_u64())  # 300
+```
+
+Use `append_var_s64` / `next_var_s64` when you need negative values; the encoding automatically performs zig-zag conversion under the hood. For values that are always non-negative, stick to `append_var_u64` / `next_var_u64` to avoid the extra zig-zag step. The legacy `append_var_int` / `next_var_int` and `append_var_uint` / `next_var_uint` aliases still work but emit `DeprecationWarning` so callers can migrate. The same encoding also powers `append_var_bytes` and `append_var_string`, which prefix their payload with a varint length field for round-tripping arbitrary byte sequences.
+
 ## Typdex markers
 
 `DyBuf` also exposes helpers for working with the library's **typdex** encodings—a compact representation of a logical type paired with an index. These markers are commonly used by higher-level protocols such as `dypkt` to describe field layouts or function identifiers.
