@@ -773,6 +773,12 @@ export class DyBuf {
         return new TextDecoder('utf-8').decode(bytes.subarray(0, end));
     }
 
+    getVarString() {
+        const buf = this.getBytesWithVarLength();
+        if (buf == null) return null;
+        return new TextDecoder('utf-8').decode(buf);
+    }
+
     putLastString(s) {
         return this.putLastBytes(new TextEncoder('utf-8').encode(s).buffer);
     }
@@ -792,13 +798,17 @@ export class DyBuf {
         return this.putBytesWithVarLength(payload.buffer);
     }
 
+    putVarString(s) {
+        return this.putBytesWithVarLength(new TextEncoder('utf-8').encode(s).buffer);
+    }
+
     // Legacy aliases for compatibility
     getStringWithVarLength() {
-        return this.getCStringWithVarLength();
+        return this.getVarString();
     }
 
     putStringWithVarLength(s) {
-        return this.putCStringWithVarLength(s);
+        return this.putVarString(s);
     }
 
     // double, float

@@ -23,6 +23,9 @@ immediately so callers fail fast during startup.
 - `putTypdex` / `getTypdex` match the canonical bit layout, and legacy helpers remain as aliases.
 - `getVarULong` / `putVarULong` and `getVarLong` / `putVarLong` follow the same
   varint/zig-zag encoding as the C library.
+- `getVarString` / `putVarString` encode UTF-8 payloads without a trailing terminator for
+  parity with Python bindings, while `getCStringWithVarLength` / `putCStringWithVarLength`
+  preserve the C-style `\0` suffix when needed.
 - `getCStringWithVarLength` trims, and `putCStringWithVarLength` appends, the trailing
   null terminator so C fixtures round-trip faithfully. Legacy `getStringWithVarLength` /
   `putStringWithVarLength` remain as aliases for now.
@@ -66,7 +69,7 @@ console.log(buf.getVarULong());          // 300n
 - Run `npm test` (Node 18+ recommended) inside this directory for the regression
   suite.
 - Regenerate golden data with `tools/generate_fixtures.sh` (it also runs the C verifier)
-  and import the JSON cases under `fixtures/v1/` for cross-language checks.
+  and keep the JSON cases under `fixtures/v1/` so the Node tests pick up the shared fixtures.
 - The module has no build step; `node -e "import('./DyBuf.js')"` still
   works for quick manual pokes.
 - When adding features, ensure they remain compatible with the canonical C fixtures

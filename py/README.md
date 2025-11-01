@@ -99,7 +99,8 @@ pytest
 
 The pytest suite loads the golden vectors generated from the canonical C library
 (`fixtures/v1/*.json`). If the fixtures are missing, run `tools/generate_fixtures.sh`
-from the repository root before executing the tests.
+from the repository root before executing the tests so `fixtures/v1` exists adjacent
+to this package.
 
 The project is configured to build wheels via `python -m build`, producing both source and binary distributions:
 
@@ -117,7 +118,7 @@ open docs/_build/html/index.html  # or use your preferred viewer
 
 ## Automated releases
 
-A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.4.0`) to trigger the pipeline.
+A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.4.1`) to trigger the pipeline.
 
 ## Licensing
 

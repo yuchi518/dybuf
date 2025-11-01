@@ -30,7 +30,7 @@ __all__ = [
     "TYPDEX_TYP_F",
 ]
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 
 def append_var_cstring(buf: DyBuf, text: str, *, encoding: str = "utf-8") -> DyBuf:

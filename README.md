@@ -30,6 +30,7 @@ Its signature helpers—`var_u64`/`var_s64` varints and **typdex** markers—let
 - Treat the C implementation as the authority by emitting versioned golden payloads (buffers, typdex sequences, protocol transcripts) stored under a documented schema.
 - Require every non-C suite to ingest the golden bundle during tests to guarantee round-trip parity across languages.
 - Provide a scripted `tools/update_golden` command so maintainers regenerate fixtures consistently and review diffs in code review.
+- When running language-specific tests, ensure `fixtures/v1/*.json` has been regenerated via `tools/generate_fixtures.sh` so every suite exercises the same data.
 
 ### Shared tooling & documentation
 - Consolidate helper scripts, environment bootstrapping, and doc builds in a `/tools` directory that all languages reuse.

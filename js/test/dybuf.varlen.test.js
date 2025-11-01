@@ -58,3 +58,19 @@ test('varlen string fixtures round-trip', () => {
     assert.strictEqual(actualHex, encodedHex, `re-encode mismatch for ${id}`);
   }
 });
+
+test('varlen string helpers omit trailing terminator', () => {
+  const varBuf = new DyBuf(32);
+  varBuf.putVarString('hello');
+  const varHex = bufferToHex(varBuf.toBytesBeforeCurrentPosition());
+
+  const cBuf = new DyBuf(32);
+  cBuf.putCStringWithVarLength('hello');
+  const cHex = bufferToHex(cBuf.toBytesBeforeCurrentPosition());
+
+  assert.ok(varHex.length < cHex.length, 'var string should be shorter than c-string encoding');
+
+  varBuf.flip();
+  assert.strictEqual(varBuf.getVarString(), 'hello');
+  assert.strictEqual(varBuf.remaining(), 0);
+});
