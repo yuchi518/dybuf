@@ -13,7 +13,7 @@ description = "Python bindings for the dybuf dynamic buffer library."
 readme = "README.md"
 authors = [{ name = "Yuchi", email = "yuchi518@gmail.com" }]
 maintainers = [{ name = "Yuchi", email = "yuchi518@gmail.com" }]
-license = "GPL-2.0-only"
+license = { text = "GPL-2.0-only" }
 keywords = ["buffer", "binary", "cython"]
 classifiers = [
     "Development Status :: 3 - Alpha",
