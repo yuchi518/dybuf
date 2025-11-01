@@ -1,0 +1,22 @@
+{
+  "cases": [
+    {"id":"zero","value_dec":"0","value_hex":"0x0","encoded_hex":"00"},
+    {"id":"one","value_dec":"1","value_hex":"0x1","encoded_hex":"01"},
+    {"id":"tier1_max","value_dec":"127","value_hex":"0x7f","encoded_hex":"7f"},
+    {"id":"tier2_min","value_dec":"128","value_hex":"0x80","encoded_hex":"8000"},
+    {"id":"tier2_max","value_dec":"16511","value_hex":"0x407f","encoded_hex":"bfff"},
+    {"id":"tier3_min","value_dec":"16512","value_hex":"0x4080","encoded_hex":"c00000"},
+    {"id":"tier3_max","value_dec":"2113663","value_hex":"0x20407f","encoded_hex":"dfffff"},
+    {"id":"tier4_min","value_dec":"2113664","value_hex":"0x204080","encoded_hex":"e0000000"},
+    {"id":"tier4_max","value_dec":"270549119","value_hex":"0x1020407f","encoded_hex":"efffffff"},
+    {"id":"tier5_min","value_dec":"270549120","value_hex":"0x10204080","encoded_hex":"f000000000"},
+    {"id":"tier5_max","value_dec":"34630287487","value_hex":"0x81020407f","encoded_hex":"f7ffffffff"},
+    {"id":"tier6_min","value_dec":"34630287488","value_hex":"0x810204080","encoded_hex":"f80000000000"},
+    {"id":"tier6_max","value_dec":"4432676798591","value_hex":"0x4081020407f","encoded_hex":"fbffffffffff"},
+    {"id":"tier7_min","value_dec":"4432676798592","value_hex":"0x40810204080","encoded_hex":"fc000000000000"},
+    {"id":"tier7_max","value_dec":"567382630219903","value_hex":"0x204081020407f","encoded_hex":"fdffffffffffff"},
+    {"id":"tier8_min","value_dec":"567382630219904","value_hex":"0x2040810204080","encoded_hex":"fe00000000000000"},
+    {"id":"tier8_max","value_dec":"72624976668147839","value_hex":"0x10204081020407f","encoded_hex":"feffffffffffffff"},
+    {"id":"u64_max","value_dec":"18446744073709551615","value_hex":"0xffffffffffffffff","encoded_hex":"fffefdfbf7efdfbf7f"}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {"id":"tier1_zero","type":0,"index":0,"encoded_hex":"00"},
+    {"id":"tier1_max","type":15,"index":7,"encoded_hex":"7f"},
+    {"id":"tier2_min_type","type":16,"index":0,"encoded_hex":"9000"},
+    {"id":"tier2_max","type":63,"index":255,"encoded_hex":"bfff"},
+    {"id":"tier3_min_type","type":64,"index":256,"encoded_hex":"c80100"},
+    {"id":"tier3_max","type":255,"index":8191,"encoded_hex":"dfffff"},
+    {"id":"tier4_min_index","type":1,"index":8192,"encoded_hex":"e0102000"},
+    {"id":"tier4_max","type":170,"index":1048575,"encoded_hex":"eaafffff"}
+  ]
+}

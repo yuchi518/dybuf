@@ -1,0 +1,11 @@
+{
+  "cases": [
+    {"id":"zero","value_dec":"0","value_hex":"0x0","encoded_hex":"00"},
+    {"id":"one","value_dec":"1","value_hex":"0x1","encoded_hex":"02"},
+    {"id":"minus_one","value_dec":"-1","value_hex":"-0x1","encoded_hex":"01"},
+    {"id":"large_positive","value_dec":"1234567890123456789","value_hex":"0x112210f47de98115","encoded_hex":"ff21421de0ebb2c1aa"},
+    {"id":"large_negative","value_dec":"-1234567890123456789","value_hex":"-0x112210f47de98115","encoded_hex":"ff21421de0ebb2c1a9"},
+    {"id":"int64_max","value_dec":"9223372036854775807","value_hex":"0x7fffffffffffffff","encoded_hex":"fffefdfbf7efdfbf7e"},
+    {"id":"int64_min","value_dec":"-9223372036854775808","value_hex":"-0x8000000000000000","encoded_hex":"fffefdfbf7efdfbf7f"}
+  ]
+}

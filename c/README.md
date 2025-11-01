@@ -1,9 +1,6 @@
 # dybuf, dypkt - C library
 This is C library of dybuf and dypkt.
 
-### Version
-0.0.1
-
 ### Tech
 C lib version uses a number of open source projects to generate json parser, if you just use dybuf or dypkt lib, you don't care about it.
 
@@ -28,6 +25,18 @@ Build test code:
 Run test code:
 ```sh
 # ./dybuf_c
+
+### Generate golden fixtures
+
+Regression suites in other languages rely on the canonical test vectors emitted by
+the C implementation. Regenerate them from the repository root with:
+
+```sh
+tools/generate_fixtures.sh
+```
+
+The script compiles the fixture generator, writes JSON bundles under
+`fixtures/v1/`, and validates them with the companion verifier.
 ```
 
 ### Integrate dypkt with your project

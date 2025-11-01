@@ -1,0 +1,7 @@
+{
+  "cases": [
+    {"id":"empty","utf8":"","encoded_hex":"0100"},
+    {"id":"hello_world","utf8":"hello world","encoded_hex":"0c68656c6c6f20776f726c6400"},
+    {"id":"sentence","utf8":"dybuf fixture cross-language sample","encoded_hex":"24647962756620666978747572652063726f73732d6c616e67756167652073616d706c6500"}
+  ]
+}

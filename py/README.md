@@ -59,6 +59,8 @@ print(buf.next_var_u64())  # 300
 
 Use `append_var_s64` / `next_var_s64` when you need negative values; the encoding automatically performs zig-zag conversion under the hood. For values that are always non-negative, stick to `append_var_u64` / `next_var_u64` to avoid the extra zig-zag step. The legacy `append_var_int` / `next_var_int` and `append_var_uint` / `next_var_uint` aliases still work but emit `DeprecationWarning` so callers can migrate. The same encoding also powers `append_var_bytes` and `append_var_string`, which prefix their payload with a varint length field for round-tripping arbitrary byte sequences.
 
+When you need compatibility with the C helpers that treat strings as NUL-terminated c-strings, call `append_var_cstring` / `next_var_cstring`. Those helpers append the trailing `\0` byte on write (and strip it on read) so buffers line up with `dyb_append_cstring_with_var_len` / `dyb_next_cstring_with_var_len`.
+
 ## Typdex markers
 
 `DyBuf` also exposes helpers for working with the library's **typdex** encodings—a compact representation of a logical type paired with an index. These markers are commonly used by higher-level protocols such as `dypkt` to describe field layouts or function identifiers.
@@ -95,6 +97,10 @@ pip install -e .
 pytest
 ```
 
+The pytest suite loads the golden vectors generated from the canonical C library
+(`fixtures/v1/*.json`). If the fixtures are missing, run `tools/generate_fixtures.sh`
+from the repository root before executing the tests.
+
 The project is configured to build wheels via `python -m build`, producing both source and binary distributions:
 
 ```bash
@@ -111,7 +117,7 @@ open docs/_build/html/index.html  # or use your preferred viewer
 
 ## Automated releases
 
-A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.3.0`) to trigger the pipeline.
+A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.4.0`) to trigger the pipeline.
 
 ## Licensing
 

@@ -8,17 +8,16 @@ Its signature helpers—`var_u64`/`var_s64` varints and **typdex** markers—let
 
 ## Projects in this repository
 
-- **C** implementation (stable): [`/c`](c)
-- **Python** bindings (published as `dybuf` on PyPI, latest release `0.3.0` and evolving): [`/py`](py)
-- **Java** bindings (complete): [`/java`](java)
-- **JavaScript** bindings: coming soon
-- **Objective-C** bindings: planned
+- **C** implementation (stable; source of golden fixtures): [`/c`](c)
+- **Python** bindings (golden fixture parity complete): [`/py`](py/README.md)
+- **Java** bindings (refactor/fixture integration in progress): [`/java`](java)
+- **JavaScript** bindings (ESM + golden fixtures wired): [`/js`](js/README.md)
 
 ## Roadmap
 
 - Publish the initial JavaScript bindings
 - Continue expanding the Python feature set and releases
-- Finish Objective-C bindings
+- Integrate Java with the shared golden fixtures
 - Binary JSON converter
 
 ## Cross-language automation TODO

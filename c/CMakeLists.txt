@@ -30,3 +30,6 @@ add_dependencies(json RunGenerator)
 add_executable(dybuf_c ${SOURCE_FILES})
 
 target_link_libraries(dybuf_c json)
+
+add_executable(dybuf_fixtures fixtures/generate_fixtures.c)
+add_executable(dybuf_verify_fixtures fixtures/verify_fixtures.c)

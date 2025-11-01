@@ -8,17 +8,16 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dybuf"
-version = "0.3.0"
+version = "0.4.0"
 description = "Python bindings for the dybuf dynamic buffer library."
 readme = "README.md"
 authors = [{ name = "Yuchi", email = "yuchi518@gmail.com" }]
 maintainers = [{ name = "Yuchi", email = "yuchi518@gmail.com" }]
-license = { file = "LICENSE" }
+license = "GPL-2.0-only"
 keywords = ["buffer", "binary", "cython"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",

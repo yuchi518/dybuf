@@ -1,0 +1,7 @@
+{
+  "cases": [
+    {"id":"empty","payload_hex":"","payload_length":0,"encoded_hex":"00"},
+    {"id":"small","payload_hex":"112233","payload_length":3,"encoded_hex":"03112233"},
+    {"id":"medium","payload_hex":"00017f80ff102030405060707a7b7c7d","payload_length":16,"encoded_hex":"1000017f80ff102030405060707a7b7c7d"}
+  ]
+}

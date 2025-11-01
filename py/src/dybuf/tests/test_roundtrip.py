@@ -7,6 +7,8 @@ from dybuf import (
     TYPDEX_TYP_INT,
     TYPDEX_TYP_STRING,
     TYPDEX_TYP_UINT,
+    append_var_cstring,
+    next_var_cstring,
 )
 
 
@@ -200,6 +202,21 @@ def test_var_string_roundtrip_utf8():
 
     for expected in strings:
         assert buf.next_var_string() == expected
+
+    assert buf.remaining() == 0
+
+
+def test_var_cstring_roundtrip_utf8():
+    strings = ["", "hello", "data\x00inside", "終點"]
+
+    buf = DyBuf(capacity=32)
+    for s in strings:
+        append_var_cstring(buf, s)
+
+    buf.flip()
+
+    for expected in strings:
+        assert next_var_cstring(buf) == expected
 
     assert buf.remaining() == 0
 
