@@ -1,6 +1,6 @@
 {
   "name": "dybuf",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Dynamic binary buffer with varints, typdex helpers, and Node/browser-friendly APIs.",
   "type": "module",
   "main": "./DyBuf.js",

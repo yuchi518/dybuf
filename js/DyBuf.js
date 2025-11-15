@@ -1,3 +1,15 @@
+export const TYPDEX_TYP_NONE = 0x00;
+export const TYPDEX_TYP_BOOL = 0x01;
+export const TYPDEX_TYP_INT = 0x02;
+export const TYPDEX_TYP_UINT = 0x03;
+export const TYPDEX_TYP_FLOAT = 0x06;
+export const TYPDEX_TYP_DOUBLE = 0x07;
+export const TYPDEX_TYP_STRING = 0x0A;
+export const TYPDEX_TYP_BYTES = 0x0B;
+export const TYPDEX_TYP_ARRAY = 0x0C;
+export const TYPDEX_TYP_MAP = 0x0D;
+export const TYPDEX_TYP_F = 0x0F;
+
 const HAS_NATIVE_BIGINT64 = typeof BigInt === 'function'
     && typeof DataView !== 'undefined'
     && DataView.prototype
@@ -12,6 +24,18 @@ if (!HAS_NATIVE_BIGINT64) {
 }*/
 
 export class DyBuf {
+    static TYPDEX_TYP_NONE = TYPDEX_TYP_NONE;
+    static TYPDEX_TYP_BOOL = TYPDEX_TYP_BOOL;
+    static TYPDEX_TYP_INT = TYPDEX_TYP_INT;
+    static TYPDEX_TYP_UINT = TYPDEX_TYP_UINT;
+    static TYPDEX_TYP_FLOAT = TYPDEX_TYP_FLOAT;
+    static TYPDEX_TYP_DOUBLE = TYPDEX_TYP_DOUBLE;
+    static TYPDEX_TYP_STRING = TYPDEX_TYP_STRING;
+    static TYPDEX_TYP_BYTES = TYPDEX_TYP_BYTES;
+    static TYPDEX_TYP_ARRAY = TYPDEX_TYP_ARRAY;
+    static TYPDEX_TYP_MAP = TYPDEX_TYP_MAP;
+    static TYPDEX_TYP_F = TYPDEX_TYP_F;
+
     constructor(buff, copy_or_not=false) {
         if (typeof buff == "number") {
             // buffer size

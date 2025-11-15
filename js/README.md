@@ -21,6 +21,7 @@ immediately so callers fail fast during startup.
 - Read/write unsigned integers from 1 to 8 bytes (`getULong(length)` /
   `putULong(length)`) using native `BigInt` arithmetic.
 - `putTypdex` / `getTypdex` match the canonical bit layout, and legacy helpers remain as aliases.
+- Named exports `TYPDEX_TYP_*` mirror the canonical typdex enum so callers don't hard-code magic numbers. The same constants are exposed as static fields on `DyBuf`.
 - `getVarULong` / `putVarULong` and `getVarLong` / `putVarLong` follow the same
   varint/zig-zag encoding as the C library.
 - `getVarString` / `putVarString` encode UTF-8 payloads without a trailing terminator for
