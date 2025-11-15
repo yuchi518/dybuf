@@ -19,6 +19,7 @@ Its signature helpers—`var_u64`/`var_s64` varints and **typdex** markers—let
 - Continue expanding the Python feature set and releases
 - Integrate Java with the shared golden fixtures
 - Binary JSON converter
+- Automate npm package publishing for the JavaScript binding via GitHub Actions
 
 ## Cross-language automation TODO
 

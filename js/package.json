@@ -1,9 +1,45 @@
 {
-  "name": "dybuf-js",
-  "version": "0.1.0",
+  "name": "dybuf",
+  "version": "0.4.1",
+  "description": "Dynamic binary buffer with varints, typdex helpers, and Node/browser-friendly APIs.",
   "type": "module",
-  "private": true,
+  "main": "./DyBuf.js",
+  "exports": {
+    ".": "./DyBuf.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "DyBuf.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "sideEffects": false,
   "scripts": {
-    "test": "node --test"
+    "check:fixtures": "node ./testutils/ensure-fixtures.js",
+    "test": "npm run check:fixtures && node --test",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "dybuf",
+    "dypkt",
+    "buffer",
+    "typdex",
+    "varint"
+  ],
+  "author": "Yuchi <yuchi518@gmail.com>",
+  "license": "GPL-2.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuchi518/dybuf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yuchi518/dybuf/issues"
+  },
+  "homepage": "https://github.com/yuchi518/dybuf#readme",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

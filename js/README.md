@@ -74,3 +74,15 @@ console.log(buf.getVarULong());          // 300n
   works for quick manual pokes.
 - When adding features, ensure they remain compatible with the canonical C fixtures
   once the cross-language regression suite is in place.
+
+## Publishing to npm
+
+Manual releases use the plain source files in this directory:
+
+1. Bump the `version` in `package.json` to the desired release.
+2. From the repo root, regenerate fixtures if needed: `tools/generate_fixtures.sh`.
+3. Back in `js/`, run `npm test` (the prepublish hook reruns this and fails if fixtures are missing).
+4. Ensure your local `~/.npmrc` has an automation token (`//registry.npmjs.org/:_authToken=...`).
+5. Publish the module: `npm publish --access public`.
+
+Trusted Publishing via GitHub Actions can replace the token step later, but these commands work on macOS/Linux today.
