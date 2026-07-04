@@ -61,6 +61,57 @@ same stream without out-of-band length metadata.
 Application schemas should define `index` values under these types. Keep high-frequency
 record IDs in `0..7` whenever practical so the complete typdex marker stays 1 byte.
 
+## Index Scope
+
+`index` can be used with two different scopes. Choose one deliberately for each schema.
+
+### Global Record IDs
+
+For protocol/message schemas, treat `type + index` as a globally defined record ID
+within the schema version. In this model, every occurrence of the same `type + index`
+has the same payload convention no matter where it appears:
+
+```text
+Typdex(TYPDEX_TYP_UINT, dype_uiid_grid_lv) -> Var uint(lv)
+Typdex(TYPDEX_TYP_MAP, dype_mid_tags)      -> tags map
+```
+
+This is the preferred model for dypkt-style package schemas. It allows readers to
+dispatch records consistently and makes compatibility rules easier to document. Within
+the same schema version, a record's payload convention is global and stable: a reader
+that does not understand the record's application meaning can still consume or skip it
+as long as the record format is defined by the shared schema. Canonical primitive types
+are naturally skippable from the type alone (for example bool, var integers, strings,
+bytes, floats, and doubles). App-defined arrays/maps are also skippable when their
+record convention is part of the shared schema or when they are length-delimited.
+Known records remain stable across compatible versions.
+
+### Object-Local Field IDs
+
+For object-oriented serialization, `index` can instead mean "field number inside the
+current object type". In this model, the same `type + index` may have different meanings
+inside different classes or nested objects:
+
+```text
+Object User:
+  Typdex(TYPDEX_TYP_STRING, 0) -> name
+  Typdex(TYPDEX_TYP_UINT,   1) -> age
+
+Object Tile:
+  Typdex(TYPDEX_TYP_UINT,   0) -> zoom level
+  Typdex(TYPDEX_TYP_ARRAY,  1) -> grid indices
+```
+
+This is useful for compact in-process object serialization, but it is a weaker
+interchange format. A decoder must already know the surrounding object type before it
+can interpret an index. Newer writers can easily produce fields that older readers do
+not understand, and because typdex does not carry payload length, older readers usually
+cannot skip unknown object-local fields safely unless the object convention adds
+length-delimited field payloads.
+
+If long-term forward/backward compatibility matters, prefer global record IDs or wrap
+object-local fields in a length-delimited container.
+
 ## Reserved Function Indices
 
 For `TYPDEX_TYP_F`, dypkt reserves these indices:
@@ -107,7 +158,7 @@ Typdex(TYPDEX_TYP_F, DYPE_F_EOF)
 
 ## Designing App Schemas
 
-Define app-level packet IDs per type:
+Define app-level record IDs per type:
 
 ```c
 enum dype_uint_id {
