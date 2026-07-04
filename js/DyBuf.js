@@ -10,6 +10,11 @@ export const TYPDEX_TYP_ARRAY = 0x0C;
 export const TYPDEX_TYP_MAP = 0x0D;
 export const TYPDEX_TYP_F = 0x0F;
 
+export const DYPE_F_EOF = 0;
+export const DYPE_F_VERSION = 1;
+export const DYPE_F_PROTOCOL = 7;
+export const DYPE_F_PROTO_VERSION = 8;
+
 const HAS_NATIVE_BIGINT64 = typeof BigInt === 'function'
     && typeof DataView !== 'undefined'
     && DataView.prototype
@@ -35,6 +40,10 @@ export class DyBuf {
     static TYPDEX_TYP_ARRAY = TYPDEX_TYP_ARRAY;
     static TYPDEX_TYP_MAP = TYPDEX_TYP_MAP;
     static TYPDEX_TYP_F = TYPDEX_TYP_F;
+    static DYPE_F_EOF = DYPE_F_EOF;
+    static DYPE_F_VERSION = DYPE_F_VERSION;
+    static DYPE_F_PROTOCOL = DYPE_F_PROTOCOL;
+    static DYPE_F_PROTO_VERSION = DYPE_F_PROTO_VERSION;
 
     constructor(buff, copy_or_not=false) {
         if (typeof buff == "number") {

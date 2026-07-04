@@ -78,7 +78,22 @@ assert buf.next_typdex() == (TYPDEX_TYP_INT, 3)
 assert buf.next_typdex() == (TYPDEX_TYP_STRING, 0x42)
 ```
 
-The constants `TYPDEX_TYP_*` mirror the underlying C enums. `append_typdex` validates that the type fits in 8 bits and the index can be represented by the packed encoding. `next_typdex` and `peek_typdex` raise `EOFError` for truncated markers and `ValueError` when encountering a malformed header.
+The constants `TYPDEX_TYP_*` mirror the underlying C enums, and `DYPE_F_*` mirrors
+the reserved dypkt function indices (`EOF`, schema version, protocol name, protocol
+version). `append_typdex` validates that the type fits in 8 bits and the index can
+be represented by the packed encoding. `next_typdex` and `peek_typdex` raise
+`EOFError` for truncated markers and `ValueError` when encountering a malformed
+header.
+
+## Schema convention
+
+When using `typdex` to design an app-level schema, treat one `Typdex(type, index)`
+plus its payload as a **record**. Keep common record IDs in `0..7` for 1-byte typdex
+markers, and start dypkt-compatible messages with `TYPDEX_TYP_F` +
+`DYPE_F_VERSION`.
+
+See the repository's [dypkt schema convention](https://github.com/yuchi518/dybuf/blob/master/DYPKT_SCHEMA_CONVENTION.md)
+for the canonical typdex layout, reserved function IDs, and compatibility rules.
 
 ## Developing locally
 

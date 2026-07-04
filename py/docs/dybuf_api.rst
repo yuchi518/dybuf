@@ -251,6 +251,20 @@ the values returned by :meth:`DyBuf.peek_typdex`) to avoid hard-coding numeric
 literals.
 
 
+Dypkt Function Constants
+------------------------
+
+The package also exports the reserved dypkt function indices:
+
+.. data:: DYPE_F_EOF
+.. data:: DYPE_F_VERSION
+.. data:: DYPE_F_PROTOCOL
+.. data:: DYPE_F_PROTO_VERSION
+
+Use these constants with ``TYPDEX_TYP_F`` when writing package control records
+such as schema version, protocol name, protocol version, and EOF markers.
+
+
 Python Special Methods
 ----------------------
 

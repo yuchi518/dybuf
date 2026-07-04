@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { DyBuf } from '../DyBuf.js';
+import {
+  DYPE_F_EOF,
+  DYPE_F_PROTOCOL,
+  DYPE_F_PROTO_VERSION,
+  DYPE_F_VERSION,
+  DyBuf,
+  TYPDEX_TYP_F,
+  TYPDEX_TYP_MAP,
+  TYPDEX_TYP_UINT,
+} from '../DyBuf.js';
 import {
   arrayBufferFrom,
   bufferToHex,
@@ -40,4 +49,16 @@ test('legacy typdex aliases remain compatible', () => {
   const { type, value } = buf.getIndexAnd4bitsType();
   assert.strictEqual(type, 0x42);
   assert.strictEqual(value, 0x1234);
+});
+
+test('exports canonical typdex and dypkt function constants', () => {
+  assert.strictEqual(TYPDEX_TYP_UINT, 0x03);
+  assert.strictEqual(TYPDEX_TYP_MAP, 0x0d);
+  assert.strictEqual(TYPDEX_TYP_F, 0x0f);
+  assert.strictEqual(DYPE_F_EOF, 0);
+  assert.strictEqual(DYPE_F_VERSION, 1);
+  assert.strictEqual(DYPE_F_PROTOCOL, 7);
+  assert.strictEqual(DYPE_F_PROTO_VERSION, 8);
+  assert.strictEqual(DyBuf.TYPDEX_TYP_F, TYPDEX_TYP_F);
+  assert.strictEqual(DyBuf.DYPE_F_PROTO_VERSION, DYPE_F_PROTO_VERSION);
 });

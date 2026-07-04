@@ -13,6 +13,13 @@ Its signature helpers—`var_u64`/`var_s64` varints and **typdex** markers—let
 - **Java** bindings (refactor/fixture integration in progress): [`/java`](java)
 - **JavaScript** bindings (ESM + golden fixtures wired): [`/js`](js/README.md)
 
+## Schema convention
+
+`typdex` is the compact `type + index` marker used by `dypkt` and app-level schemas.
+See [`DYPKT_SCHEMA_CONVENTION.md`](DYPKT_SCHEMA_CONVENTION.md) for the canonical
+typdex layout, reserved dypkt function indices, package header convention, and
+compatibility rules for designing versioned schemas.
+
 ## Roadmap
 
 - Publish the initial JavaScript bindings

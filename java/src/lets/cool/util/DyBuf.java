@@ -29,6 +29,23 @@ import java.util.logging.Logger;
 public class DyBuf {
     static Logger log = Logger.getLogger(DyBuf.class.getName());
 
+    public static final byte TYPDEX_TYP_NONE = 0x00;
+    public static final byte TYPDEX_TYP_BOOL = 0x01;
+    public static final byte TYPDEX_TYP_INT = 0x02;
+    public static final byte TYPDEX_TYP_UINT = 0x03;
+    public static final byte TYPDEX_TYP_FLOAT = 0x06;
+    public static final byte TYPDEX_TYP_DOUBLE = 0x07;
+    public static final byte TYPDEX_TYP_STRING = 0x0A;
+    public static final byte TYPDEX_TYP_BYTES = 0x0B;
+    public static final byte TYPDEX_TYP_ARRAY = 0x0C;
+    public static final byte TYPDEX_TYP_MAP = 0x0D;
+    public static final byte TYPDEX_TYP_F = 0x0F;
+
+    public static final int DYPE_F_EOF = 0;
+    public static final int DYPE_F_VERSION = 1;
+    public static final int DYPE_F_PROTOCOL = 7;
+    public static final int DYPE_F_PROTO_VERSION = 8;
+
 
     /**
      * TO-DO: automatically free cached memory block
@@ -1844,6 +1861,5 @@ public class DyBuf {
         return this;
     }
 }
-
 
 

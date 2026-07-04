@@ -22,6 +22,8 @@ generated from the C implementation.
 Additional docs:
 
 - `README.md` – high-level roadmap + CI strategy.
+- `DYPKT_SCHEMA_CONVENTION.md` – typdex layout, reserved dypkt function IDs, package
+  header, and versioned schema compatibility rules.
 - `CROSS_LANGUAGE_ALIGNMENT.md` – parity requirements, open checklist per language.
 - Language-specific READMEs – runtime requirements, development commands, release
   notes.

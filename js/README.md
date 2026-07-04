@@ -22,6 +22,7 @@ immediately so callers fail fast during startup.
   `putULong(length)`) using native `BigInt` arithmetic.
 - `putTypdex` / `getTypdex` match the canonical bit layout, and legacy helpers remain as aliases.
 - Named exports `TYPDEX_TYP_*` mirror the canonical typdex enum so callers don't hard-code magic numbers. The same constants are exposed as static fields on `DyBuf`.
+- Named exports `DYPE_F_*` mirror the reserved dypkt function indices (`EOF`, schema version, protocol name, protocol version).
 - `getVarULong` / `putVarULong` and `getVarLong` / `putVarLong` follow the same
   varint/zig-zag encoding as the C library.
 - `getVarString` / `putVarString` encode UTF-8 payloads without a trailing terminator for
@@ -41,6 +42,16 @@ immediately so callers fail fast during startup.
 
 - `putLastBytes` currently expects an `ArrayBuffer`. Accepting `TypedArray` views is a
   potential follow-up improvement.
+
+## Schema convention
+
+When using `typdex` to design an app-level schema, treat one `Typdex(type, index)`
+plus its payload as a **record**. Keep common record IDs in `0..7` for 1-byte typdex
+markers, and start dypkt-compatible messages with `TYPDEX_TYP_F` +
+`DYPE_F_VERSION`.
+
+See the repository's [dypkt schema convention](https://github.com/yuchi518/dybuf/blob/master/DYPKT_SCHEMA_CONVENTION.md)
+for the canonical typdex layout, reserved function IDs, and compatibility rules.
 
 ## Next steps
 

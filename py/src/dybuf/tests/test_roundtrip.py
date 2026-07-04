@@ -3,8 +3,14 @@ import random
 import pytest
 
 from dybuf import (
+    DYPE_F_EOF,
+    DYPE_F_PROTOCOL,
+    DYPE_F_PROTO_VERSION,
+    DYPE_F_VERSION,
     DyBuf,
+    TYPDEX_TYP_F,
     TYPDEX_TYP_INT,
+    TYPDEX_TYP_MAP,
     TYPDEX_TYP_STRING,
     TYPDEX_TYP_UINT,
     append_var_cstring,
@@ -27,6 +33,16 @@ def test_roundtrip_operations():
     assert buf.next_bool() is True
     assert buf.read(3) == b"abc"
     assert buf.remaining() == 0
+
+
+def test_exports_canonical_typdex_and_dypkt_function_constants():
+    assert TYPDEX_TYP_UINT == 0x03
+    assert TYPDEX_TYP_MAP == 0x0D
+    assert TYPDEX_TYP_F == 0x0F
+    assert DYPE_F_EOF == 0
+    assert DYPE_F_VERSION == 1
+    assert DYPE_F_PROTOCOL == 7
+    assert DYPE_F_PROTO_VERSION == 8
 
 
 def test_write_read_all():
