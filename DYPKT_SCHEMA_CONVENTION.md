@@ -157,7 +157,9 @@ and version identity.
 
 ## Package Header
 
-Every dypkt-compatible message should begin with the schema version:
+Every dypkt-compatible message should begin with enough header records for the reader
+to choose the right schema before decoding application records. For a single-purpose
+stream, the schema version alone can be sufficient:
 
 ```text
 Typdex(TYPDEX_TYP_F, DYPE_F_VERSION)
@@ -168,15 +170,23 @@ The same version number means the schema remains compatible. If an existing
 `type + index` payload layout changes incompatibly, bump the schema version or allocate
 a new index.
 
-Optional protocol metadata can follow:
+For files or transports that may carry multiple protocol families, put the protocol name
+before the schema version so the reader knows which version table to apply:
 
 ```text
 Typdex(TYPDEX_TYP_F, DYPE_F_PROTOCOL)
 Var-len cstring(protocol name)
 
+Typdex(TYPDEX_TYP_F, DYPE_F_VERSION)
+Var uint(schema version)
+
 Typdex(TYPDEX_TYP_F, DYPE_F_PROTO_VERSION)
 Var uint(protocol version)
 ```
+
+`DYPE_F_PROTO_VERSION` is optional metadata. Prefer `DYPE_F_VERSION` for binary schema
+compatibility and use `DYPE_F_PROTO_VERSION` only when the protocol needs an additional
+semantic/product version.
 
 The message can end with:
 
@@ -233,6 +243,113 @@ Typdex(TYPDEX_TYP_UINT, dype_uiid_grid_lv)
 Var uint(lv)
 ```
 
+## Container Boundary Strategies
+
+Typdex records do not carry a generic payload length. A schema must therefore define
+how nested containers end. There are two common strategies.
+
+### Length-Delimited Containers
+
+Wrap a nested object, array, or map in a byte length:
+
+```text
+Typdex(TYPDEX_TYP_OBJ, obj_id)
+Var uint(byte_length)
+byte_length bytes of nested payload
+```
+
+This makes unknown containers easy to skip and supports looser forward compatibility.
+The tradeoff is writer complexity: the writer must know the encoded nested length before
+writing the parent stream, usually by buffering the nested payload first.
+
+### Count-Bounded Containers
+
+Use schema-defined counts to delimit repeated data:
+
+```text
+Typdex(TYPDEX_TYP_UINT, record_count_id)
+Var uint(record_count)
+repeat record_count times:
+  Typdex(...)
+  payload defined by the schema
+```
+
+This keeps encoding direct and avoids nested buffering. The tradeoff is stricter
+compatibility: the reader must understand the schema-defined sequence well enough to
+consume the exact number of child records. In this model, unknown `type + index` records
+inside the same schema version are normally rejected unless they are already registered
+as skippable records.
+
+Both strategies are valid. Choose length-delimited containers for extension-heavy
+protocols where old readers should skip future records. Choose count-bounded containers
+for compact, deterministic data files where the schema version is the complete binary
+contract.
+
+## Registry Design Pattern
+
+For protocol-level schemas, define a per-type registry and name constants by both type
+and purpose:
+
+```text
+PROTO_OBJ_ROOT     = 0
+PROTO_OBJ_SECTION  = 1
+PROTO_UINT_COUNT   = 0
+PROTO_ARRAY_COORD  = 0
+PROTO_MAP_ATTRS    = 0
+```
+
+The `(type, index)` pair is the full record identity. Each type has its own `index`
+namespace, so `TYPDEX_TYP_OBJ, 0` and `TYPDEX_TYP_UINT, 0` are different records. This
+keeps common records in the 1-byte `index 0..7` range without forcing every protocol
+record into one shared integer namespace.
+
+For each registered record, document:
+
+- constant name and `(type, index)`;
+- required or optional status;
+- allowed parent/container position;
+- singleton or repeated cardinality;
+- exact payload reader;
+- whether a reader may skip it when the application does not use its value.
+
+Avoid object-local field numbering when the data is meant to be a long-lived interchange
+format. Object-local field IDs are compact but require the surrounding object type to
+interpret the same `(type, index)` pair.
+
+## Ordering and Parser Shape
+
+Schemas should define deterministic record ordering. A common pattern is:
+
+1. required metadata records;
+2. optional metadata records in a fixed order;
+3. count records;
+4. repeated child object records;
+5. registered optional extension records.
+
+Deterministic order makes parser state machines simpler, improves golden fixture diffs,
+and gives stable binary output for cache validation. Readers can use `peek_typdex()` to
+detect whether the next record is an optional record for the current container or the
+next required record expected by the parent.
+
+Do not silently treat an unexpected marker as "end of object" unless the schema defines
+that marker as an explicit scoped terminator. `DYPE_F_EOF` should normally mean end of
+the whole message, not the end of a nested object.
+
+## Extension Records
+
+If a schema needs an escape hatch, register it explicitly as a known optional record,
+for example a `TYPDEX_TYP_BYTES` extension payload:
+
+```text
+Typdex(TYPDEX_TYP_BYTES, extension_id)
+Var bytes(extension_blob)
+```
+
+Because this record is known, old readers can consume or ignore it safely. This is
+different from accepting arbitrary unknown records. Long-term protocol data should be
+promoted to named records in a future schema version instead of accumulating hidden
+semantics inside an opaque extension blob.
+
 ## Compatibility Rules
 
 - Do not change the payload layout for an existing `type + index` within the same
@@ -240,10 +357,116 @@ Var uint(lv)
 - Prefer adding new indices over redefining old ones.
 - Keep common indices in `0..7` for 1-byte typdex markers.
 - Document every app-defined `type + index` pair with its exact payload reader.
-- Typdex does not include payload length. A decoder can only skip unknown records when
-  that record's convention includes a length-delimited payload or the decoder already
-  knows its fixed size. For forward-compatible extension points, prefer wrapping unknown
-  or nested values in a length-delimited map/object convention.
+- Decide whether the schema is strict-versioned or forward-skippable.
+- In a strict-versioned schema, reject unknown records in the same schema version unless
+  they were already registered as optional/skippable records.
+- In a forward-skippable schema, make future extension points length-delimited or define
+  their payload solely with canonical primitive conventions so old readers can consume
+  them safely.
+- Starting to emit an already registered optional record can remain schema-compatible.
+  Adding a new record, changing record order, changing required/optional status, or
+  changing payload encoding should bump `DYPE_F_VERSION`.
+
+## Small Complete Example
+
+The following example defines a strict-versioned catalog message. It is intentionally
+small but includes a protocol header, per-type registry, count-bounded objects, optional
+metadata, and an extension record.
+
+### Registry
+
+```c
+enum proto_obj_id {
+    proto_obj_catalog = 0,
+    proto_obj_entry = 1,
+};
+
+enum proto_uint_id {
+    proto_uint_entry_count = 0,
+    proto_uint_entry_id = 1,
+    proto_uint_score = 2,
+};
+
+enum proto_string_id {
+    proto_string_entry_name = 0,
+};
+
+enum proto_map_id {
+    proto_map_attrs = 0,
+};
+
+enum proto_bytes_id {
+    proto_bytes_extension = 0,
+};
+```
+
+All of these indices are in `0..7`, so every marker above is 1 byte.
+
+### Message Layout
+
+```text
+Typdex(TYPDEX_TYP_F, DYPE_F_PROTOCOL)
+Var-len cstring("example.catalog")
+
+Typdex(TYPDEX_TYP_F, DYPE_F_VERSION)
+Var uint(1)
+
+Typdex(TYPDEX_TYP_OBJ, proto_obj_catalog)
+Catalog payload
+
+Typdex(TYPDEX_TYP_F, DYPE_F_EOF)        # optional
+```
+
+### Catalog Payload
+
+```text
+Typdex(TYPDEX_TYP_MAP, proto_map_attrs) # optional
+Var uint(entry_count)
+repeat entry_count times:
+  Var-len string(key)
+  Var-len string(value)
+
+Typdex(TYPDEX_TYP_UINT, proto_uint_entry_count)
+Var uint(entry_count)
+
+repeat entry_count times:
+  Typdex(TYPDEX_TYP_OBJ, proto_obj_entry)
+  Entry payload
+
+Typdex(TYPDEX_TYP_BYTES, proto_bytes_extension) # optional
+Var bytes(extension_blob)
+```
+
+### Entry Payload
+
+```text
+Typdex(TYPDEX_TYP_UINT, proto_uint_entry_id)
+Var uint(entry_id)
+
+Typdex(TYPDEX_TYP_STRING, proto_string_entry_name)
+Var-len string(name)
+
+Typdex(TYPDEX_TYP_UINT, proto_uint_score) # optional
+Var uint(score)
+
+Typdex(TYPDEX_TYP_MAP, proto_map_attrs)   # optional
+Var uint(entry_count)
+repeat entry_count times:
+  Var-len string(key)
+  Var-len string(value)
+```
+
+### Reader Rules
+
+- Verify `DYPE_F_PROTOCOL` and `DYPE_F_VERSION` before reading `proto_obj_catalog`.
+- Decode records in the documented order.
+- Use `proto_uint_entry_count` to know exactly how many `proto_obj_entry` objects follow.
+- If an optional record is present, decode it with its registered payload convention.
+- Reject unknown records in schema version `1`; do not guess where an object ends.
+- Accept unknown keys inside `proto_map_attrs` if the map is explicitly documented as
+  descriptive metadata.
+- Ignore `proto_bytes_extension` if the application does not understand its contents,
+  but still consume its `varbytes` payload.
 
 ## Language API Notes
 
