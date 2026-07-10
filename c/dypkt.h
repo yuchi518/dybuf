@@ -42,6 +42,7 @@ enum dype
     // not supported yet
     dype_array          = typdex_typ_array,                 // array of items
     dype_map            = typdex_typ_map,                   // items map
+    dype_obj            = typdex_typ_obj,                   // protocol-defined object
     // functions, options
     dype_f              = typdex_typ_f,                     // functions: index is function id
 };
@@ -266,4 +267,3 @@ dyb_inline uint8* dyp_next_data(dypkt* dyp, uint* size)
 
 
 #endif
-

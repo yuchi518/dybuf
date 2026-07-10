@@ -1,6 +1,8 @@
 {
   "cases": [
     {"id":"tier1_zero","type":0,"index":0,"encoded_hex":"00"},
+    {"id":"obj_index_zero","type":14,"index":0,"encoded_hex":"70"},
+    {"id":"obj_index_max_1byte","type":14,"index":7,"encoded_hex":"77"},
     {"id":"tier1_max","type":15,"index":7,"encoded_hex":"7f"},
     {"id":"tier2_min_type","type":16,"index":0,"encoded_hex":"9000"},
     {"id":"tier2_max","type":63,"index":255,"encoded_hex":"bfff"},

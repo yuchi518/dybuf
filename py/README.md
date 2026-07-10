@@ -78,7 +78,9 @@ assert buf.next_typdex() == (TYPDEX_TYP_INT, 3)
 assert buf.next_typdex() == (TYPDEX_TYP_STRING, 0x42)
 ```
 
-The constants `TYPDEX_TYP_*` mirror the underlying C enums, and `DYPE_F_*` mirrors
+The constants `TYPDEX_TYP_*` mirror the underlying C enums. `TYPDEX_TYP_OBJ` (`0x0e`)
+marks protocol-defined objects; its index and payload belong to the application
+protocol and are not interpreted by `dybuf`. `DYPE_F_*` mirrors
 the reserved dypkt function indices (`EOF`, schema version, protocol name, protocol
 version). `append_typdex` validates that the type fits in 8 bits and the index can
 be represented by the packed encoding. `next_typdex` and `peek_typdex` raise

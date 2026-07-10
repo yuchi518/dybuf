@@ -8,6 +8,7 @@ export const TYPDEX_TYP_STRING = 0x0A;
 export const TYPDEX_TYP_BYTES = 0x0B;
 export const TYPDEX_TYP_ARRAY = 0x0C;
 export const TYPDEX_TYP_MAP = 0x0D;
+export const TYPDEX_TYP_OBJ = 0x0E;
 export const TYPDEX_TYP_F = 0x0F;
 
 export const DYPE_F_EOF = 0;
@@ -39,6 +40,7 @@ export class DyBuf {
     static TYPDEX_TYP_BYTES = TYPDEX_TYP_BYTES;
     static TYPDEX_TYP_ARRAY = TYPDEX_TYP_ARRAY;
     static TYPDEX_TYP_MAP = TYPDEX_TYP_MAP;
+    static TYPDEX_TYP_OBJ = TYPDEX_TYP_OBJ;
     static TYPDEX_TYP_F = TYPDEX_TYP_F;
     static DYPE_F_EOF = DYPE_F_EOF;
     static DYPE_F_VERSION = DYPE_F_VERSION;

@@ -10,6 +10,7 @@ from ._core import (
     TYPDEX_TYP_BYTES,
     TYPDEX_TYP_ARRAY,
     TYPDEX_TYP_MAP,
+    TYPDEX_TYP_OBJ,
     TYPDEX_TYP_F,
 )
 
@@ -32,6 +33,7 @@ __all__ = [
     "TYPDEX_TYP_BYTES",
     "TYPDEX_TYP_ARRAY",
     "TYPDEX_TYP_MAP",
+    "TYPDEX_TYP_OBJ",
     "TYPDEX_TYP_F",
     "DYPE_F_EOF",
     "DYPE_F_VERSION",
@@ -39,7 +41,7 @@ __all__ = [
     "DYPE_F_PROTO_VERSION",
 ]
 
-__version__ = "0.4.3"
+__version__ = "0.4.4"
 
 
 def append_var_cstring(buf: DyBuf, text: str, *, encoding: str = "utf-8") -> DyBuf:

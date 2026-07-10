@@ -244,11 +244,14 @@ for convenience:
 .. data:: TYPDEX_TYP_BYTES
 .. data:: TYPDEX_TYP_ARRAY
 .. data:: TYPDEX_TYP_MAP
+.. data:: TYPDEX_TYP_OBJ
 .. data:: TYPDEX_TYP_F
 
 These constants can be passed to :meth:`DyBuf.append_typdex` (or compared with
 the values returned by :meth:`DyBuf.peek_typdex`) to avoid hard-coding numeric
-literals.
+literals. ``TYPDEX_TYP_OBJ`` (``0x0e``) marks protocol-defined objects. Its index
+and payload are defined by the application protocol; this package only encodes
+and decodes the typdex marker.
 
 
 Dypkt Function Constants

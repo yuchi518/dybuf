@@ -247,6 +247,8 @@ static int write_typdex(const char *out_dir) {
         uint32_t index;
     } cases[] = {
         {"tier1_zero", 0x00, 0x00},
+        {"obj_index_zero", typdex_typ_obj, 0x00},
+        {"obj_index_max_1byte", typdex_typ_obj, 0x07},
         {"tier1_max", 0x0F, 0x07},
         {"tier2_min_type", 0x10, 0x00},
         {"tier2_max", 0x3F, 0xFF},

@@ -392,4 +392,5 @@ TYPDEX_TYP_STRING = typdex_typ_string
 TYPDEX_TYP_BYTES = typdex_typ_bytes
 TYPDEX_TYP_ARRAY = typdex_typ_array
 TYPDEX_TYP_MAP = typdex_typ_map
+TYPDEX_TYP_OBJ = typdex_typ_obj
 TYPDEX_TYP_F = typdex_typ_f

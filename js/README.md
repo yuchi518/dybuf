@@ -22,6 +22,7 @@ immediately so callers fail fast during startup.
   `putULong(length)`) using native `BigInt` arithmetic.
 - `putTypdex` / `getTypdex` match the canonical bit layout, and legacy helpers remain as aliases.
 - Named exports `TYPDEX_TYP_*` mirror the canonical typdex enum so callers don't hard-code magic numbers. The same constants are exposed as static fields on `DyBuf`.
+- `TYPDEX_TYP_OBJ` (`0x0e`) marks protocol-defined objects. Its index and payload are protocol-defined; `DyBuf` only reads and writes the typdex marker.
 - Named exports `DYPE_F_*` mirror the reserved dypkt function indices (`EOF`, schema version, protocol name, protocol version).
 - `getVarULong` / `putVarULong` and `getVarLong` / `putVarLong` follow the same
   varint/zig-zag encoding as the C library.

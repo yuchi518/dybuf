@@ -42,7 +42,8 @@ same stream without out-of-band length metadata.
 
 ## Canonical Type Values
 
-`dybuf` reserves the following type identifiers:
+`dybuf` defines the following type identifiers. Values not listed here are
+unassigned, not application extension points:
 
 | Constant | Value | Payload convention |
 | --- | ---: | --- |
@@ -56,10 +57,37 @@ same stream without out-of-band length metadata.
 | `TYPDEX_TYP_BYTES` | `0x0b` | variable-length binary |
 | `TYPDEX_TYP_ARRAY` | `0x0c` | app-defined array payload |
 | `TYPDEX_TYP_MAP` | `0x0d` | app-defined map payload |
+| `TYPDEX_TYP_OBJ` | `0x0e` | protocol-defined object marker and payload |
 | `TYPDEX_TYP_F` | `0x0f` | dypkt function/control packet |
+
+The unassigned 1-byte type IDs are `0x04`, `0x05`, `0x08`, and `0x09`. They are
+reserved for future `dybuf` allocation and must not be assigned by application
+protocols. `0x0f` is reserved for dypkt control records.
 
 Application schemas should define `index` values under these types. Keep high-frequency
 record IDs in `0..7` whenever practical so the complete typdex marker stays 1 byte.
+
+### Protocol-defined objects
+
+`TYPDEX_TYP_OBJ` identifies an object kind, but deliberately defines no object payload
+format. Its `index` is local to the protocol named by the enclosing package. Different
+protocols may reuse the same index:
+
+```text
+Protocol "tour-overview":
+  Typdex(TYPDEX_TYP_OBJ, 0) -> OBJ_OVERVIEW
+  Typdex(TYPDEX_TYP_OBJ, 1) -> OBJ_LEVEL
+  Typdex(TYPDEX_TYP_OBJ, 2) -> OBJ_CELL
+```
+
+Indices `0..7` produce 1-byte markers. Larger indices remain valid, but use the
+existing multi-byte typdex layouts.
+
+The bytes after an object marker are entirely protocol-defined. A generic `dybuf`
+decoder can decode or encode the marker itself, but cannot parse, validate, or skip an
+object payload without the protocol schema. Protocol packages must export their own
+`OBJ_*` indices and payload rules. `TYPDEX_TYP_OBJ` is the canonical public marker for
+protocol-defined objects.
 
 ## Index Scope
 

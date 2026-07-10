@@ -39,6 +39,7 @@ public class DyBuf {
     public static final byte TYPDEX_TYP_BYTES = 0x0B;
     public static final byte TYPDEX_TYP_ARRAY = 0x0C;
     public static final byte TYPDEX_TYP_MAP = 0x0D;
+    public static final byte TYPDEX_TYP_OBJ = 0x0E;
     public static final byte TYPDEX_TYP_F = 0x0F;
 
     public static final int DYPE_F_EOF = 0;
@@ -1861,5 +1862,3 @@ public class DyBuf {
         return this;
     }
 }
-
-

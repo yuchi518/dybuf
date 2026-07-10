@@ -88,6 +88,7 @@ cdef extern from "dybuf.h":
     cdef const unsigned int typdex_typ_bytes
     cdef const unsigned int typdex_typ_array
     cdef const unsigned int typdex_typ_map
+    cdef const unsigned int typdex_typ_obj
     cdef const unsigned int typdex_typ_f
 
     dybuf* dyb_append_typdex(dybuf* dyb, uint8 type, uint index)

@@ -865,6 +865,7 @@ enum {
     typdex_typ_bytes    = 0xb,              // variable length binary
     typdex_typ_array    = 0xc,              // array of items
     typdex_typ_map      = 0xd,              // items map
+    typdex_typ_obj      = 0xe,              // protocol-defined object
     typdex_typ_f        = 0xf,              // functions
 };
 
@@ -1080,6 +1081,5 @@ dyb_inline char* dyb_next_cstring_with_var_len(dybuf* dyb, uint* size)
 
 
 #endif //DYBUF_C_DYBUF_H
-
 
 

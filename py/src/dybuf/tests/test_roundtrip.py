@@ -11,6 +11,7 @@ from dybuf import (
     TYPDEX_TYP_F,
     TYPDEX_TYP_INT,
     TYPDEX_TYP_MAP,
+    TYPDEX_TYP_OBJ,
     TYPDEX_TYP_STRING,
     TYPDEX_TYP_UINT,
     append_var_cstring,
@@ -38,6 +39,7 @@ def test_roundtrip_operations():
 def test_exports_canonical_typdex_and_dypkt_function_constants():
     assert TYPDEX_TYP_UINT == 0x03
     assert TYPDEX_TYP_MAP == 0x0D
+    assert TYPDEX_TYP_OBJ == 0x0E
     assert TYPDEX_TYP_F == 0x0F
     assert DYPE_F_EOF == 0
     assert DYPE_F_VERSION == 1

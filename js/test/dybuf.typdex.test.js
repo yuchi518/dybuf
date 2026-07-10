@@ -8,6 +8,7 @@ import {
   DyBuf,
   TYPDEX_TYP_F,
   TYPDEX_TYP_MAP,
+  TYPDEX_TYP_OBJ,
   TYPDEX_TYP_UINT,
 } from '../DyBuf.js';
 import {
@@ -54,11 +55,13 @@ test('legacy typdex aliases remain compatible', () => {
 test('exports canonical typdex and dypkt function constants', () => {
   assert.strictEqual(TYPDEX_TYP_UINT, 0x03);
   assert.strictEqual(TYPDEX_TYP_MAP, 0x0d);
+  assert.strictEqual(TYPDEX_TYP_OBJ, 0x0e);
   assert.strictEqual(TYPDEX_TYP_F, 0x0f);
   assert.strictEqual(DYPE_F_EOF, 0);
   assert.strictEqual(DYPE_F_VERSION, 1);
   assert.strictEqual(DYPE_F_PROTOCOL, 7);
   assert.strictEqual(DYPE_F_PROTO_VERSION, 8);
   assert.strictEqual(DyBuf.TYPDEX_TYP_F, TYPDEX_TYP_F);
+  assert.strictEqual(DyBuf.TYPDEX_TYP_OBJ, TYPDEX_TYP_OBJ);
   assert.strictEqual(DyBuf.DYPE_F_PROTO_VERSION, DYPE_F_PROTO_VERSION);
 });
