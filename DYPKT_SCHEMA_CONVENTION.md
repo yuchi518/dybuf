@@ -1,9 +1,12 @@
 # dypkt Schema Convention
 
 `typdex` is the compact wire tag used by `dybuf`/`dypkt`. It is not a full schema
-language by itself. The actual schema is a versioned code contract: readers inspect
-`Typdex(type, index)` and then dispatch to the payload reader defined by that schema
-version.
+language by itself. A schema convention is a separate design choice layered on top of
+`Typdex(type, index)` and the dybuf primitive payload encodings.
+
+This document describes several schema styles rather than one universal convention.
+Choose the style that matches the data model, compatibility goal, and amount of schema
+machinery a project wants to maintain.
 
 ## Terminology
 
@@ -64,81 +67,413 @@ The unassigned 1-byte type IDs are `0x04`, `0x05`, `0x08`, and `0x09`. They are
 reserved for future `dybuf` allocation and must not be assigned by application
 protocols. `0x0f` is reserved for dypkt control records.
 
-Application schemas should define `index` values under these types. Keep high-frequency
-record IDs in `0..7` whenever practical so the complete typdex marker stays 1 byte.
+Application schemas should define `index` values under these types. The meaning of
+`index` depends on the schema style: it can be a field number, a JSON encoding variant,
+or a protocol-level record ID. Keep high-frequency indices in `0..7` whenever practical
+so the complete typdex marker stays 1 byte.
 
-### Protocol-defined objects
+## Basic Typdex Use
 
-`TYPDEX_TYP_OBJ` identifies an object kind, but deliberately defines no object payload
-format. Its `index` is local to the protocol named by the enclosing package. Different
-protocols may reuse the same index:
-
-```text
-Protocol "tour-overview":
-  Typdex(TYPDEX_TYP_OBJ, 0) -> OBJ_OVERVIEW
-  Typdex(TYPDEX_TYP_OBJ, 1) -> OBJ_LEVEL
-  Typdex(TYPDEX_TYP_OBJ, 2) -> OBJ_CELL
-```
-
-Indices `0..7` produce 1-byte markers. Larger indices remain valid, but use the
-existing multi-byte typdex layouts.
-
-The bytes after an object marker are entirely protocol-defined. A generic `dybuf`
-decoder can decode or encode the marker itself, but cannot parse, validate, or skip an
-object payload without the protocol schema. Protocol packages must export their own
-`OBJ_*` indices and payload rules. `TYPDEX_TYP_OBJ` is the canonical public marker for
-protocol-defined objects.
-
-## Index Scope
-
-`index` can be used with two different scopes. Choose one deliberately for each schema.
-
-### Global Record IDs
-
-For protocol/message schemas, treat `type + index` as a globally defined record ID
-within the schema version. In this model, every occurrence of the same `type + index`
-has the same payload convention no matter where it appears:
+At the wire level, a record starts with:
 
 ```text
-Typdex(TYPDEX_TYP_UINT, dype_uiid_grid_lv) -> Var uint(lv)
-Typdex(TYPDEX_TYP_MAP, dype_mid_tags)      -> tags map
+Typdex(type, index)
+payload chosen by the schema
 ```
 
-This is the preferred model for dypkt-style package schemas. It allows readers to
-dispatch records consistently and makes compatibility rules easier to document. Within
-the same schema version, a record's payload convention is global and stable: a reader
-that does not understand the record's application meaning can still consume or skip it
-as long as the record format is defined by the shared schema. Canonical primitive types
-are naturally skippable from the type alone (for example bool, var integers, strings,
-bytes, floats, and doubles). App-defined arrays/maps are also skippable when their
-record convention is part of the shared schema or when they are length-delimited.
-Known records remain stable across compatible versions.
+The `type` identifies the broad dybuf payload family, and `index` refines that marker
+inside the selected schema style. A generic dybuf implementation can encode and decode
+the marker itself, but it cannot know the application payload rules for arrays, maps,
+objects, or protocol-specific records without the surrounding schema.
 
-### Object-Local Field IDs
+## Schema Styles
 
-For object-oriented serialization, `index` can instead mean "field number inside the
-current object type". In this model, the same `type + index` may have different meanings
-inside different classes or nested objects:
+The same typdex primitive can support different schema styles:
+
+1. **Field-indexed object serialization**: `index` is the field number within the
+   current object/class, similar to protobuf field IDs. The schema is code-first rather
+   than generated from a `.proto` file.
+2. **JSON-equivalent encoding**: dybuf is used as a binary representation for the JSON
+   value model. Helper functions convert JSON values to/from dybuf without app-specific
+   record registries.
+3. **Semantic record registry**: `(type, index)` is a protocol-level record ID with a
+   stable payload convention. This is useful for strict binary file protocols, but it is
+   the most specialized style and should not be treated as the default.
+
+## Style 1: Field-Indexed Object Serialization
+
+In this style, `index` means "field number inside this object type". The same
+`type + index` can mean different fields in different object classes because the
+surrounding object type selects the field table.
+
+Example object schema:
 
 ```text
 Object User:
-  Typdex(TYPDEX_TYP_STRING, 0) -> name
-  Typdex(TYPDEX_TYP_UINT,   1) -> age
-
-Object Tile:
-  Typdex(TYPDEX_TYP_UINT,   0) -> zoom level
-  Typdex(TYPDEX_TYP_ARRAY,  1) -> grid indices
+  field 0: TYPDEX_TYP_UINT   id
+  field 1: TYPDEX_TYP_STRING name
+  field 2: TYPDEX_TYP_STRING email       # optional
+  field 3: TYPDEX_TYP_ARRAY  tags        # repeated/generic payload
 ```
 
-This is useful for compact in-process object serialization, but it is a weaker
-interchange format. A decoder must already know the surrounding object type before it
-can interpret an index. Newer writers can easily produce fields that older readers do
-not understand, and because typdex does not carry payload length, older readers usually
-cannot skip unknown object-local fields safely unless the object convention adds
-length-delimited field payloads.
+Encoder shape:
 
-If long-term forward/backward compatibility matters, prefer global record IDs or wrap
-object-local fields in a length-delimited container.
+```text
+encode_user(user):
+  putTypdex(TYPDEX_TYP_UINT, 0)
+  putVarULong(user.id)
+
+  putTypdex(TYPDEX_TYP_STRING, 1)
+  putVarString(user.name)
+
+  if user.email is present:
+    putTypdex(TYPDEX_TYP_STRING, 2)
+    putVarString(user.email)
+
+  if user.tags is present:
+    putTypdex(TYPDEX_TYP_ARRAY, 3)
+    putVarULong(tag_count)
+    repeat tag_count:
+      putVarString(tag)
+```
+
+Decoder shape:
+
+```text
+decode_user(field_count or byte_limit):
+  user = new User()
+  repeat until object boundary:
+    typdex = nextTypdex()
+    switch typdex.index:
+      case 0:
+        require typdex.type == TYPDEX_TYP_UINT
+        user.id = nextVarULong()
+      case 1:
+        require typdex.type == TYPDEX_TYP_STRING
+        user.name = nextVarString()
+      case 2:
+        require typdex.type == TYPDEX_TYP_STRING
+        user.email = nextVarString()
+      case 3:
+        require typdex.type == TYPDEX_TYP_ARRAY
+        user.tags = read_tags_array()
+      default:
+        skip or reject according to the object compatibility policy
+```
+
+Wrong type for a known field is a decoding error. For example, field `1` above must be
+`TYPDEX_TYP_STRING`; `TYPDEX_TYP_UINT, 1` is not a valid alternate encoding for `name`.
+
+This style is the most natural choice when serializing application objects:
+
+- multiple fields with the same dybuf type are easy because their field numbers differ;
+- each object/class can reuse compact field numbers `0..7`;
+- code directly documents encode/decode behavior, without requiring a schema compiler;
+- optional generic fields can be supported by reserving fields whose payload is itself
+  a typdex-tagged value, byte blob, map, or array.
+
+The object boundary must still be explicit. Common choices are:
+
+- a field count before the object payload;
+- a byte length before the object payload;
+- a parent container count that says how many objects follow;
+- a fixed record order for small closed objects.
+
+If unknown field skipping matters, prefer length-delimited object payloads or restrict
+unknown fields to canonical primitive/var-length payloads that a reader can consume
+without understanding application semantics.
+
+## Style 2: JSON-Equivalent Encoding
+
+This style uses dybuf as a binary representation of the JSON value model. The goal is
+not an app-specific schema; the goal is a pair of helpers such as:
+
+```text
+append_json_value(buf, value)
+next_json_value(buf) -> value
+```
+
+The root value is encoded as one JSON value record. Its `index` should be `0`
+regardless of whether the value is a scalar, array, or object:
+
+```text
+Typdex(json_value_type, 0)
+JSON payload
+```
+
+A prototype should round-trip the JSON data model:
+
+| JSON value | Suggested root/array typdex |
+| --- | --- |
+| `null` | `TYPDEX_TYP_NONE, 0` |
+| boolean | `TYPDEX_TYP_BOOL, 0` + bool payload |
+| integer number | `TYPDEX_TYP_INT/UINT, 0` + varint payload |
+| floating number | `TYPDEX_TYP_DOUBLE, 0` + double payload |
+| string | `TYPDEX_TYP_STRING, 0` + varstring payload |
+| array | `TYPDEX_TYP_ARRAY, 0` + count + repeated JSON values |
+| object | `TYPDEX_TYP_MAP, 0` + current dictionary context + repeated value records |
+
+### Array Payload
+
+JSON arrays can contain mixed value types, so every element needs its own typdex marker:
+
+```text
+Typdex(TYPDEX_TYP_ARRAY, 0)
+Var uint(item_count)
+repeat item_count times:
+  Typdex(element_type, 0)
+  JSON value
+```
+
+The recommended convention is `index = 0` for array elements. Array position already
+comes from sequence order, so storing the array index in typdex is redundant and becomes
+less compact after index `7`. A variant may store the element position in `index`, but
+that should be documented as a non-default JSON encoding variant.
+
+### Object / Map Payload
+
+JSON object keys are strings and values can be any JSON type. A JSON-equivalent dybuf
+encoding therefore needs a key dictionary for object/map values. There are two useful
+variants.
+
+#### Inline Dictionary Variant
+
+The simplest variant stores the key dictionary directly inside each map payload. Then
+each value typdex uses `index` to point into that local dictionary:
+
+```text
+Typdex(TYPDEX_TYP_MAP, 0)
+Var uint(key_count)
+repeat key_count times:
+  Var-len string(key)
+
+repeat key_count times:
+  Typdex(value_type, key_index)
+  JSON value
+```
+
+For deterministic output, writers should emit value records in key dictionary order and
+set `key_index` to the corresponding dictionary slot. Readers should reject duplicate
+keys in the dictionary, duplicate `key_index` value records, missing value records, and
+`key_index >= key_count`.
+
+This gives `index` a local, mechanical meaning only inside the current JSON object. It
+does not create an app-specific schema: the dictionary embedded in that object is the
+schema for that object's keys.
+
+This variant is self-contained but repeats key dictionaries. For many small objects with
+the same shape, dictionary overhead can be larger than the payload savings.
+
+#### Document-Level Dictionary Variant
+
+For larger JSON documents, define all object-key dictionaries once near the beginning
+of the dybuf stream. This keeps repeated object payloads small while still allowing
+generic JSON decoding.
+
+The encoder cannot stream the final bytes directly to the output file in one pass
+unless it already knows all dictionaries. It must either:
+
+- make a pre-pass over the JSON tree to build the dictionary collection, then encode
+  the payload; or
+- encode the payload into a temporary dybuf while collecting dictionaries, then write
+  the dictionary collection before the buffered payload.
+
+One practical layout is to reserve two JSON document objects under `TYPDEX_TYP_OBJ`:
+
+```text
+Typdex(TYPDEX_TYP_OBJ, 0)          # JSON dictionary collection
+Var uint(json_dybuf_format_version)
+Var uint(dictionary_count)
+repeat dictionary_count times:
+  Var-len string(dictionary_name)
+  Var uint(key_count)
+  repeat key_count times:
+    Var-len string(key)
+
+Typdex(TYPDEX_TYP_OBJ, 1)          # JSON payload
+Typdex(root_json_value_type, 0)
+Root JSON payload
+```
+
+`TYPDEX_TYP_OBJ, 0` is the metadata block that a generic JSON-dybuf decoder needs
+before reading object values. `json_dybuf_format_version` should start at `1` and
+identify this JSON encoding convention, including path grammar, dictionary rules, and
+number policy. `TYPDEX_TYP_OBJ, 1` marks the start of the encoded JSON payload. This is
+a JSON encoding convention; it is separate from dypkt function/control records.
+
+The dictionary collection is not one global key dictionary for the whole JSON document.
+It is a set of dictionaries, one per structural object position. During encoding, each
+dictionary grows as keys are encountered at that structural position. When a new key is
+inserted, the next index is the previous dictionary size.
+
+Example encoder-side dictionary state:
+
+```json
+{
+  "$": {
+    "key1": 0,
+    "key2": 1,
+    "key3": 2
+  },
+  "$.2.[]": {
+    "key11": 0
+  }
+}
+```
+
+In this example, `$` is the root object dictionary. `key3` is assigned index `2` in the
+root dictionary, so objects inside the array stored at `key3` use the dictionary named
+`$.2.[]`. The path uses dictionary indices, not key strings. This keeps dictionary names
+stable after encoding and avoids repeating long key names in nested dictionary names.
+
+The dictionary name is a structural value path. A version-1 prototype should use this
+grammar:
+
+```text
+$       root value
+.K      value stored under object key index K in the current object dictionary
+.[]     value stored as an element of the current array
+```
+
+Object values use their current value path as the dictionary name. Examples:
+
+```text
+$          root object
+$.[]       object elements of a root array
+$.2        object value stored under root key index 2
+$.2.[]     object elements inside the array stored under root key index 2
+$.2.[].1   object value stored under key index 1 of those array elements
+```
+
+When an array contains objects, all object elements at that array position share the
+same dictionary path. This is the main compression benefit for common JSON payloads such
+as `[{...}, {...}, ...]`: the root array object elements share `$.[]`.
+
+When an object contains different object-valued keys, those child objects use different
+dictionary paths because their parent key indices differ. This avoids merging unrelated
+object shapes just because they appear at the same depth.
+
+When encoding an object/map value, the current traversal context selects the dictionary.
+
+The object/map payload does not need to repeat the dictionary name when both encoder and
+decoder use the same traversal rules. Its value records use `typdex.index` as the key
+index in the current dictionary:
+
+```text
+Typdex(TYPDEX_TYP_MAP, 0)
+Var uint(present_count)
+repeat present_count times:
+  Typdex(value_type, key_index)
+  JSON value
+```
+
+`key_index` is the slot in the current structural dictionary. This supports sparse
+objects: the dictionary may contain all keys ever seen at that position, while each
+object instance emits only its present keys. Readers should reject duplicate
+`key_index`, `key_index >= key_count`, missing dictionary names, and missing required
+keys if the JSON encoding variant defines required keys.
+
+For the JSON shape:
+
+```json
+{
+  "key1": 123,
+  "key2": "asdf",
+  "key3": [{}, {}]
+}
+```
+
+the root dictionary is named `$`, with keys `key1`, `key2`, `key3`. If objects inside
+the `key3` array later gain keys, their dictionary is named `$.2.[]` because `key3`
+has root dictionary index `2`.
+
+Writers should preserve JSON object member order while building dictionaries. The first
+time a key appears in a structural dictionary, it receives the next index. Later objects
+at the same structural path reuse that index. This makes the encoded bytes depend on
+the input key order, which is acceptable for a JSON-equivalent transport.
+
+Version 1 targets round-trip equivalence:
+
+```text
+decode(encode(value)) == value
+```
+
+It does not target canonical bytes. Two JSON objects with the same semantic content but
+different member order may encode to different byte streams, and two language bindings
+may produce different byte streams if their parsed object member order differs. The
+required compatibility property is that Python and JavaScript can decode each other's
+valid JSON-dybuf byte streams back to the same JSON value. If canonical binary output
+is required later, define a canonical key ordering or frequency-based index assignment
+as a separate format version.
+
+A variant may put an explicit dictionary ID in every map payload instead of deriving the
+dictionary name from traversal context. That is simpler for random access into nested
+payloads, but it costs extra bytes per object and is not the compact default described
+above.
+
+For a first cross-language prototype, keep JSON number handling conservative:
+
+- encode integer-looking numbers as `TYPDEX_TYP_INT` or `TYPDEX_TYP_UINT` only when the
+  value is inside JavaScript's safe integer range;
+- encode fractional numbers as `TYPDEX_TYP_DOUBLE`;
+- reject `NaN`, `Infinity`, and `-Infinity`, because they are not JSON values;
+- document whether `-0` must round-trip distinctly or may decode as `0`.
+
+Avoid `TYPDEX_TYP_F` for JSON dictionaries because `TYPDEX_TYP_F` is reserved for dypkt
+control records. If the JSON encoding needs an explicit dictionary-table marker,
+`TYPDEX_TYP_OBJ` is the better fit because the dictionary table is a JSON-encoding
+object, not a package control function.
+
+Remaining choices for a JSON prototype:
+
+- choose whether the first utility supports only the document-level dictionary variant
+  or also exposes the simpler inline dictionary variant;
+- reject duplicate object keys or define deterministic last-wins behavior before
+  building the key dictionary;
+- define the exact behavior for `-0` before claiming full JavaScript JSON
+  round-tripping;
+- ensure arrays/objects use counts so decoders know exactly where nested values end;
+- add cross-language fixtures that prove Python and JavaScript derive the same
+  dictionary paths and key indices.
+
+This style is the easiest entry point for users who already have JSON-compatible data
+and want a dybuf binary form without designing a custom typdex registry.
+
+## Style 3: Semantic Record Registry
+
+For protocol/message schemas, `type + index` can be treated as a globally defined
+record ID within the schema version. In this model, every occurrence of the same
+`type + index` has the same payload convention no matter where it appears:
+
+```text
+Typdex(TYPDEX_TYP_UINT, record_grid_lv) -> Var uint(lv)
+Typdex(TYPDEX_TYP_MAP, record_tags)     -> tags map
+```
+
+This style is useful for strict binary file protocols and compact static data. It is
+not a good default for general object serialization. If one container needs multiple
+fields of the same conceptual type, field-indexed object serialization is usually
+clearer than inventing many semantic subtypes.
+
+Within the same schema version, a record's payload convention is global and stable: a
+reader that does not understand the record's application meaning can still consume or
+skip it if the record format is defined by the shared schema. Canonical primitive types
+are naturally skippable from the type alone (for example bool, var integers, strings,
+bytes, floats, and doubles). App-defined arrays/maps/objects are skippable only when
+their record convention is part of the shared schema or when they are length-delimited.
+
+For this style, `TYPDEX_TYP_OBJ` can identify protocol-defined object kinds:
+
+```text
+Protocol "example.catalog":
+  Typdex(TYPDEX_TYP_OBJ, 0) -> OBJ_CATALOG
+  Typdex(TYPDEX_TYP_OBJ, 1) -> OBJ_ENTRY
+```
+
+The bytes after an object marker are entirely protocol-defined. A generic `dybuf`
+decoder can decode or encode the marker itself, but cannot parse, validate, or skip an
+object payload without the protocol schema. Protocol packages should export their own
+`OBJ_*` indices and payload rules.
 
 ## Reserved Function Indices
 
@@ -194,9 +529,9 @@ The message can end with:
 Typdex(TYPDEX_TYP_F, DYPE_F_EOF)
 ```
 
-## Designing App Schemas
+## Style 3 Example Records
 
-Define app-level record IDs per type:
+For a semantic record registry, define app-level record IDs per type:
 
 ```c
 enum dype_uint_id {
@@ -213,7 +548,7 @@ enum dype_array_id {
 };
 ```
 
-Example payload conventions:
+Example payload conventions for this style:
 
 ```text
 Typdex(TYPDEX_TYP_MAP, dype_mid_object)
