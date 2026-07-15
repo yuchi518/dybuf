@@ -15,6 +15,7 @@ export const DYPE_F_EOF = 0;
 export const DYPE_F_VERSION = 1;
 export const DYPE_F_PROTOCOL = 7;
 export const DYPE_F_PROTO_VERSION = 8;
+export const JSON_DYBUF_FORMAT_VERSION = 1;
 
 const HAS_NATIVE_BIGINT64 = typeof BigInt === 'function'
     && typeof DataView !== 'undefined'
@@ -46,6 +47,7 @@ export class DyBuf {
     static DYPE_F_VERSION = DYPE_F_VERSION;
     static DYPE_F_PROTOCOL = DYPE_F_PROTOCOL;
     static DYPE_F_PROTO_VERSION = DYPE_F_PROTO_VERSION;
+    static JSON_DYBUF_FORMAT_VERSION = JSON_DYBUF_FORMAT_VERSION;
 
     constructor(buff, copy_or_not=false) {
         if (typeof buff == "number") {
@@ -847,7 +849,33 @@ export class DyBuf {
     }
 
     // double, float
-    // TODO: implement later
+    getFloat(littleEndian=false) {
+        this.prepareForRead(4);
+        const index = this._position;
+        this._position += 4;
+        return this._data.getFloat32(index, littleEndian);
+    }
+
+    putFloat(value, littleEndian=false) {
+        this.prepareForWrite(4);
+        this._data.setFloat32(this._position, value, littleEndian);
+        this._position += 4;
+        return this;
+    }
+
+    getDouble(littleEndian=false) {
+        this.prepareForRead(8);
+        const index = this._position;
+        this._position += 8;
+        return this._data.getFloat64(index, littleEndian);
+    }
+
+    putDouble(value, littleEndian=false) {
+        this.prepareForWrite(8);
+        this._data.setFloat64(this._position, value, littleEndian);
+        this._position += 8;
+        return this;
+    }
 
     // index and 4bits type
     putTypdex(type, index) {
@@ -913,6 +941,294 @@ export class DyBuf {
         return this._data.buffer.slice(this._mark, this._position);
     }
 
+}
+
+const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
+const MIN_SAFE_BIGINT = -MAX_SAFE_BIGINT;
+
+export function encodeJson(value) {
+    const buf = new DyBuf(256);
+    appendJsonValue(buf, value);
+    return buf.toBytesBeforeCurrentPosition();
+}
+
+export function decodeJson(data) {
+    const buf = new DyBuf(_arrayBufferFromJsonInput(data));
+    const value = nextJsonValue(buf);
+    if (buf.remaining() !== 0) {
+        throw new Error('trailing bytes after JSON-dybuf payload');
+    }
+    return value;
+}
+
+export function appendJsonValue(buf, value) {
+    const dictionaries = _buildJsonDictionaries(value);
+
+    buf.putTypdex(TYPDEX_TYP_OBJ, 0);
+    buf.putVarULong(JSON_DYBUF_FORMAT_VERSION);
+    buf.putVarULong(dictionaries.size);
+    for (const [path, keyToIndex] of dictionaries.entries()) {
+        buf.putVarString(path);
+        buf.putVarULong(keyToIndex.size);
+        for (const key of keyToIndex.keys()) {
+            buf.putVarString(key);
+        }
+    }
+
+    buf.putTypdex(TYPDEX_TYP_OBJ, 1);
+    _putJsonRecord(buf, value, '$', 0, dictionaries);
+    return buf;
+}
+
+export function nextJsonValue(buf) {
+    let marker = buf.getTypdex();
+    if (marker.type !== TYPDEX_TYP_OBJ || marker.index !== 0) {
+        throw new Error('JSON-dybuf stream must start with TYPDEX_TYP_OBJ, 0');
+    }
+
+    const version = _readJsonCount(buf, 'json_dybuf_format_version');
+    if (version !== JSON_DYBUF_FORMAT_VERSION) {
+        throw new Error(`unsupported JSON-dybuf format version: ${version}`);
+    }
+
+    const dictionaryCount = _readJsonCount(buf, 'dictionary_count');
+    const dictionaries = new Map();
+    for (let i = 0; i < dictionaryCount; i += 1) {
+        const path = buf.getVarString();
+        if (dictionaries.has(path)) {
+            throw new Error(`duplicate JSON dictionary path: ${path}`);
+        }
+        const keyCount = _readJsonCount(buf, `key_count for ${path}`);
+        const keys = [];
+        const seen = new Set();
+        for (let j = 0; j < keyCount; j += 1) {
+            const key = buf.getVarString();
+            if (seen.has(key)) {
+                throw new Error(`duplicate key in JSON dictionary ${path}: ${key}`);
+            }
+            seen.add(key);
+            keys.push(key);
+        }
+        dictionaries.set(path, keys);
+    }
+
+    marker = buf.getTypdex();
+    if (marker.type !== TYPDEX_TYP_OBJ || marker.index !== 1) {
+        throw new Error('JSON-dybuf payload marker must be TYPDEX_TYP_OBJ, 1');
+    }
+
+    const root = buf.getTypdex();
+    return _getJsonPayload(buf, root.type, root.index, '$', dictionaries);
+}
+
+function _buildJsonDictionaries(value) {
+    const dictionaries = new Map();
+
+    function ensure(path) {
+        let dictionary = dictionaries.get(path);
+        if (dictionary == null) {
+            dictionary = new Map();
+            dictionaries.set(path, dictionary);
+        }
+        return dictionary;
+    }
+
+    function visit(current, path) {
+        if (_isJsonObject(current)) {
+            const dictionary = ensure(path);
+            for (const key of Object.keys(current)) {
+                if (!dictionary.has(key)) {
+                    dictionary.set(key, dictionary.size);
+                }
+                visit(current[key], `${path}.${dictionary.get(key)}`);
+            }
+            return;
+        }
+        if (Array.isArray(current)) {
+            for (const child of current) {
+                visit(child, `${path}.[]`);
+            }
+            return;
+        }
+        _jsonTypdexType(current);
+    }
+
+    visit(value, '$');
+    return dictionaries;
+}
+
+function _putJsonRecord(buf, value, path, index, dictionaries) {
+    const type = _jsonTypdexType(value);
+    buf.putTypdex(type, index);
+
+    switch (type) {
+        case TYPDEX_TYP_NONE:
+            return;
+        case TYPDEX_TYP_BOOL:
+            buf.putBool(value);
+            return;
+        case TYPDEX_TYP_INT:
+            buf.putVarLong(BigInt(value));
+            return;
+        case TYPDEX_TYP_UINT:
+            buf.putVarULong(BigInt(value));
+            return;
+        case TYPDEX_TYP_DOUBLE:
+            buf.putDouble(value, true);
+            return;
+        case TYPDEX_TYP_STRING:
+            buf.putVarString(value);
+            return;
+        case TYPDEX_TYP_ARRAY: {
+            buf.putVarULong(value.length);
+            const childPath = `${path}.[]`;
+            for (const child of value) {
+                _putJsonRecord(buf, child, childPath, 0, dictionaries);
+            }
+            return;
+        }
+        case TYPDEX_TYP_MAP: {
+            const dictionary = dictionaries.get(path);
+            if (dictionary == null) {
+                throw new Error(`missing JSON dictionary for path: ${path}`);
+            }
+            buf.putVarULong(Object.keys(value).length);
+            for (const key of Object.keys(value)) {
+                const keyIndex = dictionary.get(key);
+                _putJsonRecord(buf, value[key], `${path}.${keyIndex}`, keyIndex, dictionaries);
+            }
+            return;
+        }
+        default:
+            throw new Error(`unhandled JSON typdex type: ${type}`);
+    }
+}
+
+function _getJsonPayload(buf, type, index, path, dictionaries) {
+    switch (type) {
+        case TYPDEX_TYP_NONE:
+            return null;
+        case TYPDEX_TYP_BOOL:
+            return buf.getBool();
+        case TYPDEX_TYP_INT:
+            return _safeJsonNumber(buf.getVarLong(), 'signed integer');
+        case TYPDEX_TYP_UINT:
+            return _safeJsonNumber(buf.getVarULong(), 'unsigned integer');
+        case TYPDEX_TYP_DOUBLE:
+            return _finiteJsonDouble(buf.getDouble(true));
+        case TYPDEX_TYP_STRING:
+            return buf.getVarString();
+        case TYPDEX_TYP_ARRAY: {
+            const count = _readJsonCount(buf, 'array item_count');
+            const childPath = `${path}.[]`;
+            const result = [];
+            for (let i = 0; i < count; i += 1) {
+                const child = buf.getTypdex();
+                result.push(_getJsonPayload(buf, child.type, child.index, childPath, dictionaries));
+            }
+            return result;
+        }
+        case TYPDEX_TYP_MAP: {
+            const keys = dictionaries.get(path);
+            if (keys == null) {
+                throw new Error(`missing JSON dictionary for path: ${path}`);
+            }
+            const presentCount = _readJsonCount(buf, `present_count for ${path}`);
+            const result = {};
+            const seenIndices = new Set();
+            for (let i = 0; i < presentCount; i += 1) {
+                const child = buf.getTypdex();
+                if (seenIndices.has(child.index)) {
+                    throw new Error(`duplicate key index ${child.index} in JSON object ${path}`);
+                }
+                if (child.index >= keys.length) {
+                    throw new Error(`key index ${child.index} out of range for JSON object ${path}`);
+                }
+                seenIndices.add(child.index);
+                result[keys[child.index]] = _getJsonPayload(
+                    buf,
+                    child.type,
+                    child.index,
+                    `${path}.${child.index}`,
+                    dictionaries
+                );
+            }
+            return result;
+        }
+        default:
+            throw new Error(`unsupported JSON typdex type: ${type}`);
+    }
+}
+
+function _jsonTypdexType(value) {
+    if (value === null) {
+        return TYPDEX_TYP_NONE;
+    }
+    if (typeof value === 'boolean') {
+        return TYPDEX_TYP_BOOL;
+    }
+    if (typeof value === 'number') {
+        if (!Number.isFinite(value)) {
+            throw new Error('JSON number must be finite');
+        }
+        if (Number.isInteger(value)) {
+            if (!Number.isSafeInteger(value)) {
+                throw new Error('JSON integer is outside JavaScript safe integer range');
+            }
+            return value < 0 ? TYPDEX_TYP_INT : TYPDEX_TYP_UINT;
+        }
+        return TYPDEX_TYP_DOUBLE;
+    }
+    if (typeof value === 'string') {
+        return TYPDEX_TYP_STRING;
+    }
+    if (Array.isArray(value)) {
+        return TYPDEX_TYP_ARRAY;
+    }
+    if (_isJsonObject(value)) {
+        return TYPDEX_TYP_MAP;
+    }
+    throw new TypeError(`unsupported JSON value type: ${typeof value}`);
+}
+
+function _isJsonObject(value) {
+    if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+        return false;
+    }
+    const proto = Object.getPrototypeOf(value);
+    return proto === Object.prototype || proto === null;
+}
+
+function _readJsonCount(buf, label) {
+    const value = buf.getVarULong();
+    if (value > MAX_SAFE_BIGINT) {
+        throw new Error(`${label} is too large`);
+    }
+    return Number(value);
+}
+
+function _safeJsonNumber(value, label) {
+    if (value < MIN_SAFE_BIGINT || value > MAX_SAFE_BIGINT) {
+        throw new Error(`decoded JSON ${label} is outside JavaScript safe integer range`);
+    }
+    return Number(value);
+}
+
+function _finiteJsonDouble(value) {
+    if (!Number.isFinite(value)) {
+        throw new Error('decoded JSON double must be finite');
+    }
+    return value;
+}
+
+function _arrayBufferFromJsonInput(data) {
+    if (data instanceof ArrayBuffer) {
+        return data;
+    }
+    if (ArrayBuffer.isView(data)) {
+        return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+    }
+    throw new TypeError('decodeJson expects an ArrayBuffer or ArrayBuffer view');
 }
 
 // eslint-disable-next-line no-unused-vars

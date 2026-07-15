@@ -8,6 +8,7 @@ JSON manifests that hold:
   the C generator.
 - `decoded`: typed fields describing the semantic meaning (e.g., unsigned integer
   value, typdex `{ "type": 3, "index": 42 }`, payload text).
+- `value`: JSON-compatible values for JSON-dybuf cases.
 
 Consumers should take the following approach:
 
@@ -22,6 +23,8 @@ Fixtures currently cover:
 - Unsigned and signed varints around every encoding boundary.
 - Typdex headers across all width tiers.
 - Variable-length payload helpers, including empty payloads.
+- JSON-dybuf v1 document-level dictionary streams for root scalars, arrays,
+  objects, nested objects, sparse objects, mixed arrays, and doubles.
 
 The fixture generator lives in `c/` and will materialise outputs into
 `fixtures/v1/` by default.

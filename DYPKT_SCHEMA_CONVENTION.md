@@ -417,24 +417,18 @@ For a first cross-language prototype, keep JSON number handling conservative:
   value is inside JavaScript's safe integer range;
 - encode fractional numbers as `TYPDEX_TYP_DOUBLE`;
 - reject `NaN`, `Infinity`, and `-Infinity`, because they are not JSON values;
-- document whether `-0` must round-trip distinctly or may decode as `0`.
+- do not guarantee that JavaScript `-0` round-trips distinctly from `0` in version 1.
 
 Avoid `TYPDEX_TYP_F` for JSON dictionaries because `TYPDEX_TYP_F` is reserved for dypkt
 control records. If the JSON encoding needs an explicit dictionary-table marker,
 `TYPDEX_TYP_OBJ` is the better fit because the dictionary table is a JSON-encoding
 object, not a package control function.
 
-Remaining choices for a JSON prototype:
-
-- choose whether the first utility supports only the document-level dictionary variant
-  or also exposes the simpler inline dictionary variant;
-- reject duplicate object keys or define deterministic last-wins behavior before
-  building the key dictionary;
-- define the exact behavior for `-0` before claiming full JavaScript JSON
-  round-tripping;
-- ensure arrays/objects use counts so decoders know exactly where nested values end;
-- add cross-language fixtures that prove Python and JavaScript derive the same
-  dictionary paths and key indices.
+The version-1 Python and JavaScript utilities implement the document-level dictionary
+variant above. Arrays and objects carry counts, and the shared `json_values` fixture is
+generated and verified by the C fixture toolchain before the language bindings consume
+it. Duplicate object-key policy remains delegated to the host JSON/object model before
+encoding; decoders reject duplicate key indices within an encoded object.
 
 This style is the easiest entry point for users who already have JSON-compatible data
 and want a dybuf binary form without designing a custom typdex registry.

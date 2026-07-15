@@ -34,15 +34,15 @@
 - [x] 定義 dictionary path 使用 structural index path，例如 `$`, `$.[]`, `$.2.[]`
 - [x] 記錄 encoder 需要 pre-pass 或 temporary payload buffer，因為 dictionary collection
   必須寫在 JSON payload 前面
-- [ ] 實作 Python JSON encoder/decoder utility
-- [ ] 實作 JavaScript JSON encoder/decoder utility
-- [ ] 建立 Python/JavaScript 共用 JSON fixture
-- [ ] 加入 Python encode -> JS decode 驗證
-- [ ] 加入 JS encode -> Python decode 驗證
-- [ ] 加入隨機 JSON round-trip 測試，先限制深度、key 字元集、number 範圍
-- [ ] 明確測試 root object、root array、nested object、array of objects、mixed-type array
+- [x] 實作 Python JSON encoder/decoder utility
+- [x] 實作 JavaScript JSON encoder/decoder utility
+- [x] 建立 Python/JavaScript 共用 JSON fixture
+- [x] 透過共用 fixture 驗證 Python 產生的 JSON-dybuf bytes 可由 JavaScript decode
+- [x] 透過共用 fixture 驗證 JavaScript 產生的 JSON-dybuf bytes 可由 Python decode
+- [x] 加入隨機 JSON round-trip 測試，先限制深度、key 字元集、number 範圍
+- [x] 明確測試 root object、root array、nested object、array of objects、mixed-type array
 - [x] 確認第一版不追求 canonical bytes，只追求 encode/decode round-trip 等價
-- [ ] 文件化 JSON number policy：safe integer、double、`-0`、非 JSON number 的處理
+- [x] 文件化 JSON number policy：safe integer、double、`-0`、非 JSON number 的處理
 
 ### Draft v1 constraints
 
@@ -56,5 +56,6 @@
 - Integers should stay within JavaScript's safe integer range for the first
   cross-language utility. Fractional values use double. `NaN` and infinities are
   rejected because they are not valid JSON values.
+- Version 1 does not guarantee that JavaScript `-0` round-trips distinctly from `0`.
 - Array elements are always individually typdex-tagged. Array element typdex indices
   default to `0`; object key indices are carried by map value typdex markers.

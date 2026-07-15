@@ -7,6 +7,7 @@ Python bindings for the [`dybuf`](../c/dybuf.h) dynamic buffer library implement
 - Thin, fast wrapper around the original `dybuf` implementation.
 - Supports reading and writing unsigned integers (8–64 bits), booleans, raw byte payloads, and the library’s compact `var_u64`/`var_s64` varints.
 - Exposes typdex markers so higher-level protocols can tag fields without hauling in a full protobuf-style schema.
+- Provides JSON-equivalent helpers for binary JSON round-tripping with shared key dictionaries.
 - Compatible with Windows, Linux, and macOS thanks to compiled extension modules.
 - Designed for publishing on PyPI with automated release workflows.
 
@@ -96,6 +97,25 @@ markers, and start dypkt-compatible messages with `TYPDEX_TYP_F` +
 
 See the repository's [dypkt schema convention](https://github.com/yuchi518/dybuf/blob/master/DYPKT_SCHEMA_CONVENTION.md)
 for the canonical typdex layout, reserved function IDs, and compatibility rules.
+
+## JSON helpers
+
+`encode_json` and `decode_json` store JSON-compatible Python values using the
+JSON-equivalent dybuf convention documented in `DYPKT_SCHEMA_CONVENTION.md`.
+The first version targets round-trip equivalence rather than canonical bytes.
+
+```python
+from dybuf import decode_json, encode_json
+
+payload = {"items": [{"id": 1, "name": "alpha"}, {"id": 2, "name": "beta"}]}
+encoded = encode_json(payload)
+
+assert decode_json(encoded) == payload
+```
+
+Integers must fit JavaScript's safe integer range for Python/JavaScript parity.
+Fractional numbers are encoded as doubles. `NaN` and infinities are rejected because
+they are not valid JSON values.
 
 ## Developing locally
 

@@ -111,6 +111,80 @@ static int parse_json_number(const char **cursor, char *out, size_t out_size) {
     return 0;
 }
 
+static int skip_json_value(const char **cursor);
+
+static int skip_json_string_value(const char **cursor) {
+    char scratch[512];
+    return parse_json_string(cursor, scratch, sizeof(scratch));
+}
+
+static int skip_json_compound(const char **cursor, char open_ch, char close_ch) {
+    const char *p = *cursor;
+    if (*p != open_ch) return -1;
+    ++p;
+    while (1) {
+        p = skip_ws(p);
+        if (*p == close_ch) {
+            ++p;
+            *cursor = p;
+            return 0;
+        }
+        if (*p == '\0') return -1;
+        if (open_ch == '{') {
+            if (*p != '"') return -1;
+            if (skip_json_string_value(&p) != 0) return -1;
+            p = skip_ws(p);
+            if (*p != ':') return -1;
+            ++p;
+        }
+        p = skip_ws(p);
+        if (skip_json_value(&p) != 0) return -1;
+        p = skip_ws(p);
+        if (*p == ',') {
+            ++p;
+            continue;
+        }
+        if (*p == close_ch) {
+            ++p;
+            *cursor = p;
+            return 0;
+        }
+        return -1;
+    }
+}
+
+static int skip_json_scalar(const char **cursor) {
+    const char *p = *cursor;
+    while (*p && *p != ',' && *p != '}' && *p != ']' && *p != ' ' && *p != '\n' && *p != '\r' && *p != '\t') {
+        ++p;
+    }
+    if (p == *cursor) return -1;
+    *cursor = p;
+    return 0;
+}
+
+static int skip_json_value(const char **cursor) {
+    const char *p = skip_ws(*cursor);
+    if (*p == '"') {
+        int status = skip_json_string_value(&p);
+        *cursor = p;
+        return status;
+    }
+    if (*p == '{') {
+        int status = skip_json_compound(&p, '{', '}');
+        *cursor = p;
+        return status;
+    }
+    if (*p == '[') {
+        int status = skip_json_compound(&p, '[', ']');
+        *cursor = p;
+        return status;
+    }
+    if (skip_json_scalar(&p) != 0) return -1;
+    *cursor = p;
+    return 0;
+}
+
 static int store_field(field_entry *fields, size_t field_count, const char *name, const char *value) {
     for (size_t i = 0; i < field_count; ++i) {
         if (strcmp(name, fields[i].name) == 0) {
@@ -144,9 +218,12 @@ static int parse_json_object(const char **cursor, field_entry *fields, size_t fi
         ++p;
         p = skip_ws(p);
 
-        char value[512];
+        char value[512] = {0};
         if (*p == '"') {
             if (parse_json_string(&p, value, sizeof(value)) != 0) return -1;
+        } else if (*p == '{' || *p == '[') {
+            if (skip_json_value(&p) != 0) return -1;
+            value[0] = '\0';
         } else {
             if (parse_json_number(&p, value, sizeof(value)) != 0) return -1;
         }
@@ -251,6 +328,165 @@ static const char *locate_cases_array(const char *data) {
 static int compare_bytes(const uint8 *a, const uint8 *b, size_t len) {
     if (len == 0) return 0;
     return memcmp(a, b, len);
+}
+
+static dybuf *append_var_string(dybuf *buf, const char *text) {
+    return dyb_append_data_with_var_len(buf, (uint8 *)text, (uint)strlen(text));
+}
+
+static dybuf *append_json_stream_header(dybuf *buf, uint64 dictionary_count) {
+    dyb_append_typdex(buf, typdex_typ_obj, 0);
+    dyb_append_var_u64(buf, 1);
+    dyb_append_var_u64(buf, dictionary_count);
+    return buf;
+}
+
+static dybuf *append_json_dictionary(dybuf *buf, const char *path, const char **keys, uint key_count) {
+    append_var_string(buf, path);
+    dyb_append_var_u64(buf, key_count);
+    for (uint i = 0; i < key_count; ++i) {
+        append_var_string(buf, keys[i]);
+    }
+    return buf;
+}
+
+static dybuf *append_json_payload_marker(dybuf *buf) {
+    return dyb_append_typdex(buf, typdex_typ_obj, 1);
+}
+
+static dybuf *append_json_null(dybuf *buf, uint index) {
+    return dyb_append_typdex(buf, typdex_typ_none, index);
+}
+
+static dybuf *append_json_bool(dybuf *buf, uint index, boolean value) {
+    dyb_append_typdex(buf, typdex_typ_bool, index);
+    return dyb_append_bool(buf, value);
+}
+
+static dybuf *append_json_int(dybuf *buf, uint index, int64 value) {
+    dyb_append_typdex(buf, typdex_typ_int, index);
+    return dyb_append_var_s64(buf, value);
+}
+
+static dybuf *append_json_uint(dybuf *buf, uint index, uint64 value) {
+    dyb_append_typdex(buf, typdex_typ_uint, index);
+    return dyb_append_var_u64(buf, value);
+}
+
+static dybuf *append_json_double(dybuf *buf, uint index, double value) {
+    dyb_append_typdex(buf, typdex_typ_double, index);
+    return dyb_append_double(buf, value);
+}
+
+static dybuf *append_json_string_value(dybuf *buf, uint index, const char *value) {
+    dyb_append_typdex(buf, typdex_typ_string, index);
+    return append_var_string(buf, value);
+}
+
+static dybuf *append_json_map_start(dybuf *buf, uint index, uint64 present_count) {
+    dyb_append_typdex(buf, typdex_typ_map, index);
+    return dyb_append_var_u64(buf, present_count);
+}
+
+static dybuf *append_json_array_start(dybuf *buf, uint index, uint64 item_count) {
+    dyb_append_typdex(buf, typdex_typ_array, index);
+    return dyb_append_var_u64(buf, item_count);
+}
+
+static void encode_json_root_object(dybuf *buf) {
+    const char *root_keys[] = {"name", "version", "enabled"};
+    append_json_stream_header(buf, 1);
+    append_json_dictionary(buf, "$", root_keys, 3);
+    append_json_payload_marker(buf);
+    append_json_map_start(buf, 0, 3);
+    append_json_string_value(buf, 0, "dybuf");
+    append_json_uint(buf, 1, 1);
+    append_json_bool(buf, 2, true);
+}
+
+static void encode_json_root_array_objects(dybuf *buf) {
+    const char *array_keys[] = {"id", "name", "active"};
+    append_json_stream_header(buf, 1);
+    append_json_dictionary(buf, "$.[]", array_keys, 3);
+    append_json_payload_marker(buf);
+    append_json_array_start(buf, 0, 3);
+    append_json_map_start(buf, 0, 2);
+    append_json_uint(buf, 0, 1);
+    append_json_string_value(buf, 1, "alpha");
+    append_json_map_start(buf, 0, 2);
+    append_json_uint(buf, 0, 2);
+    append_json_bool(buf, 2, false);
+    append_json_map_start(buf, 0, 2);
+    append_json_string_value(buf, 1, "gamma");
+    append_json_bool(buf, 2, true);
+}
+
+static void encode_json_nested_object(dybuf *buf) {
+    const char *root_keys[] = {"meta", "items"};
+    const char *meta_keys[] = {"title", "count"};
+    const char *item_keys[] = {"coord"};
+    const char *coord_keys[] = {"x", "y"};
+    append_json_stream_header(buf, 4);
+    append_json_dictionary(buf, "$", root_keys, 2);
+    append_json_dictionary(buf, "$.0", meta_keys, 2);
+    append_json_dictionary(buf, "$.1.[]", item_keys, 1);
+    append_json_dictionary(buf, "$.1.[].0", coord_keys, 2);
+    append_json_payload_marker(buf);
+    append_json_map_start(buf, 0, 2);
+    append_json_map_start(buf, 0, 2);
+    append_json_string_value(buf, 0, "map");
+    append_json_uint(buf, 1, 2);
+    append_json_array_start(buf, 1, 2);
+    append_json_map_start(buf, 0, 1);
+    append_json_map_start(buf, 0, 2);
+    append_json_int(buf, 0, -3);
+    append_json_uint(buf, 1, 4);
+    append_json_map_start(buf, 0, 1);
+    append_json_map_start(buf, 0, 2);
+    append_json_uint(buf, 0, 5);
+    append_json_int(buf, 1, -6);
+}
+
+static void encode_json_mixed_array(dybuf *buf) {
+    const char *object_keys[] = {"k"};
+    append_json_stream_header(buf, 1);
+    append_json_dictionary(buf, "$.[]", object_keys, 1);
+    append_json_payload_marker(buf);
+    append_json_array_start(buf, 0, 9);
+    append_json_null(buf, 0);
+    append_json_bool(buf, 0, true);
+    append_json_bool(buf, 0, false);
+    append_json_int(buf, 0, -7);
+    append_json_uint(buf, 0, 42);
+    append_json_double(buf, 0, 3.5);
+    append_json_string_value(buf, 0, "text");
+    append_json_map_start(buf, 0, 1);
+    append_json_string_value(buf, 0, "v");
+    append_json_array_start(buf, 0, 2);
+    append_json_uint(buf, 0, 1);
+    append_json_string_value(buf, 0, "two");
+}
+
+static void encode_json_root_scalar_string(dybuf *buf) {
+    append_json_stream_header(buf, 0);
+    append_json_payload_marker(buf);
+    append_json_string_value(buf, 0, "hello");
+}
+
+static void encode_json_root_scalar_null(dybuf *buf) {
+    append_json_stream_header(buf, 0);
+    append_json_payload_marker(buf);
+    append_json_null(buf, 0);
+}
+
+static void (*json_encoder_for_id(const char *id))(dybuf *buf) {
+    if (strcmp(id, "root_object") == 0) return encode_json_root_object;
+    if (strcmp(id, "root_array_objects") == 0) return encode_json_root_array_objects;
+    if (strcmp(id, "nested_object") == 0) return encode_json_nested_object;
+    if (strcmp(id, "mixed_array") == 0) return encode_json_mixed_array;
+    if (strcmp(id, "root_scalar_string") == 0) return encode_json_root_scalar_string;
+    if (strcmp(id, "root_scalar_null") == 0) return encode_json_root_scalar_null;
+    return NULL;
 }
 
 static int verify_varuint(const char *dir) {
@@ -805,6 +1041,112 @@ static int verify_varlen_strings(const char *dir) {
     return status;
 }
 
+static int verify_json_values(const char *dir) {
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path), "%s/json_values.json", dir);
+    char *content = NULL;
+    if (read_file(path, &content, NULL) != 0) return -1;
+
+    const char *p = locate_cases_array(content);
+    if (!p) {
+        free(content);
+        return -1;
+    }
+
+    int status = 0;
+    size_t case_index = 0;
+    while (1) {
+        p = skip_ws(p);
+        if (*p == ']') break;
+
+        size_t current_case = case_index + 1;
+        char id[64] = {0};
+        char encoded_hex[2048] = {0};
+        field_entry fields[] = {
+            {"id", id, sizeof(id), 1, 0},
+            {"encoded_hex", encoded_hex, sizeof(encoded_hex), 1, 0}
+        };
+        if (parse_json_object(&p, fields, sizeof(fields)/sizeof(fields[0])) != 0) {
+            report_parse_error(path, current_case, id);
+            status = -1;
+            break;
+        }
+
+        void (*encoder)(dybuf *buf) = json_encoder_for_id(id);
+        if (!encoder) {
+            fprintf(stderr, "%s: unknown JSON fixture id (%s)\n", path, id);
+            status = -1;
+            break;
+        }
+
+        uint8 *encoded_bytes = NULL;
+        size_t encoded_len = 0;
+        if (hex_to_bytes(encoded_hex, &encoded_bytes, &encoded_len) != 0) {
+            report_hex_error(path, "encoded_hex", id, current_case);
+            status = -1;
+            break;
+        }
+
+        dybuf writer_store;
+        dybuf *writer = dyb_create(&writer_store, (uint)(encoded_len + 64));
+        if (!writer) {
+            free(encoded_bytes);
+            status = -1;
+            break;
+        }
+        encoder(writer);
+
+        uint out_len = 0;
+        uint8 *out_bytes = dyb_get_data_before_current_position(writer, &out_len);
+        if (out_len != encoded_len || compare_bytes(out_bytes, encoded_bytes, encoded_len) != 0) {
+            fprintf(stderr, "%s: json_values re-encode mismatch (%s)\n", path, id);
+            dyb_release(writer);
+            free(encoded_bytes);
+            status = -1;
+            break;
+        }
+
+        dybuf reader_store;
+        dybuf *reader = dyb_refer(&reader_store, encoded_bytes, (uint)encoded_len, false);
+        if (!reader) {
+            fprintf(stderr, "%s: failed to create reader for case #%zu\n", path, current_case);
+            dyb_release(writer);
+            free(encoded_bytes);
+            status = -1;
+            break;
+        }
+        uint8 type = 0;
+        uint index = 0;
+        dyb_next_typdex(reader, &type, &index);
+        if (type != typdex_typ_obj || index != 0 || dyb_next_var_u64(reader) != 1) {
+            fprintf(stderr, "%s: json_values invalid stream header (%s)\n", path, id);
+            dyb_release(writer);
+            free(encoded_bytes);
+            status = -1;
+            break;
+        }
+
+        dyb_release(writer);
+        free(encoded_bytes);
+
+        if (verbose_mode) {
+            printf("%s: OK (%s)\n", path, id[0] ? id : "case");
+        }
+
+        ++case_index;
+        p = skip_ws(p);
+        if (*p == ',') {
+            ++p;
+            continue;
+        } else if (*p == ']') {
+            break;
+        }
+    }
+
+    free(content);
+    return status;
+}
+
 int main(int argc, char **argv) {
     const char *dir = "fixtures/v1";
     int arg_index = 1;
@@ -827,6 +1169,7 @@ int main(int argc, char **argv) {
     if (verify_typdex(dir) != 0) return EXIT_FAILURE;
     if (verify_varlen_bytes(dir) != 0) return EXIT_FAILURE;
     if (verify_varlen_strings(dir) != 0) return EXIT_FAILURE;
+    if (verify_json_values(dir) != 0) return EXIT_FAILURE;
 
     printf("Fixture verification succeeded for %s\n", dir);
     return EXIT_SUCCESS;

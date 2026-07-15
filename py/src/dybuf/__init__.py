@@ -13,6 +13,13 @@ from ._core import (
     TYPDEX_TYP_OBJ,
     TYPDEX_TYP_F,
 )
+from .json import (
+    JSON_DYBUF_FORMAT_VERSION,
+    append_json_value,
+    decode_json,
+    encode_json,
+    next_json_value,
+)
 
 DYPE_F_EOF = 0
 DYPE_F_VERSION = 1
@@ -21,7 +28,12 @@ DYPE_F_PROTO_VERSION = 8
 
 __all__ = [
     "DyBuf",
+    "JSON_DYBUF_FORMAT_VERSION",
     "append_var_cstring",
+    "append_json_value",
+    "decode_json",
+    "encode_json",
+    "next_json_value",
     "next_var_cstring",
     "TYPDEX_TYP_NONE",
     "TYPDEX_TYP_BOOL",
@@ -41,7 +53,7 @@ __all__ = [
     "DYPE_F_PROTO_VERSION",
 ]
 
-__version__ = "0.4.4"
+__version__ = "0.4.5"
 
 
 def append_var_cstring(buf: DyBuf, text: str, *, encoding: str = "utf-8") -> DyBuf:

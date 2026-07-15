@@ -1,0 +1,11 @@
+{
+  "format": "json_dybuf_v1",
+  "cases": [
+    {"id":"root_object","value":{"name":"dybuf","version":1,"enabled":true},"encoded_hex":"700101012403046e616d650776657273696f6e07656e61626c65647168035005647962756619010a01"},
+    {"id":"root_array_objects","value":[{"id":1,"name":"alpha"},{"id":2,"active":false},{"name":"gamma","active":true}],"encoded_hex":"70010104242e5b5d03026964046e616d6506616374697665716003680218015105616c706861680218020a006802510567616d6d610a01"},
+    {"id":"nested_object","value":{"meta":{"title":"map","count":2},"items":[{"coord":{"x":-3,"y":4}},{"coord":{"x":5,"y":-6}}]},"encoded_hex":"700104012402046d657461056974656d7303242e3002057469746c6505636f756e7406242e312e5b5d0105636f6f726408242e312e5b5d2e300201780179716802680250036d6170190261026801680210051904680168021805110b"},
+    {"id":"mixed_array","value":[null,true,false,-7,42,3.5,"text",{"k":"v"},[1,"two"]],"encoded_hex":"70010104242e5b5d01016b7160090008010800100d182a380000000000000c40500474657874680150017660021801500374776f"},
+    {"id":"root_scalar_string","value":"hello","encoded_hex":"70010071500568656c6c6f"},
+    {"id":"root_scalar_null","value":null,"encoded_hex":"7001007100"}
+  ]
+}

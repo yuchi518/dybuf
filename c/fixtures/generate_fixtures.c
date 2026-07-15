@@ -87,6 +87,155 @@ static void write_json_string(FILE *fp, const char *text) {
     fputc('"', fp);
 }
 
+static dybuf *append_var_string(dybuf *buf, const char *text) {
+    return dyb_append_data_with_var_len(buf, (uint8 *)text, (uint)strlen(text));
+}
+
+static dybuf *append_json_stream_header(dybuf *buf, uint64 dictionary_count) {
+    dyb_append_typdex(buf, typdex_typ_obj, 0);
+    dyb_append_var_u64(buf, 1);
+    dyb_append_var_u64(buf, dictionary_count);
+    return buf;
+}
+
+static dybuf *append_json_dictionary(dybuf *buf, const char *path, const char **keys, uint key_count) {
+    append_var_string(buf, path);
+    dyb_append_var_u64(buf, key_count);
+    for (uint i = 0; i < key_count; ++i) {
+        append_var_string(buf, keys[i]);
+    }
+    return buf;
+}
+
+static dybuf *append_json_payload_marker(dybuf *buf) {
+    return dyb_append_typdex(buf, typdex_typ_obj, 1);
+}
+
+static dybuf *append_json_null(dybuf *buf, uint index) {
+    return dyb_append_typdex(buf, typdex_typ_none, index);
+}
+
+static dybuf *append_json_bool(dybuf *buf, uint index, boolean value) {
+    dyb_append_typdex(buf, typdex_typ_bool, index);
+    return dyb_append_bool(buf, value);
+}
+
+static dybuf *append_json_int(dybuf *buf, uint index, int64 value) {
+    dyb_append_typdex(buf, typdex_typ_int, index);
+    return dyb_append_var_s64(buf, value);
+}
+
+static dybuf *append_json_uint(dybuf *buf, uint index, uint64 value) {
+    dyb_append_typdex(buf, typdex_typ_uint, index);
+    return dyb_append_var_u64(buf, value);
+}
+
+static dybuf *append_json_double(dybuf *buf, uint index, double value) {
+    dyb_append_typdex(buf, typdex_typ_double, index);
+    return dyb_append_double(buf, value);
+}
+
+static dybuf *append_json_string_value(dybuf *buf, uint index, const char *value) {
+    dyb_append_typdex(buf, typdex_typ_string, index);
+    return append_var_string(buf, value);
+}
+
+static dybuf *append_json_map_start(dybuf *buf, uint index, uint64 present_count) {
+    dyb_append_typdex(buf, typdex_typ_map, index);
+    return dyb_append_var_u64(buf, present_count);
+}
+
+static dybuf *append_json_array_start(dybuf *buf, uint index, uint64 item_count) {
+    dyb_append_typdex(buf, typdex_typ_array, index);
+    return dyb_append_var_u64(buf, item_count);
+}
+
+static void encode_json_root_object(dybuf *buf) {
+    const char *root_keys[] = {"name", "version", "enabled"};
+    append_json_stream_header(buf, 1);
+    append_json_dictionary(buf, "$", root_keys, 3);
+    append_json_payload_marker(buf);
+    append_json_map_start(buf, 0, 3);
+    append_json_string_value(buf, 0, "dybuf");
+    append_json_uint(buf, 1, 1);
+    append_json_bool(buf, 2, true);
+}
+
+static void encode_json_root_array_objects(dybuf *buf) {
+    const char *array_keys[] = {"id", "name", "active"};
+    append_json_stream_header(buf, 1);
+    append_json_dictionary(buf, "$.[]", array_keys, 3);
+    append_json_payload_marker(buf);
+    append_json_array_start(buf, 0, 3);
+    append_json_map_start(buf, 0, 2);
+    append_json_uint(buf, 0, 1);
+    append_json_string_value(buf, 1, "alpha");
+    append_json_map_start(buf, 0, 2);
+    append_json_uint(buf, 0, 2);
+    append_json_bool(buf, 2, false);
+    append_json_map_start(buf, 0, 2);
+    append_json_string_value(buf, 1, "gamma");
+    append_json_bool(buf, 2, true);
+}
+
+static void encode_json_nested_object(dybuf *buf) {
+    const char *root_keys[] = {"meta", "items"};
+    const char *meta_keys[] = {"title", "count"};
+    const char *item_keys[] = {"coord"};
+    const char *coord_keys[] = {"x", "y"};
+    append_json_stream_header(buf, 4);
+    append_json_dictionary(buf, "$", root_keys, 2);
+    append_json_dictionary(buf, "$.0", meta_keys, 2);
+    append_json_dictionary(buf, "$.1.[]", item_keys, 1);
+    append_json_dictionary(buf, "$.1.[].0", coord_keys, 2);
+    append_json_payload_marker(buf);
+    append_json_map_start(buf, 0, 2);
+    append_json_map_start(buf, 0, 2);
+    append_json_string_value(buf, 0, "map");
+    append_json_uint(buf, 1, 2);
+    append_json_array_start(buf, 1, 2);
+    append_json_map_start(buf, 0, 1);
+    append_json_map_start(buf, 0, 2);
+    append_json_int(buf, 0, -3);
+    append_json_uint(buf, 1, 4);
+    append_json_map_start(buf, 0, 1);
+    append_json_map_start(buf, 0, 2);
+    append_json_uint(buf, 0, 5);
+    append_json_int(buf, 1, -6);
+}
+
+static void encode_json_mixed_array(dybuf *buf) {
+    const char *object_keys[] = {"k"};
+    append_json_stream_header(buf, 1);
+    append_json_dictionary(buf, "$.[]", object_keys, 1);
+    append_json_payload_marker(buf);
+    append_json_array_start(buf, 0, 9);
+    append_json_null(buf, 0);
+    append_json_bool(buf, 0, true);
+    append_json_bool(buf, 0, false);
+    append_json_int(buf, 0, -7);
+    append_json_uint(buf, 0, 42);
+    append_json_double(buf, 0, 3.5);
+    append_json_string_value(buf, 0, "text");
+    append_json_map_start(buf, 0, 1);
+    append_json_string_value(buf, 0, "v");
+    append_json_array_start(buf, 0, 2);
+    append_json_uint(buf, 0, 1);
+    append_json_string_value(buf, 0, "two");
+}
+
+static void encode_json_root_scalar_string(dybuf *buf) {
+    append_json_stream_header(buf, 0);
+    append_json_payload_marker(buf);
+    append_json_string_value(buf, 0, "hello");
+}
+
+static void encode_json_root_scalar_null(dybuf *buf) {
+    append_json_stream_header(buf, 0);
+    append_json_payload_marker(buf);
+    append_json_null(buf, 0);
+}
+
 static int write_varuint(const char *out_dir) {
     static const uint64_t tier2_max = 0x3FFFULL + 0x80ULL;
     static const uint64_t tier3_max = 0x1FFFFFULL + 0x4080ULL;
@@ -445,6 +594,93 @@ static int write_varlen_strings(const char *out_dir) {
     return 0;
 }
 
+static int write_json_values(const char *out_dir) {
+    struct case_entry {
+        const char *id;
+        const char *value_json;
+        void (*encode)(dybuf *buf);
+    };
+
+    const struct case_entry cases[] = {
+        {
+            "root_object",
+            "{\"name\":\"dybuf\",\"version\":1,\"enabled\":true}",
+            encode_json_root_object
+        },
+        {
+            "root_array_objects",
+            "[{\"id\":1,\"name\":\"alpha\"},{\"id\":2,\"active\":false},{\"name\":\"gamma\",\"active\":true}]",
+            encode_json_root_array_objects
+        },
+        {
+            "nested_object",
+            "{\"meta\":{\"title\":\"map\",\"count\":2},\"items\":[{\"coord\":{\"x\":-3,\"y\":4}},{\"coord\":{\"x\":5,\"y\":-6}}]}",
+            encode_json_nested_object
+        },
+        {
+            "mixed_array",
+            "[null,true,false,-7,42,3.5,\"text\",{\"k\":\"v\"},[1,\"two\"]]",
+            encode_json_mixed_array
+        },
+        {
+            "root_scalar_string",
+            "\"hello\"",
+            encode_json_root_scalar_string
+        },
+        {
+            "root_scalar_null",
+            "null",
+            encode_json_root_scalar_null
+        }
+    };
+
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path), "%s/json_values.json", out_dir);
+    FILE *fp = fopen(path, "w");
+    if (!fp) {
+        perror("fopen json_values.json");
+        return -1;
+    }
+
+    fprintf(fp, "{\n  \"format\": \"json_dybuf_v1\",\n  \"cases\": [\n");
+
+    dybuf buf_store;
+    dybuf *buf = dyb_create(&buf_store, 256);
+    if (!buf) {
+        fclose(fp);
+        return -1;
+    }
+
+    const size_t total = sizeof(cases) / sizeof(cases[0]);
+    for (size_t i = 0; i < total; ++i) {
+        dyb_clear(buf);
+        cases[i].encode(buf);
+
+        uint len = 0;
+        uint8 *encoded = dyb_get_data_before_current_position(buf, &len);
+        char *encoded_hex = (char *)malloc((len * 2) + 1);
+        if (!encoded_hex) {
+            dyb_release(buf);
+            fclose(fp);
+            return -1;
+        }
+        bytes_to_hex(encoded, len, encoded_hex);
+
+        fprintf(fp, "    {\"id\":\"%s\",\"value\":%s,\"encoded_hex\":\"%s\"}%s\n",
+                cases[i].id,
+                cases[i].value_json,
+                encoded_hex,
+                (i + 1 == total) ? "" : ",");
+
+        free(encoded_hex);
+    }
+
+    dyb_release(buf);
+    fprintf(fp, "  ]\n}\n");
+    fclose(fp);
+    return 0;
+}
+
 int main(int argc, char **argv) {
     const char *out_dir = argc > 1 ? argv[1] : "fixtures/v1";
     if (ensure_dir(out_dir) != 0) {
@@ -457,6 +693,7 @@ int main(int argc, char **argv) {
     if (write_typdex(out_dir) != 0) return EXIT_FAILURE;
     if (write_varlen_bytes(out_dir) != 0) return EXIT_FAILURE;
     if (write_varlen_strings(out_dir) != 0) return EXIT_FAILURE;
+    if (write_json_values(out_dir) != 0) return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
 }

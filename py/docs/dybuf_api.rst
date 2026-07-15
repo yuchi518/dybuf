@@ -228,6 +228,35 @@ related protocols to describe schema metadata or function identifiers.
    encoding.
 
 
+JSON Helpers
+------------
+
+.. data:: JSON_DYBUF_FORMAT_VERSION
+
+   Version number for the JSON-equivalent dybuf encoding. Version ``1`` targets
+   JSON value round-trip equivalence, not canonical byte output.
+
+.. function:: encode_json(value)
+
+   Encode a JSON-compatible Python value as a complete JSON-dybuf byte stream.
+   Supported values are ``None``, ``bool``, safe-range integers, finite floats,
+   ``str``, ``list``, and ``dict`` with string keys.
+
+.. function:: decode_json(data)
+
+   Decode a complete JSON-dybuf byte stream back to a Python value. Raises
+   :class:`ValueError` when trailing bytes remain or the stream violates the
+   JSON-dybuf convention.
+
+.. function:: append_json_value(buf, value)
+
+   Append a complete JSON-dybuf value stream to an existing :class:`DyBuf`.
+
+.. function:: next_json_value(buf)
+
+   Read one complete JSON-dybuf value stream from an existing :class:`DyBuf`.
+
+
 Typdex Constants
 ----------------
 

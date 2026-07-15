@@ -1,6 +1,6 @@
 {
   "name": "dybuf",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Dynamic binary buffer with varints, typdex helpers, and Node/browser-friendly APIs.",
   "type": "module",
   "main": "./DyBuf.js",
@@ -15,9 +15,11 @@
   ],
   "sideEffects": false,
   "scripts": {
+    "auth:web": "npm login --auth-type=web",
     "check:fixtures": "node ./testutils/ensure-fixtures.js",
     "test": "npm run check:fixtures && node --test",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "publish:public": "npm publish --access public"
   },
   "keywords": [
     "dybuf",

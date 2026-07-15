@@ -9,7 +9,7 @@ varints, and typdex helpers—but runs entirely on native JavaScript primitives.
 - **BigInt support** (stage 4 as of 2018) and `DataView#getBigUint64` /
   `setBigUint64`. We intentionally do **not** ship a fallback shim; environments must
   be equivalent to Chrome 67+, Node.js 10.4+, Safari 14+, or Edge Chromium.
-- ES modules. The implementation exports `DyBuf` with `export default`.
+- ES modules. The implementation exports `DyBuf` and helper functions as named exports.
 
 If either BigInt or the 64-bit DataView APIs are missing, module evaluation throws
 immediately so callers fail fast during startup.
@@ -29,6 +29,8 @@ immediately so callers fail fast during startup.
 - `getVarString` / `putVarString` encode UTF-8 payloads without a trailing terminator for
   parity with Python bindings, while `getCStringWithVarLength` / `putCStringWithVarLength`
   preserve the C-style `\0` suffix when needed.
+- `encodeJson` / `decodeJson` provide JSON-equivalent dybuf round-tripping using the
+  document-level dictionary convention.
 - `getCStringWithVarLength` trims, and `putCStringWithVarLength` appends, the trailing
   null terminator so C fixtures round-trip faithfully. Legacy `getStringWithVarLength` /
   `putStringWithVarLength` remain as aliases for now.
@@ -66,7 +68,7 @@ for the canonical typdex layout, reserved function IDs, and compatibility rules.
 ## Usage
 
 ```js
-import DyBuf from './DyBuf.js';
+import { DyBuf } from './DyBuf.js';
 
 const buf = new DyBuf(32);
 buf.putUInt(0xDEADBEEF)
@@ -76,6 +78,21 @@ buf.putUInt(0xDEADBEEF)
 console.log(buf.getUInt().toString(16)); // deadbeef
 console.log(buf.getVarULong());          // 300n
 ```
+
+JSON-compatible values can be encoded as a complete JSON-dybuf byte stream:
+
+```js
+import { decodeJson, encodeJson } from './DyBuf.js';
+
+const payload = { items: [{ id: 1, name: 'alpha' }, { id: 2, name: 'beta' }] };
+const encoded = encodeJson(payload);
+
+console.log(decodeJson(encoded)); // { items: [...] }
+```
+
+The JSON helper targets round-trip equivalence, not canonical bytes. Integers must fit
+JavaScript's safe integer range, fractional numbers are encoded as doubles, and
+`NaN`/`Infinity` are rejected because they are not JSON values.
 
 ## Development notes
 
@@ -95,7 +112,7 @@ Manual releases use the plain source files in this directory:
 1. Bump the `version` in `package.json` to the desired release.
 2. From the repo root, regenerate fixtures if needed: `tools/generate_fixtures.sh`.
 3. Back in `js/`, run `npm test` (the prepublish hook reruns this and fails if fixtures are missing).
-4. Ensure your local `~/.npmrc` has an automation token (`//registry.npmjs.org/:_authToken=...`).
-5. Publish the module: `npm publish --access public`.
+4. Authorize the npm CLI if needed: `npm run auth:web` opens the browser-based login flow.
+5. Publish the module: `npm run publish:public`.
 
-Trusted Publishing via GitHub Actions can replace the token step later, but these commands work on macOS/Linux today.
+Trusted Publishing via GitHub Actions can replace local login later, but these commands work on macOS/Linux today.
