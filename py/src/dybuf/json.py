@@ -139,7 +139,7 @@ def _append_json_record(
         buf.append_var_u64(value)
         return
     if typ == TYPDEX_TYP_DOUBLE:
-        buf.write(struct.pack("<d", float(value)))
+        buf.write(struct.pack(">d", float(value)))
         return
     if typ == TYPDEX_TYP_STRING:
         buf.append_var_string(value)
@@ -176,7 +176,7 @@ def _next_json_payload(
     if typ == TYPDEX_TYP_UINT:
         return _safe_number(buf.next_var_u64(), "unsigned integer")
     if typ == TYPDEX_TYP_DOUBLE:
-        value = struct.unpack("<d", buf.read(8))[0]
+        value = struct.unpack(">d", buf.read(8))[0]
         if not math.isfinite(value):
             raise ValueError("decoded JSON double must be finite")
         return value

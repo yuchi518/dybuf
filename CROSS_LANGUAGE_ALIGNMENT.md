@@ -24,7 +24,7 @@ without translation or lossy conversions.
 
 ### Java
 
-- **Typdex encoding:** switch to the canonical bit layout (type stays 6/8 bits after
+- **Typdex encoding:** switched to the canonical bit layout (type stays 6/8 bits after
   the one-byte form, index widths match 8/13/20 bits) to remain wire-compatible with
   C/Cython (`dyb_append_typdex` / `dyb_next_typdex`).
 - **Capacity shrink:** copy only `min(old_capacity, new_capacity)` when resizing to
@@ -32,8 +32,9 @@ without translation or lossy conversions.
 - **Zero-length handling:** return empty arrays/strings instead of `null` from
   `getBytesWithFixedLength` and related helpers so var-length readers can distinguish
   empty from missing.
-- **Tests:** add JUnit cases that load canonical fixtures and verify helpers
-  (varints, typdex, read/write cursor ops) match the decoded values from C.
+- **Tests:** `tools/test_java_fixtures.sh` compiles a plain Java fixture runner that
+  loads canonical fixtures and verifies varints, typdex, and var-length payloads
+  match the decoded values from C.
 
 ### JavaScript
 
@@ -76,10 +77,10 @@ without translation or lossy conversions.
 
 ## Operational Checklist
 
-- [ ] Implement Java fixes (typdex, capacity, zero-length, tests).
+- [x] Implement Java fixes (typdex, capacity, zero-length, tests).
 - [ ] Implement JavaScript fixes (typdex, capacity/compact, byte copying, zero-length).
 - [x] Land fixture generator tooling and share sample fixtures.
 - [x] Wire fixtures into the JavaScript regression suite.
 - [x] Wire fixtures into the Python regression suite.
-- [ ] Wire fixtures into the Java regression suite.
+- [x] Wire fixtures into the Java regression suite.
 - [ ] Update CI pipelines to enforce the cross-language checks.

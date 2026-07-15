@@ -1024,26 +1024,34 @@ dyb_inline int64 dyb_next_var_s64(dybuf* dyb)
 #if !defined(DISABLE_FP)
 dyb_inline dybuf* dyb_append_float(dybuf* dyb, float value)
 {
-    dyb_append_u32(dyb, dyb_swap_u32(*(uint32*)&value));
+    uint32 bits = 0;
+    dyb_mem_copy(&bits, &value, sizeof(bits));
+    dyb_append_u32(dyb, bits);
     return dyb;
 }
 
 dyb_inline float dyb_next_float(dybuf* dyb)
 {
-    uint32 v = dyb_swap_u32(dyb_next_u32(dyb));
-    return *(float*)&v;
+    uint32 bits = dyb_next_u32(dyb);
+    float value = 0;
+    dyb_mem_copy(&value, &bits, sizeof(value));
+    return value;
 }
 
 dyb_inline dybuf* dyb_append_double(dybuf* dyb, double value)
 {
-    dyb_append_u64(dyb, dyb_swap_u64(*(uint64*)&value));
+    uint64 bits = 0;
+    dyb_mem_copy(&bits, &value, sizeof(bits));
+    dyb_append_u64(dyb, bits);
     return dyb;
 }
 
 dyb_inline double dyb_next_double(dybuf* dyb)
 {
-    uint64 v = dyb_swap_u64(dyb_next_u64(dyb));
-    return *(double*)&v;
+    uint64 bits = dyb_next_u64(dyb);
+    double value = 0;
+    dyb_mem_copy(&value, &bits, sizeof(value));
+    return value;
 }
 #endif
 
@@ -1081,5 +1089,3 @@ dyb_inline char* dyb_next_cstring_with_var_len(dybuf* dyb, uint* size)
 
 
 #endif //DYBUF_C_DYBUF_H
-
-

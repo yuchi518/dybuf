@@ -117,6 +117,13 @@ Integers must fit JavaScript's safe integer range for Python/JavaScript parity.
 Fractional numbers are encoded as doubles. `NaN` and infinities are rejected because
 they are not valid JSON values.
 
+## Version notes
+
+- `0.5.0` is a wire-format compatibility release. Fixed-width floating point payloads
+  now follow the same big-endian order as fixed-width integers. Data written by older
+  little-endian C builds through the float/double helpers may need migration before
+  reading with `0.5.0`.
+
 ## Developing locally
 
 Create a virtual environment and install the build requirements:

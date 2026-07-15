@@ -40,7 +40,7 @@ test('JSON-dybuf rejects unsupported values', () => {
   assert.throws(() => encodeJson(2 ** 53), /safe integer/);
   assert.throws(() => encodeJson(Number.NaN), /finite/);
   assert.throws(
-    () => decodeJson(fixtureBytes('7001007138000000000000f87f')),
+    () => decodeJson(fixtureBytes('70010071387ff8000000000000')),
     /finite/
   );
   assert.throws(() => encodeJson({ bad: undefined }), /unsupported JSON value type/);

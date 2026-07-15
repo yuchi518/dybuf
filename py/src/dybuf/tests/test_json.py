@@ -32,7 +32,7 @@ def test_json_rejects_unsupported_values():
     with pytest.raises(ValueError):
         encode_json(2**53)
     with pytest.raises(ValueError):
-        decode_json(bytes.fromhex("7001007138000000000000f87f"))
+        decode_json(bytes.fromhex("70010071387ff8000000000000"))
     with pytest.raises(TypeError):
         encode_json({"bad": object()})
     with pytest.raises(TypeError):

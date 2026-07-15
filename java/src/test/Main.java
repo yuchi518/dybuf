@@ -19,7 +19,7 @@
 
 package test;
 
-import lets.cool.util.DyBuf;
+import oyo.lol.util.DyBuf;
 
 public class Main {
 

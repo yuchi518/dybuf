@@ -39,7 +39,8 @@ layout that can hold both values:
 | 3 | `110x xxxx ...` | 8 bits | 13 bits | `type <= 0xff`, `index <= 8191` |
 | 4 | `1110 xxxx ...` | 8 bits | 20 bits | `type <= 0xff`, `index <= 1048575` |
 
-All multi-byte integer payloads are encoded big-endian by the existing dybuf helpers.
+All multi-byte fixed-width numeric payloads are encoded big-endian by the existing
+dybuf helpers, including integers, floats, and doubles.
 Because the first bits identify the typdex width, every implementation can decode the
 same stream without out-of-band length metadata.
 

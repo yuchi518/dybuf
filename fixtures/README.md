@@ -35,6 +35,7 @@ The fixture generator lives in `c/` and will materialise outputs into
 # from repo root
 tools/generate_fixtures.sh                # writes fixtures/v1/*.json and validates them
 tools/generate_fixtures.sh /tmp/dybuf-fixtures   # optional custom path + validation
+tools/test_java_fixtures.sh               # compiles Java and checks fixtures/v1
 ```
 
 The script compiles the C generator and verifier on the fly, emits the JSON bundle,

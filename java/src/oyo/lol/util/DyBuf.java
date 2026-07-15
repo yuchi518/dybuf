@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package lets.cool.util;
+package oyo.lol.util;
 
 import java.io.*;
 import java.nio.BufferUnderflowException;
@@ -181,7 +181,7 @@ public class DyBuf {
         if (newCapacity == _capacity) return this;
 
         byte newData[] = allocBytes(newCapacity);
-        System.arraycopy(_data, 0, newData, 0, _capacity);
+        System.arraycopy(_data, 0, newData, 0, Math.min(_capacity, newData.length));
         _capacity = newData.length;
         releaseBytes(_data);
         _data = newData;
@@ -806,7 +806,7 @@ public class DyBuf {
 
         byte b[];
 
-        if (_limit - _position <= 0) return null;
+        if (_limit - _position <= 0) return new byte[0];
 
         b = Arrays.copyOfRange(_data, _position, _limit);
         _position = _limit;
@@ -815,9 +815,9 @@ public class DyBuf {
     }
 
     public byte[] getBytesWithFixedLength(int length) {
-        if (length == 0) return null;
-
         prepareForRead(length);
+
+        if (length == 0) return new byte[0];
 
         byte b[];
 
@@ -832,9 +832,9 @@ public class DyBuf {
 
         int length = _data[_position++];
 
-        if (length == 0) return null;
-
         prepareForRead(length);
+
+        if (length == 0) return new byte[0];
 
         byte b[];
 
@@ -850,9 +850,9 @@ public class DyBuf {
         int length = ((int) _data[_position++] & 0x00ff) << 8;
         length |= ((int) _data[_position++] & 0x00ff);
 
-        if (length == 0) return null;
-
         prepareForRead(length);
+
+        if (length == 0) return new byte[0];
 
         byte b[];
 
@@ -866,7 +866,7 @@ public class DyBuf {
     public String getLastString() {
         prepareAllForRead();
 
-        if (_limit - _position <= 0) return null;
+        if (_limit - _position <= 0) return "";
 
         String s;
         try {
@@ -882,9 +882,9 @@ public class DyBuf {
     }
 
     public String getStringWithFixedLength(int length) {
-        if (length <= 0) return null;
-
         prepareForRead(length);
+
+        if (length == 0) return "";
 
         String s;
         try {
@@ -904,9 +904,9 @@ public class DyBuf {
 
         int length = _data[_position++];
 
-        if (length == 0) return null;
-
         prepareForRead(length);
+
+        if (length == 0) return "";
 
         String s;
         try {
@@ -927,9 +927,9 @@ public class DyBuf {
         int length = ((int) _data[_position++] & 0x00ff) << 8;
         length |= ((int) _data[_position++] & 0x00ff);
 
-        if (length == 0) return null;
-
         prepareForRead(length);
+
+        if (length == 0) return "";
 
         String s;
         try {
@@ -1396,25 +1396,30 @@ public class DyBuf {
 
         public Typdex(byte type, int index) {
             this.index = index;
+            this.type = type & 0xFF;
+        }
+
+        public Typdex(int type, int index) {
+            this.index = index;
             this.type = type;
         }
 
         public int index;
-        public byte type;
+        public int type;
     }
 
     public DyBuf putTypdex(Typdex typdex) {
-        if (typdex.type<0 || typdex.index<0) {
+        if (typdex.type < 0 || typdex.index < 0) {
             throw new RuntimeException("Incorrect typdex value");
         }
         if (typdex.type <= 0x0f && typdex.index <= 0x07) {                                              // header:0x00(1bits), type:0~0x0F(4bits), index:0~0x7(3bits)
             put((byte) ((typdex.type<<3) | typdex.index));
-        } else if (typdex.type <= 0x1f && typdex.index <= 0x1FF) {									        // header:0x02(2bits), type:0~0x1F(5bits), index:0~0x01FF(9bits)
-            putShort((short) (0x8000 | ((short)typdex.type<<9) | typdex.index));
-        } else if (typdex.type <= 0x3f && typdex.index <= 0x7FFF) {									        // header:0x06(3bits), type:0~0x3F(6bits), index:0~0x7FFF(15bits)
-            put3bytesInt((0xC00000 | ((int)typdex.type<<15) | typdex.index));
-        } else if (typdex.type <= 0x7f && typdex.index <= 0x1FFFFF) {								            // header:0x0E(4bits), type:0~0x7F(7bits), index:0~0x1FFFFF(21bits)
-            putInt((0xE0000000 | ((int)typdex.type<<21) | typdex.index));
+        } else if (typdex.type <= 0x3f && typdex.index <= 0x0FF) {                                      // header:0x02(2bits), type:0~0x3F(6bits), index:0~0x00FF(8bits)
+            putShort((short) (0x8000 | (typdex.type<<8) | typdex.index));
+        } else if (typdex.type <= 0xff && typdex.index <= 0x1FFF) {                                     // header:0x06(3bits), type:0~0xFF(8bits), index:0~0x1FFF(13bits)
+            put3bytesInt((0xC00000 | (typdex.type<<13) | typdex.index));
+        } else if (typdex.type <= 0xff && typdex.index <= 0x0FFFFF) {                                   // header:0x0E(4bits), type:0~0xFF(8bits), index:0~0x0FFFFF(20bits)
+            putInt((0xE0000000 | (typdex.type << 20) | typdex.index));
         } else {
             throw new RuntimeException("Type or index value is too long");
             //EXCEPTIONv(@"Type value(%lld) to long", value);
@@ -1431,16 +1436,16 @@ public class DyBuf {
             typdex.index = v & 0x07;
         } else if ((header&0x40)==0) {
             short v = getShort();
-            typdex.type = (byte)((v >> 9) & 0x1F);
-            typdex.index = v & 0x01FF;
+            typdex.type = (v >> 8) & 0x3F;
+            typdex.index = v & 0x00FF;
         } else if ((header&0x20)==0) {
             int v = get3bytesInt();
-            typdex.type = (byte)((v >> 15) & 0x3F);
-            typdex.index = v & 0x7FFF;
+            typdex.type = (v >> 13) & 0xFF;
+            typdex.index = v & 0x1FFF;
         } else if ((header&0x10)==0) {
             int v = getInt();
-            typdex.type = (byte)((v >> 21) & 0x7F);
-            typdex.index = v & 0x1FFFFF;
+            typdex.type = (v >> 20) & 0xFF;
+            typdex.index = v & 0x0FFFFF;
         } else {
             throw new RuntimeException("Type or index value is too long");
         }
@@ -1613,6 +1618,42 @@ public class DyBuf {
         int len = (int) getVarLong();
 
         return getStringWithFixedLength(len);
+    }
+
+    public DyBuf putCStringWithVarLength(String s) {
+        if (s == null) {
+            putVarLong(0);
+            return this;
+        }
+
+        byte data[];
+
+        try {
+            data = s.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.log(Level.WARNING, "Not supported encoded", e);
+            data = s.getBytes();
+        }
+
+        putVarLong(data.length + 1);
+        putLastBytes(data);
+        put((byte) 0);
+
+        return this;
+    }
+
+    public String getCStringWithVarLength() {
+        byte[] data = getVarLengthData();
+        int len = data.length;
+        if (len > 0 && data[len - 1] == 0) {
+            len -= 1;
+        }
+        try {
+            return new String(data, 0, len, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            log.log(Level.WARNING, "Not supported decoded", e);
+            return new String(data, 0, len);
+        }
     }
 
     /// 1 byte crc and xor

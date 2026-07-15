@@ -59,3 +59,48 @@
 - Version 1 does not guarantee that JavaScript `-0` round-trips distinctly from `0`.
 - Array elements are always individually typdex-tagged. Array element typdex indices
   default to `0`; object key indices are carried by map value typdex markers.
+
+## Fixed-width floating point endian parity
+
+- [x] 將 C `dyb_append_float` / `dyb_append_double` 的 wire format 明確修正為
+  big-endian，和 `dyb_append_u16/u32/u64` 等固定寬度整數一致
+- [x] 將 C `dyb_next_float` / `dyb_next_double` 對應調整為讀取 big-endian bits
+- [x] 重新產生 JSON fixtures，確認 JSON double payload 不再依賴 host endian
+- [x] 將 Python JSON double encode/decode 改回 big-endian
+- [x] 將 JavaScript JSON double encode/decode 改回 big-endian
+- [x] 增加或確認 golden fixture 覆蓋 fractional JSON number，例如 `3.5`
+- [x] 在文件中明確說明 multi-byte fixed-width integer/float/double 都使用 big-endian
+
+### Findings
+
+- dybuf 既有 multi-byte integer helpers 採 big-endian wire order。
+- 目前 C float/double helper 先 `dyb_swap_u32/u64` 再呼叫 big-endian append，
+  在 little-endian host 上實際輸出 little-endian payload，導致 JSON double fixture
+  目前也跟著偏離整體 dybuf 慣例。
+- Python/JavaScript JSON helper 曾為了通過 C fixture 暫時跟隨這個輸出；修正 C 後
+  需要同步改回 big-endian。
+
+## Java golden fixture alignment
+
+- [x] 修正 Java typdex encode/decode layout：2-byte form 使用 `type:6,index:8`，
+  3-byte form 使用 `type:8,index:13`，4-byte form 使用 `type:8,index:20`
+- [x] 修正 Java zero-length bytes/string readers，回傳 empty `byte[]` / `""` 而不是 `null`
+- [x] 修正 Java `capacity(newCapacity)` 縮小時 copy 超出新陣列長度的問題
+- [x] 補 Java golden test runner，讀取 `fixtures/v1/varint_unsigned.json`
+- [x] 補 Java golden test runner，讀取 `fixtures/v1/varint_signed.json`
+- [x] 補 Java golden test runner，讀取 `fixtures/v1/typdex.json`
+- [x] 補 Java golden test runner，讀取 `fixtures/v1/varlen_bytes.json`
+- [x] 補 Java golden test runner，讀取 `fixtures/v1/varlen_strings.json`
+- [x] 將 Java golden test 加入可重複執行的命令或腳本
+- [x] 更新 `CROSS_LANGUAGE_ALIGNMENT.md` 的 Java checklist 狀態
+
+### Findings
+
+- Java varint bucket encoding大致與 C 一致，但尚未用完整 golden fixtures 覆蓋。
+- Java typdex 仍使用舊 layout；例如 C canonical `83ff` 應 decode 為
+  `type=3,index=255`，Java 目前 decode 為 `type=1,index=511`。
+- Java `putTypdex(type=63,index=255)` 目前輸出 `df80ff`，C canonical 是 `bfff`。
+- Java var-length empty bytes/string 目前 decode 為 `null`，與 Python/JavaScript
+  及 fixture 期待的 empty payload 語義不同。
+- Java 目前沒有 Maven/Gradle/JUnit wiring，只有 IntelliJ project files；第一階段可先用
+  `javac/java` 可執行的 fixture runner 建立 golden test 流程。

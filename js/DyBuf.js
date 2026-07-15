@@ -1074,7 +1074,7 @@ function _putJsonRecord(buf, value, path, index, dictionaries) {
             buf.putVarULong(BigInt(value));
             return;
         case TYPDEX_TYP_DOUBLE:
-            buf.putDouble(value, true);
+            buf.putDouble(value);
             return;
         case TYPDEX_TYP_STRING:
             buf.putVarString(value);
@@ -1115,7 +1115,7 @@ function _getJsonPayload(buf, type, index, path, dictionaries) {
         case TYPDEX_TYP_UINT:
             return _safeJsonNumber(buf.getVarULong(), 'unsigned integer');
         case TYPDEX_TYP_DOUBLE:
-            return _finiteJsonDouble(buf.getDouble(true));
+            return _finiteJsonDouble(buf.getDouble());
         case TYPDEX_TYP_STRING:
             return buf.getVarString();
         case TYPDEX_TYP_ARRAY: {

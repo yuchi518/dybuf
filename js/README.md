@@ -94,6 +94,13 @@ The JSON helper targets round-trip equivalence, not canonical bytes. Integers mu
 JavaScript's safe integer range, fractional numbers are encoded as doubles, and
 `NaN`/`Infinity` are rejected because they are not JSON values.
 
+## Version notes
+
+- `0.5.0` is a wire-format compatibility release. Fixed-width floating point payloads
+  now follow the same big-endian order as fixed-width integers. Data written by older
+  little-endian C builds through the float/double helpers may need migration before
+  reading with `0.5.0`.
+
 ## Development notes
 
 - Run `npm test` (Node 18+ recommended) inside this directory for the regression

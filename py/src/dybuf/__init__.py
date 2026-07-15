@@ -53,7 +53,7 @@ __all__ = [
     "DYPE_F_PROTO_VERSION",
 ]
 
-__version__ = "0.4.5"
+__version__ = "0.5.0"
 
 
 def append_var_cstring(buf: DyBuf, text: str, *, encoding: str = "utf-8") -> DyBuf:
