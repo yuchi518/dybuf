@@ -39,7 +39,7 @@ immediately so callers fail fast during startup.
 - Bulk payload helpers (`getBytesWithVarLength`, `putBytesWithVarLength`, etc.) work
   with `ArrayBuffer` instances.
 - The Node-based regression suite covers typdex layouts, varint/zig-zag boundaries,
-  and zero-length payload semantics.
+  zero-length payload semantics, shared golden fixtures, and JSON-dybuf cases.
 
 ## Known gaps vs. C/Python
 
@@ -58,8 +58,6 @@ for the canonical typdex layout, reserved function IDs, and compatibility rules.
 
 ## Next steps
 
-- Generate golden fixtures from the C implementation and plug them into the Node test
-  suite for cross-language parity checks.
 - Expand byte helpers to accept `TypedArray` views directly (mirroring the C/Python
   ergonomics).
 - Wire the package into CI so `npm test` runs automatically alongside the other
@@ -110,7 +108,7 @@ JavaScript's safe integer range, fractional numbers are encoded as doubles, and
 - The module has no build step; `node -e "import('./DyBuf.js')"` still
   works for quick manual pokes.
 - When adding features, ensure they remain compatible with the canonical C fixtures
-  once the cross-language regression suite is in place.
+  consumed by the cross-language regression suite.
 
 ## Publishing to npm
 

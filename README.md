@@ -9,9 +9,9 @@ Its signature helpers—`var_u64`/`var_s64` varints and **typdex** markers—let
 ## Projects in this repository
 
 - **C** implementation (stable; source of golden fixtures): [`/c`](c)
-- **Python** bindings (golden fixture parity complete): [`/py`](py/README.md)
-- **Java** bindings (refactor/fixture integration in progress): [`/java`](java)
-- **JavaScript** bindings (ESM + golden fixtures wired): [`/js`](js/README.md)
+- **Python** bindings (PyPI package + golden fixture parity): [`/py`](py/README.md)
+- **Java** binding (package `oyo.lol.util`, golden fixtures + JSON helpers): [`/java`](java/README.md)
+- **JavaScript** binding (ESM npm package + golden fixtures): [`/js`](js/README.md)
 
 ## Schema convention
 
@@ -20,13 +20,21 @@ See [`DYPKT_SCHEMA_CONVENTION.md`](DYPKT_SCHEMA_CONVENTION.md) for the canonical
 typdex layout, reserved dypkt function indices, package header convention, and
 compatibility rules for designing versioned schemas.
 
+## Version notes
+
+- `0.5.0` is a wire-format compatibility release. Fixed-width `float` and `double`
+  payloads now use big-endian byte order, matching the existing fixed-width integer
+  helpers. Older C builds on little-endian hosts wrote `float`/`double` payloads in
+  little-endian order through `dyb_append_float` / `dyb_append_double`, so data written
+  by those helpers before `0.5.0` may need migration before reading with newer
+  bindings. Fixed-width integer payloads are unchanged.
+
 ## Roadmap
 
-- Publish the initial JavaScript bindings
-- Continue expanding the Python feature set and releases
-- Integrate Java with the shared golden fixtures
-- Binary JSON converter
-- Automate npm package publishing for the JavaScript binding via GitHub Actions
+- Add Gradle or Maven wiring for Java builds, tests, and eventual Maven Central publishing.
+- Add CI jobs that run C fixture generation plus Python, Java, and JavaScript regression suites.
+- Add composite packet fixtures for mixed record/cursor workflows.
+- Automate npm package publishing for the JavaScript binding via GitHub Actions.
 
 ## Cross-language automation TODO
 
@@ -37,7 +45,7 @@ compatibility rules for designing versioned schemas.
 ### Golden artifacts & shared contracts
 - Treat the C implementation as the authority by emitting versioned golden payloads (buffers, typdex sequences, protocol transcripts) stored under a documented schema.
 - Require every non-C suite to ingest the golden bundle during tests to guarantee round-trip parity across languages.
-- Provide a scripted `tools/update_golden` command so maintainers regenerate fixtures consistently and review diffs in code review.
+- Use `tools/generate_fixtures.sh` as the canonical fixture refresh command so maintainers regenerate fixtures consistently and review diffs in code review.
 - When running language-specific tests, ensure `fixtures/v1/*.json` has been regenerated via `tools/generate_fixtures.sh` so every suite exercises the same data.
 
 ### Shared tooling & documentation

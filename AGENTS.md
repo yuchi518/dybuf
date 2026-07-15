@@ -13,8 +13,8 @@ generated from the C implementation.
   runs tests must ensure `fixtures/v1/*.json` exist (see `tools/generate_fixtures.sh`).
 - `py/` – Cython wrapper packaged for PyPI.  Uses pytest + fixtures; see `py/README.md`
   for build instructions and release workflow.
-- `java/` – JVM binding under refactor.  Aligns with the same fixtures but currently
-  lacks automated wiring—consult `CROSS_LANGUAGE_ALIGNMENT.md` before touching.
+- `java/` – JVM binding under package `oyo.lol.util`.  Uses the shared fixtures through
+  `tools/test_java_fixtures.sh`; see `java/README.md` for current build/test notes.
 - `js/` – ESM binding published to npm (`dybuf`).  Uses Node’s built-in test runner
   with fixture-based suites; manual publish steps live in `js/README.md`.
 - `tools/` – repo-wide scripts.  `generate_fixtures.sh` builds and verifies golden data.
@@ -31,11 +31,13 @@ Additional docs:
 ## Working conventions
 
 1. **Treat C as the source of truth.** Any protocol change must land in `c/` first,
-   regenerate fixtures, then port outward.
-2. **Keep fixtures fresh.** Before running Python/JavaScript tests or publishing,
+   regenerate fixtures, then port outward.  The Python vendored headers under
+   `py/include/dybuf/` mirror `c/dybuf.h` and `c/platform/*.h`; `py/setup.py` syncs
+   them during repo-local builds, and they must not be edited independently.
+2. **Keep fixtures fresh.** Before running Python, Java, or JavaScript tests or publishing,
    execute `tools/generate_fixtures.sh` from the repo root so `fixtures/v1/*.json`
-   match the latest C behavior.  JS tests call `testutils/ensure-fixtures.js` and fail
-   fast when data is missing.
+   match the latest C behavior.  JS tests call `testutils/ensure-fixtures.js`; Java
+   tests read the same directory via `tools/test_java_fixtures.sh`.
 3. **Cross-language validation.** Every binding test suite should read the fixtures,
    decode payloads, and re-encode to the same hex.  When adding features, update the
    fixture generator plus verifier to cover new cases.
@@ -43,11 +45,10 @@ Additional docs:
    - C: build targets via CMake or the helper scripts in `c/fixtures`.
    - Python: `pip install -e . && pytest` inside `py/`.
    - JavaScript: `npm test` inside `js/` (Node 18+).
-   - Java: follow `java/README` once the fixture wiring lands; currently keep manual
-     parity in mind.
+   - Java: `tools/test_java_fixtures.sh` from the repo root.
 5. **Releases.** Python uses its existing GitHub Actions PyPI workflow.  JavaScript
-   publishes from `js/` via `npm publish --access public` (see README for steps);
-   roadmap item tracks automating npm releases via Actions.
+   publishes from `js/` via the scripts in `js/package.json`; Java publishing is not
+   wired yet and should wait for Gradle or Maven metadata.
 
 ## When in doubt
 

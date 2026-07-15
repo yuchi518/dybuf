@@ -46,6 +46,9 @@ public class DyBuf {
     public static final int DYPE_F_VERSION = 1;
     public static final int DYPE_F_PROTOCOL = 7;
     public static final int DYPE_F_PROTO_VERSION = 8;
+    public static final int JSON_DYBUF_FORMAT_VERSION = 1;
+    private static final long MAX_JSON_SAFE_INTEGER = (1L << 53) - 1;
+    private static final long MIN_JSON_SAFE_INTEGER = -MAX_JSON_SAFE_INTEGER;
 
 
     /**
@@ -1620,6 +1623,14 @@ public class DyBuf {
         return getStringWithFixedLength(len);
     }
 
+    public DyBuf putVarString(String s) {
+        return putVarLengthString(s);
+    }
+
+    public String getVarString() {
+        return getVarLengthString();
+    }
+
     public DyBuf putCStringWithVarLength(String s) {
         if (s == null) {
             putVarLong(0);
@@ -1654,6 +1665,286 @@ public class DyBuf {
             log.log(Level.WARNING, "Not supported decoded", e);
             return new String(data, 0, len);
         }
+    }
+
+    public static byte[] encodeJson(Object value) {
+        DyBuf buf = new DyBuf(256);
+        appendJsonValue(buf, value);
+        return buf.toBytesBeforeCurrentPosition();
+    }
+
+    public static Object decodeJson(byte[] data) {
+        DyBuf buf = new DyBuf(data, true);
+        Object value = nextJsonValue(buf);
+        if (buf.remaining() != 0) {
+            throw new IllegalArgumentException("trailing bytes after JSON-dybuf payload");
+        }
+        return value;
+    }
+
+    public static DyBuf appendJsonValue(DyBuf buf, Object value) {
+        LinkedHashMap<String, LinkedHashMap<String, Integer>> dictionaries = buildJsonDictionaries(value);
+
+        buf.putTypdex(new Typdex(TYPDEX_TYP_OBJ, 0));
+        buf.putUnsignedVarLong(JSON_DYBUF_FORMAT_VERSION);
+        buf.putUnsignedVarLong(dictionaries.size());
+        for (Map.Entry<String, LinkedHashMap<String, Integer>> entry : dictionaries.entrySet()) {
+            buf.putVarString(entry.getKey());
+            buf.putUnsignedVarLong(entry.getValue().size());
+            for (String key : entry.getValue().keySet()) {
+                buf.putVarString(key);
+            }
+        }
+
+        buf.putTypdex(new Typdex(TYPDEX_TYP_OBJ, 1));
+        putJsonRecord(buf, value, "$", 0, dictionaries);
+        return buf;
+    }
+
+    public static Object nextJsonValue(DyBuf buf) {
+        Typdex marker = buf.getTypdex();
+        if (marker.type != TYPDEX_TYP_OBJ || marker.index != 0) {
+            throw new IllegalArgumentException("JSON-dybuf stream must start with TYPDEX_TYP_OBJ, 0");
+        }
+
+        long version = readJsonCount(buf, "json_dybuf_format_version");
+        if (version != JSON_DYBUF_FORMAT_VERSION) {
+            throw new IllegalArgumentException("unsupported JSON-dybuf format version: " + version);
+        }
+
+        int dictionaryCount = (int) readJsonCount(buf, "dictionary_count");
+        LinkedHashMap<String, List<String>> dictionaries = new LinkedHashMap<>();
+        for (int i = 0; i < dictionaryCount; i++) {
+            String path = buf.getVarString();
+            if (dictionaries.containsKey(path)) {
+                throw new IllegalArgumentException("duplicate JSON dictionary path: " + path);
+            }
+            int keyCount = (int) readJsonCount(buf, "key_count for " + path);
+            ArrayList<String> keys = new ArrayList<>();
+            HashSet<String> seen = new HashSet<>();
+            for (int j = 0; j < keyCount; j++) {
+                String key = buf.getVarString();
+                if (!seen.add(key)) {
+                    throw new IllegalArgumentException("duplicate key in JSON dictionary " + path + ": " + key);
+                }
+                keys.add(key);
+            }
+            dictionaries.put(path, keys);
+        }
+
+        marker = buf.getTypdex();
+        if (marker.type != TYPDEX_TYP_OBJ || marker.index != 1) {
+            throw new IllegalArgumentException("JSON-dybuf payload marker must be TYPDEX_TYP_OBJ, 1");
+        }
+
+        Typdex root = buf.getTypdex();
+        return getJsonPayload(buf, root.type, root.index, "$", dictionaries);
+    }
+
+    private static LinkedHashMap<String, LinkedHashMap<String, Integer>> buildJsonDictionaries(Object value) {
+        LinkedHashMap<String, LinkedHashMap<String, Integer>> dictionaries = new LinkedHashMap<>();
+        visitJsonValue(value, "$", dictionaries);
+        return dictionaries;
+    }
+
+    private static LinkedHashMap<String, Integer> ensureJsonDictionary(
+            LinkedHashMap<String, LinkedHashMap<String, Integer>> dictionaries,
+            String path
+    ) {
+        LinkedHashMap<String, Integer> dictionary = dictionaries.get(path);
+        if (dictionary == null) {
+            dictionary = new LinkedHashMap<>();
+            dictionaries.put(path, dictionary);
+        }
+        return dictionary;
+    }
+
+    private static void visitJsonValue(
+            Object value,
+            String path,
+            LinkedHashMap<String, LinkedHashMap<String, Integer>> dictionaries
+    ) {
+        if (value instanceof Map<?, ?>) {
+            LinkedHashMap<String, Integer> dictionary = ensureJsonDictionary(dictionaries, path);
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
+                if (!(entry.getKey() instanceof String)) {
+                    throw new IllegalArgumentException("JSON object keys must be strings");
+                }
+                String key = (String) entry.getKey();
+                if (!dictionary.containsKey(key)) {
+                    dictionary.put(key, dictionary.size());
+                }
+                visitJsonValue(entry.getValue(), path + "." + dictionary.get(key), dictionaries);
+            }
+            return;
+        }
+        if (value instanceof List<?>) {
+            for (Object child : (List<?>) value) {
+                visitJsonValue(child, path + ".[]", dictionaries);
+            }
+            return;
+        }
+        jsonTypdexType(value);
+    }
+
+    private static void putJsonRecord(
+            DyBuf buf,
+            Object value,
+            String path,
+            int index,
+            LinkedHashMap<String, LinkedHashMap<String, Integer>> dictionaries
+    ) {
+        int type = jsonTypdexType(value);
+        buf.putTypdex(new Typdex(type, index));
+
+        switch (type) {
+            case TYPDEX_TYP_NONE:
+                return;
+            case TYPDEX_TYP_BOOL:
+                buf.put((Boolean) value);
+                return;
+            case TYPDEX_TYP_INT:
+                buf.putSignedVarLong(((Number) value).longValue());
+                return;
+            case TYPDEX_TYP_UINT:
+                buf.putUnsignedVarLong(((Number) value).longValue());
+                return;
+            case TYPDEX_TYP_DOUBLE:
+                buf.putDouble(((Number) value).doubleValue());
+                return;
+            case TYPDEX_TYP_STRING:
+                buf.putVarString((String) value);
+                return;
+            case TYPDEX_TYP_ARRAY:
+                List<?> list = (List<?>) value;
+                buf.putUnsignedVarLong(list.size());
+                for (Object child : list) {
+                    putJsonRecord(buf, child, path + ".[]", 0, dictionaries);
+                }
+                return;
+            case TYPDEX_TYP_MAP:
+                Map<?, ?> map = (Map<?, ?>) value;
+                LinkedHashMap<String, Integer> dictionary = dictionaries.get(path);
+                if (dictionary == null) {
+                    throw new IllegalArgumentException("missing JSON dictionary for path: " + path);
+                }
+                buf.putUnsignedVarLong(map.size());
+                for (Map.Entry<?, ?> entry : map.entrySet()) {
+                    String key = (String) entry.getKey();
+                    int keyIndex = dictionary.get(key);
+                    putJsonRecord(buf, entry.getValue(), path + "." + keyIndex, keyIndex, dictionaries);
+                }
+                return;
+            default:
+                throw new IllegalArgumentException("unhandled JSON typdex type: " + type);
+        }
+    }
+
+    private static Object getJsonPayload(
+            DyBuf buf,
+            int type,
+            int index,
+            String path,
+            LinkedHashMap<String, List<String>> dictionaries
+    ) {
+        switch (type) {
+            case TYPDEX_TYP_NONE:
+                return null;
+            case TYPDEX_TYP_BOOL:
+                return buf.getBoolean();
+            case TYPDEX_TYP_INT:
+                return safeJsonNumber(buf.getSignedVarLong(), "signed integer");
+            case TYPDEX_TYP_UINT:
+                return safeJsonNumber(buf.getUnsignedVarLong(), "unsigned integer");
+            case TYPDEX_TYP_DOUBLE:
+                double value = buf.getDouble();
+                if (!Double.isFinite(value)) {
+                    throw new IllegalArgumentException("decoded JSON double must be finite");
+                }
+                return value;
+            case TYPDEX_TYP_STRING:
+                return buf.getVarString();
+            case TYPDEX_TYP_ARRAY:
+                int count = (int) readJsonCount(buf, "array item_count");
+                ArrayList<Object> result = new ArrayList<>();
+                for (int i = 0; i < count; i++) {
+                    Typdex child = buf.getTypdex();
+                    result.add(getJsonPayload(buf, child.type, child.index, path + ".[]", dictionaries));
+                }
+                return result;
+            case TYPDEX_TYP_MAP:
+                List<String> keys = dictionaries.get(path);
+                if (keys == null) {
+                    throw new IllegalArgumentException("missing JSON dictionary for path: " + path);
+                }
+                int presentCount = (int) readJsonCount(buf, "present_count for " + path);
+                LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+                HashSet<Integer> seenIndices = new HashSet<>();
+                for (int i = 0; i < presentCount; i++) {
+                    Typdex child = buf.getTypdex();
+                    if (!seenIndices.add(child.index)) {
+                        throw new IllegalArgumentException("duplicate key index " + child.index + " in JSON object " + path);
+                    }
+                    if (child.index >= keys.size()) {
+                        throw new IllegalArgumentException("key index " + child.index + " out of range for JSON object " + path);
+                    }
+                    map.put(
+                            keys.get(child.index),
+                            getJsonPayload(buf, child.type, child.index, path + "." + child.index, dictionaries)
+                    );
+                }
+                return map;
+            default:
+                throw new IllegalArgumentException("unsupported JSON typdex type: " + type);
+        }
+    }
+
+    private static int jsonTypdexType(Object value) {
+        if (value == null) {
+            return TYPDEX_TYP_NONE;
+        }
+        if (value instanceof Boolean) {
+            return TYPDEX_TYP_BOOL;
+        }
+        if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long) {
+            long longValue = ((Number) value).longValue();
+            if (longValue < MIN_JSON_SAFE_INTEGER || longValue > MAX_JSON_SAFE_INTEGER) {
+                throw new IllegalArgumentException("JSON integer is outside JavaScript safe integer range");
+            }
+            return longValue < 0 ? TYPDEX_TYP_INT : TYPDEX_TYP_UINT;
+        }
+        if (value instanceof Float || value instanceof Double) {
+            double doubleValue = ((Number) value).doubleValue();
+            if (!Double.isFinite(doubleValue)) {
+                throw new IllegalArgumentException("JSON number must be finite");
+            }
+            return TYPDEX_TYP_DOUBLE;
+        }
+        if (value instanceof String) {
+            return TYPDEX_TYP_STRING;
+        }
+        if (value instanceof List<?>) {
+            return TYPDEX_TYP_ARRAY;
+        }
+        if (value instanceof Map<?, ?>) {
+            return TYPDEX_TYP_MAP;
+        }
+        throw new IllegalArgumentException("unsupported JSON value type: " + value.getClass().getName());
+    }
+
+    private static long readJsonCount(DyBuf buf, String label) {
+        long value = buf.getUnsignedVarLong();
+        if (Long.compareUnsigned(value, MAX_JSON_SAFE_INTEGER) > 0) {
+            throw new IllegalArgumentException(label + " is too large");
+        }
+        return value;
+    }
+
+    private static Long safeJsonNumber(long value, String label) {
+        if (value < MIN_JSON_SAFE_INTEGER || value > MAX_JSON_SAFE_INTEGER) {
+            throw new IllegalArgumentException("decoded JSON " + label + " is outside JavaScript safe integer range");
+        }
+        return value;
     }
 
     /// 1 byte crc and xor

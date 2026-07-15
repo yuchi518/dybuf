@@ -25,6 +25,7 @@ Build test code:
 Run test code:
 ```sh
 # ./dybuf_c
+```
 
 ### Generate golden fixtures
 
@@ -37,7 +38,6 @@ tools/generate_fixtures.sh
 
 The script compiles the fixture generator, writes JSON bundles under
 `fixtures/v1/`, and validates them with the companion verifier.
-```
 
 ### Integrate dypkt with your project
 1. Copy following files to your project's include path.
@@ -57,7 +57,7 @@ The script compiles the fixture generator, writes JSON bundles under
         uint8 mem[1024];
         dypkt* dyp = dyp_pack(null, mem, 1024);
         // Option, append version & protocol information
-        dyp_append_protocol(dyp, "bjson);               // binary json
+        dyp_append_protocol(dyp, "dypkt");              // protocol name
         dyp_append_protocol_version(dyp, 0x010001);     // version 1.0.1
         // Append your data
         dyp_append_int(dyp, 0, 123);        // append a int with value 123
@@ -125,8 +125,11 @@ The script compiles the fixture generator, writes JSON bundles under
 
 
 
-### ToDo
-- JSON and binary JSON converter
+### Notes
+
+The repository-level JSON-dybuf helper is covered by shared fixtures under
+`fixtures/v1/json_values.json`. The C fixture generator emits and verifies those bytes;
+Python, Java, and JavaScript consume the same cases in their regression suites.
 
 License
 ---

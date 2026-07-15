@@ -57,3 +57,6 @@ typedef unsigned long long  uint64;
 #define plat_inline     static inline
 
 #endif //_PLAT_C_TYPE_
+
+
+

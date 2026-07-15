@@ -34,7 +34,8 @@ without translation or lossy conversions.
   empty from missing.
 - **Tests:** `tools/test_java_fixtures.sh` compiles a plain Java fixture runner that
   loads canonical fixtures and verifies varints, typdex, and var-length payloads
-  match the decoded values from C.
+  match the decoded values from C. The same runner also verifies JSON-dybuf golden
+  cases and deterministic random JSON round trips.
 
 ### JavaScript
 
@@ -46,8 +47,8 @@ without translation or lossy conversions.
   payloads aren’t zeroed.
 - **Zero-length payloads:** return empty `ArrayBuffer`/`Uint8Array` instances from
   readers; update string helpers to return `""` for empty payloads.
-- **Tests:** port the Python smoke tests using Node (e.g., Jest or Vitest) and include
-  fixture-based round trips.
+- **Tests:** Node's built-in test runner loads the shared fixtures and verifies
+  byte-for-byte round trips, including JSON-dybuf cases.
 
 ## Shared Tasks
 
@@ -78,7 +79,7 @@ without translation or lossy conversions.
 ## Operational Checklist
 
 - [x] Implement Java fixes (typdex, capacity, zero-length, tests).
-- [ ] Implement JavaScript fixes (typdex, capacity/compact, byte copying, zero-length).
+- [x] Implement JavaScript fixes (typdex, capacity/compact, byte copying, zero-length).
 - [x] Land fixture generator tooling and share sample fixtures.
 - [x] Wire fixtures into the JavaScript regression suite.
 - [x] Wire fixtures into the Python regression suite.

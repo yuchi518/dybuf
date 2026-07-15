@@ -402,10 +402,10 @@ decode(encode(value)) == value
 It does not target canonical bytes. Two JSON objects with the same semantic content but
 different member order may encode to different byte streams, and two language bindings
 may produce different byte streams if their parsed object member order differs. The
-required compatibility property is that Python and JavaScript can decode each other's
-valid JSON-dybuf byte streams back to the same JSON value. If canonical binary output
-is required later, define a canonical key ordering or frequency-based index assignment
-as a separate format version.
+required compatibility property is that Python, Java, and JavaScript can decode each
+other's valid JSON-dybuf byte streams back to the same JSON value. If canonical binary
+output is required later, define a canonical key ordering or frequency-based index
+assignment as a separate format version.
 
 A variant may put an explicit dictionary ID in every map payload instead of deriving the
 dictionary name from traversal context. That is simpler for random access into nested
@@ -425,7 +425,7 @@ control records. If the JSON encoding needs an explicit dictionary-table marker,
 `TYPDEX_TYP_OBJ` is the better fit because the dictionary table is a JSON-encoding
 object, not a package control function.
 
-The version-1 Python and JavaScript utilities implement the document-level dictionary
+The version-1 Python, Java, and JavaScript utilities implement the document-level dictionary
 variant above. Arrays and objects carry counts, and the shared `json_values` fixture is
 generated and verified by the C fixture toolchain before the language bindings consume
 it. Duplicate object-key policy remains delegated to the host JSON/object model before
@@ -807,4 +807,5 @@ repeat entry_count times:
 - JavaScript exposes `putTypdex`, `getTypdex`, `TYPDEX_TYP_*`, and `DYPE_F_*` from the
   `dybuf` module. The constants are also static fields on `DyBuf`.
 - Java exposes `putTypdex`, `getTypdex`, `Typdex`, `TYPDEX_TYP_*`, and `DYPE_F_*` on
-  `DyBuf`. Java typdex wire-layout parity is still tracked in `CROSS_LANGUAGE_ALIGNMENT.md`.
+  `oyo.lol.util.DyBuf`, and verifies the same typdex fixtures through
+  `tools/test_java_fixtures.sh`.

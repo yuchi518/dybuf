@@ -146,6 +146,11 @@ The pytest suite loads the golden vectors generated from the canonical C library
 from the repository root before executing the tests so `fixtures/v1` exists adjacent
 to this package.
 
+`py/include/dybuf/` contains vendored copies of the canonical C headers for source
+builds and wheel packaging. When building from this repository, `setup.py` syncs those
+headers from `c/` before compiling. Source distributions still rely on the vendored
+copies, so do not patch the Python copy independently from the C headers.
+
 The project is configured to build wheels via `python -m build`, producing both source and binary distributions:
 
 ```bash
@@ -162,7 +167,7 @@ open docs/_build/html/index.html  # or use your preferred viewer
 
 ## Automated releases
 
-A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.4.1`) to trigger the pipeline.
+A GitHub Actions workflow under `.github/workflows/pypi-release.yml` drives [cibuildwheel](https://github.com/pypa/cibuildwheel) to produce Windows, Linux, and macOS artifacts and publish them to PyPI.  Provide a `PYPI_API_TOKEN` secret in your repository and tag releases with a semantic version (e.g. `v0.5.0`) to trigger the pipeline.
 
 ## Licensing
 
