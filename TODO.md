@@ -1,5 +1,10 @@
 # TODO
 
+本文件只追蹤 `dybuf` library 自身的工程工作。Truelies 產品功能、跨 repo package
+遷移與 consumer rollout 統一記錄於
+[`truelies-platform/TODO.md`](../truelies/truelies-platform/TODO.md)；binary contract 仍由
+本 repo 的 C implementation、fixtures 與相關 canonical documents 擁有。
+
 ## Typdex / TYP_OBJ
 
 - [x] 盤點 C canonical type/dex 定義與實際數值
