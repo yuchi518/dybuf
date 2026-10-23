@@ -60,8 +60,8 @@ for the canonical typdex layout, reserved function IDs, and compatibility rules.
 
 - Expand byte helpers to accept `TypedArray` views directly (mirroring the C/Python
   ergonomics).
-- Wire the package into CI so `npm test` runs automatically alongside the other
-  bindings.
+- If the wire format starts changing frequently or a parity failure exposes a process gap, add a
+  unified CI gate that runs `npm test` alongside the C, Python, and Java fixture suites.
 
 ## Usage
 

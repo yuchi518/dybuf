@@ -11,7 +11,7 @@ without translation or lossy conversions.
   var-length payloads) across all bindings.
 - Guarantee empty payloads and cursor semantics (`position`/`limit`/`compact`)
   behave exactly the same in every language.
-- Ship reusable fixtures so regressions are caught by CI before release.
+- Ship reusable fixtures so every supported binding can run the same byte-level verification.
 
 ## Authoritative Reference
 
@@ -66,15 +66,16 @@ without translation or lossy conversions.
   the canonical C implementation before other languages consume it.
 - Extend Python’s test suite to compare runtime results with the fixture files.
 - Import the same fixtures in Java/JS tests and assert byte-for-byte equality.
-- Add composite “packet” fixtures that chain multiple encoded elements to test cursor
-  behaviour and mixed read/write flows.
+- If a format change or parity failure exposes a coverage gap, add composite “packet” fixtures
+  that chain multiple encoded elements to test cursor behaviour and mixed read/write flows.
 
-## CI Integration
+## Conditional CI Integration
 
-- Update GitHub Actions so the C job produces the fixture artifacts as build outputs.
-- Downstream language jobs download the artifacts, run their respective tests, and fail
-  fast when decoding mismatches occur.
-- Gate releases on every language job passing against the latest fixtures.
+A unified C → Python → Java → JavaScript CI gate is an optional hardening step rather than a
+missing golden-data implementation. Add it when the wire format changes materially or release
+frequency makes the existing explicit local suites insufficient. At that point, the C job should
+produce fixture artifacts, downstream language jobs should consume those exact artifacts, and
+releases should require every supported binding to pass.
 
 ## Operational Checklist
 
@@ -84,4 +85,5 @@ without translation or lossy conversions.
 - [x] Wire fixtures into the JavaScript regression suite.
 - [x] Wire fixtures into the Python regression suite.
 - [x] Wire fixtures into the Java regression suite.
-- [ ] Update CI pipelines to enforce the cross-language checks.
+- [x] Provide explicit local commands for C verification and all three binding suites.
+- [ ] Add a unified cross-language CI release gate if the conditional need described above arises.

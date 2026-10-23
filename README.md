@@ -29,35 +29,21 @@ compatibility rules for designing versioned schemas.
   by those helpers before `0.5.0` may need migration before reading with newer
   bindings. Fixed-width integer payloads are unchanged.
 
-## Roadmap
+## Cross-language verification
 
-- Add Gradle or Maven wiring for Java builds, tests, and eventual Maven Central publishing.
-- Add CI jobs that run C fixture generation plus Python, Java, and JavaScript regression suites.
-- Add composite packet fixtures for mixed record/cursor workflows.
-- Automate npm package publishing for the JavaScript binding via GitHub Actions.
+The required golden-data path is implemented:
 
-## Cross-language automation TODO
+- `tools/generate_fixtures.sh` generates versioned fixtures from C and runs the C verifier.
+- Python, Java, and JavaScript load the same fixtures, verify decoded values, and compare
+  deterministic re-encoded bytes.
+- `tools/test_java_fixtures.sh`, the Python pytest suite, and `npm test` provide explicit local
+  verification commands.
 
-### Pipeline strategy
-- Build a unified CI workflow that orchestrates C → Python → Java → JavaScript (and future bindings) so compatibility checks run in a predictable order.
-- Fail fast if the canonical C job breaks, preventing downstream bindings from running with stale artifacts.
-
-### Golden artifacts & shared contracts
-- Treat the C implementation as the authority by emitting versioned golden payloads (buffers, typdex sequences, protocol transcripts) stored under a documented schema.
-- Require every non-C suite to ingest the golden bundle during tests to guarantee round-trip parity across languages.
-- Use `tools/generate_fixtures.sh` as the canonical fixture refresh command so maintainers regenerate fixtures consistently and review diffs in code review.
-- When running language-specific tests, ensure `fixtures/v1/*.json` has been regenerated via `tools/generate_fixtures.sh` so every suite exercises the same data.
-
-### Shared tooling & documentation
-- Consolidate helper scripts, environment bootstrapping, and doc builds in a `/tools` directory that all languages reuse.
-- Publish a single documentation portal (via GitHub Pages or similar) with per-language sections living under dedicated subdirectories.
-
-### CI workflow outline
-1. Prep job: install shared dependencies, lint metadata, and fan out environment caches.
-2. C job: build/tests, produce golden artifacts, upload for downstream jobs.
-3. Binding jobs: for each language download artifacts, run tests against the golden data, and perform cross-language read/write checks.
-4. Docs job: aggregate language docs, build the static site, and deploy.
-5. Release gate: only tag/publish when every job succeeds against the latest golden contracts.
+A unified four-language CI gate is not currently required for product operation. Gradle or Maven
+wiring, composite packet/cursor fixtures, automatic npm publication, and consolidated hosted
+documentation remain conditional improvements. Add them when the wire format changes materially,
+Java gains a production consumer, release frequency makes manual publication costly, or an actual
+parity failure shows the local golden suites are insufficient.
 
 ## License
 
